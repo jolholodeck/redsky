@@ -1,0 +1,205 @@
+{
+ "ENTERTAINMENT_MODULE/ENTERTAINMENT.dir": {
+  "bitmap": 5234,
+  "sound": 34,
+  "palette": 3,
+  "members": 5310,
+  "errors": 0
+ },
+ "EXIT_MODULE/EXIT.dir": {
+  "bitmap": 133,
+  "sound": 2,
+  "palette": 3,
+  "members": 158,
+  "errors": 0
+ },
+ "MAIN/main.dir": {
+  "bitmap": 27,
+  "sound": 0,
+  "palette": 4,
+  "members": 39,
+  "errors": 0
+ },
+ "SPEAKER_MODULE/SHOWMAN.dir": {
+  "bitmap": 93,
+  "sound": 0,
+  "palette": 4,
+  "members": 1185,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/hp_pong/hp_pong6.dir": {
+  "bitmap": 37,
+  "sound": 3,
+  "palette": 3,
+  "members": 58,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/le_beyond/le_beyond6.dir": {
+  "bitmap": 22,
+  "sound": 0,
+  "palette": 3,
+  "members": 36,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/nike_agassi/nike_agassi6.dir": {
+  "bitmap": 253,
+  "sound": 9,
+  "palette": 4,
+  "members": 301,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/nike_jordan/nike_jordan6.dir": {
+  "bitmap": 145,
+  "sound": 9,
+  "palette": 4,
+  "members": 210,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/nike_lil_penny/nike_lil_penny6.dir": {
+  "bitmap": 406,
+  "sound": 0,
+  "palette": 3,
+  "members": 475,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/nike_mia/nike_mia6.dir": {
+  "bitmap": 174,
+  "sound": 1,
+  "palette": 5,
+  "members": 249,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/nike_nba_banners/nike_nba_banners6.dir": {
+  "bitmap": 36,
+  "sound": 2,
+  "palette": 3,
+  "members": 52,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/nike_olympic/nike_olympic6.dir": {
+  "bitmap": 30,
+  "sound": 0,
+  "palette": 4,
+  "members": 51,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/nike_tiger_97/nike_tiger_976.dir": {
+  "bitmap": 122,
+  "sound": 11,
+  "palette": 3,
+  "members": 168,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/nike_tiger_98/nike_tiger_986.dir": {
+  "bitmap": 122,
+  "sound": 12,
+  "palette": 3,
+  "members": 158,
+  "errors": 0
+ },
+ "WORK_MODULE/NEW_FANGLED/sega_banners/sega_banners6.dir": {
+  "bitmap": 27,
+  "sound": 1,
+  "palette": 3,
+  "members": 44,
+  "errors": 0
+ },
+ "WORK_MODULE/OLD_TIMEY/bofa_home/bofa_home6.dir": {
+  "bitmap": 225,
+  "sound": 5,
+  "palette": 6,
+  "members": 397,
+  "errors": 0
+ },
+ "WORK_MODULE/OLD_TIMEY/nike_airmax/nike_airmax6.dir": {
+  "bitmap": 143,
+  "sound": 10,
+  "palette": 3,
+  "members": 213,
+  "errors": 0
+ },
+ "WORK_MODULE/OLD_TIMEY/nike_zoomair/nike_zoomair6.dir": {
+  "bitmap": 189,
+  "sound": 32,
+  "palette": 5,
+  "members": 302,
+  "errors": 0
+ },
+ "WORK_MODULE/OLD_TIMEY/ready_set_dinner/ready_set_dinner6.dir": {
+  "bitmap": 62,
+  "sound": 4,
+  "palette": 7,
+  "members": 415,
+  "errors": 0
+ },
+ "WORK_MODULE/OLD_TIMEY/sony_vaio/sony_vaio6.dir": {
+  "bitmap": 342,
+  "sound": 5,
+  "palette": 4,
+  "members": 377,
+  "errors": 0
+ },
+ "WORK_MODULE/OLD_TIMEY/west_end_post/west_end_post6.dir": {
+  "bitmap": 114,
+  "sound": 21,
+  "palette": 13,
+  "members": 260,
+  "errors": 0
+ },
+ "WORK_MODULE/PLUMB_LOCO/absolut_pitch/absolut_pitch6.dir": {
+  "bitmap": 176,
+  "sound": 12,
+  "palette": 4,
+  "members": 209,
+  "errors": 0
+ },
+ "WORK_MODULE/PLUMB_LOCO/at_home/at_home6.dir": {
+  "bitmap": 908,
+  "sound": 5,
+  "palette": 5,
+  "members": 1112,
+  "errors": 0
+ },
+ "WORK_MODULE/PLUMB_LOCO/clay_demo/clay_demo6.dir": {
+  "bitmap": 713,
+  "sound": 15,
+  "palette": 4,
+  "members": 817,
+  "errors": 0
+ },
+ "WORK_MODULE/PLUMB_LOCO/hypnosis/hypnosis6.dir": {
+  "bitmap": 318,
+  "sound": 11,
+  "palette": 5,
+  "members": 372,
+  "errors": 0
+ },
+ "WORK_MODULE/PLUMB_LOCO/pic_a_puke/pic_a_puke6.dir": {
+  "bitmap": 18,
+  "sound": 7,
+  "palette": 3,
+  "members": 46,
+  "errors": 0
+ },
+ "WORK_MODULE/PLUMB_LOCO/site_x/site_x6.dir": {
+  "bitmap": 66,
+  "sound": 3,
+  "palette": 4,
+  "members": 93,
+  "errors": 0
+ },
+ "WORK_MODULE/PLUMB_LOCO/virtual_bully/virtual_bully6.dir": {
+  "bitmap": 218,
+  "sound": 3,
+  "palette": 6,
+  "members": 286,
+  "errors": 0
+ },
+ "WORK_MODULE/WORK.dir": {
+  "bitmap": 196,
+  "sound": 11,
+  "palette": 3,
+  "members": 248,
+  "errors": 0
+ }
+}

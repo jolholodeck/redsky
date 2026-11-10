@@ -1,0 +1,3212 @@
+[
+ {
+  "lib": "Internal",
+  "num": 1,
+  "name": "Potato Board.pict",
+  "type": "bitmap",
+  "w": 545,
+  "h": 76,
+  "bpp": 4,
+  "regx": 271,
+  "regy": 70,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0001_Potato Board.pict.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 2,
+  "name": "Presents Text.PICT",
+  "type": "bitmap",
+  "w": 98,
+  "h": 18,
+  "bpp": 8,
+  "regx": 49,
+  "regy": 9,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0002_Presents Text.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 3,
+  "name": "Ready.PICT",
+  "type": "bitmap",
+  "w": 166,
+  "h": 40,
+  "bpp": 4,
+  "regx": 83,
+  "regy": 20,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0003_Ready.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 4,
+  "name": "Napkin.PICT",
+  "type": "bitmap",
+  "w": 31,
+  "h": 72,
+  "bpp": 1,
+  "regx": 15,
+  "regy": 36,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0004_Napkin.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 5,
+  "name": "Set.PICT",
+  "type": "bitmap",
+  "w": 90,
+  "h": 40,
+  "bpp": 4,
+  "regx": 45,
+  "regy": 20,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0005_Set.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 6,
+  "name": "Fork.PICT",
+  "type": "bitmap",
+  "w": 14,
+  "h": 70,
+  "bpp": 1,
+  "regx": 7,
+  "regy": 35,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0006_Fork.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 7,
+  "name": "Knife.PICT",
+  "type": "bitmap",
+  "w": 12,
+  "h": 77,
+  "bpp": 1,
+  "regx": 6,
+  "regy": 38,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0007_Knife.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 8,
+  "name": "Spoon.PICT",
+  "type": "bitmap",
+  "w": 19,
+  "h": 62,
+  "bpp": 1,
+  "regx": 9,
+  "regy": 31,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0008_Spoon.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 9,
+  "name": "Dinner.PICT",
+  "type": "bitmap",
+  "w": 231,
+  "h": 67,
+  "bpp": 4,
+  "regx": 115,
+  "regy": 33,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0009_Dinner.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 10,
+  "name": "Plate.PICT",
+  "type": "bitmap",
+  "w": 79,
+  "h": 76,
+  "bpp": 1,
+  "regx": 39,
+  "regy": 38,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0010_Plate.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 11,
+  "name": "Open Dish Small.PICT",
+  "type": "bitmap",
+  "w": 400,
+  "h": 316,
+  "bpp": 8,
+  "regx": 200,
+  "regy": 158,
+  "clut": 118,
+  "clutlib": -1,
+  "file": "Internal/0011_Open Dish Small.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 12,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 13,
+  "name": "Plain Background.pict.8.c",
+  "type": "bitmap",
+  "w": 640,
+  "h": 480,
+  "bpp": 8,
+  "regx": 320,
+  "regy": 240,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0013_Plain Background.pict.8.c.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 14,
+  "name": "help_up",
+  "type": "bitmap",
+  "w": 54,
+  "h": 28,
+  "bpp": 8,
+  "regx": 25,
+  "regy": 14,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0014_help_up.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 15,
+  "name": "help_dwn",
+  "type": "bitmap",
+  "w": 53,
+  "h": 29,
+  "bpp": 8,
+  "regx": 25,
+  "regy": 15,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0015_help_dwn.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 16,
+  "name": "recipe_up",
+  "type": "bitmap",
+  "w": 83,
+  "h": 84,
+  "bpp": 8,
+  "regx": 39,
+  "regy": 48,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0016_recipe_up.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 17,
+  "name": "recipe_dwn",
+  "type": "bitmap",
+  "w": 79,
+  "h": 82,
+  "bpp": 8,
+  "regx": 37,
+  "regy": 46,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0017_recipe_dwn.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 18,
+  "name": "recipe_dim",
+  "type": "bitmap",
+  "w": 73,
+  "h": 84,
+  "bpp": 8,
+  "regx": 30,
+  "regy": 48,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0018_recipe_dim.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 19,
+  "name": "weekly_up",
+  "type": "bitmap",
+  "w": 84,
+  "h": 139,
+  "bpp": 8,
+  "regx": 41,
+  "regy": 72,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0019_weekly_up.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 20,
+  "name": "weekly_dwn",
+  "type": "bitmap",
+  "w": 79,
+  "h": 139,
+  "bpp": 8,
+  "regx": 38,
+  "regy": 72,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0020_weekly_dwn.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 21,
+  "name": "weekly_dim",
+  "type": "bitmap",
+  "w": 73,
+  "h": 139,
+  "bpp": 8,
+  "regx": 32,
+  "regy": 72,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0021_weekly_dim.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 22,
+  "name": "grocery_up",
+  "type": "bitmap",
+  "w": 85,
+  "h": 114,
+  "bpp": 8,
+  "regx": 43,
+  "regy": 60,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0022_grocery_up.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 23,
+  "name": "grocery_dwn",
+  "type": "bitmap",
+  "w": 85,
+  "h": 112,
+  "bpp": 8,
+  "regx": 43,
+  "regy": 58,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0023_grocery_dwn.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 24,
+  "name": "grocery_dim",
+  "type": "bitmap",
+  "w": 84,
+  "h": 114,
+  "bpp": 8,
+  "regx": 42,
+  "regy": 60,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0024_grocery_dim.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 25,
+  "name": "Exit  UP.PICT",
+  "type": "bitmap",
+  "w": 45,
+  "h": 27,
+  "bpp": 8,
+  "regx": 22,
+  "regy": 13,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0025_Exit  UP.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 26,
+  "name": "exit_dwn",
+  "type": "bitmap",
+  "w": 45,
+  "h": 27,
+  "bpp": 8,
+  "regx": 22,
+  "regy": 13,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0026_exit_dwn.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 27,
+  "name": "back_up",
+  "type": "bitmap",
+  "w": 52,
+  "h": 27,
+  "bpp": 8,
+  "regx": 25,
+  "regy": 13,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0027_back_up.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 28,
+  "name": "back_dwn",
+  "type": "bitmap",
+  "w": 52,
+  "h": 27,
+  "bpp": 8,
+  "regx": 25,
+  "regy": 13,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0028_back_dwn.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 29,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 30,
+  "name": "",
+  "type": "field",
+  "text": "(Click anywhere to return to main menu.)"
+ },
+ {
+  "lib": "Internal",
+  "num": 31,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 32,
+  "name": "",
+  "type": "field",
+  "text": "Do you have dinner plans tonight?"
+ },
+ {
+  "lib": "Internal",
+  "num": 33,
+  "name": "pi-1b",
+  "type": "bitmap",
+  "w": 74,
+  "h": 61,
+  "bpp": 8,
+  "regx": 37,
+  "regy": 29,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0033_pi-1b.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 34,
+  "name": "pi-2b",
+  "type": "bitmap",
+  "w": 72,
+  "h": 59,
+  "bpp": 8,
+  "regx": 36,
+  "regy": 28,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0034_pi-2b.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 35,
+  "name": "pi-3b",
+  "type": "bitmap",
+  "w": 71,
+  "h": 62,
+  "bpp": 8,
+  "regx": 35,
+  "regy": 29,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0035_pi-3b.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 36,
+  "name": "pi-4b",
+  "type": "bitmap",
+  "w": 70,
+  "h": 61,
+  "bpp": 8,
+  "regx": 35,
+  "regy": 28,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0036_pi-4b.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 37,
+  "name": "pi-5b",
+  "type": "bitmap",
+  "w": 69,
+  "h": 63,
+  "bpp": 8,
+  "regx": 34,
+  "regy": 27,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0037_pi-5b.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 38,
+  "name": "pi-6b",
+  "type": "bitmap",
+  "w": 70,
+  "h": 62,
+  "bpp": 8,
+  "regx": 35,
+  "regy": 30,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0038_pi-6b.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 39,
+  "name": "pi-7b",
+  "type": "bitmap",
+  "w": 72,
+  "h": 60,
+  "bpp": 8,
+  "regx": 36,
+  "regy": 28,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0039_pi-7b.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 40,
+  "name": "Recipe Folder.pict.8.c",
+  "type": "bitmap",
+  "w": 528,
+  "h": 412,
+  "bpp": 8,
+  "regx": 264,
+  "regy": 204,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0040_Recipe Folder.pict.8.c.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 41,
+  "name": "Weekly Planner.pict.8.c",
+  "type": "bitmap",
+  "w": 521,
+  "h": 480,
+  "bpp": 8,
+  "regx": 260,
+  "regy": 240,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0041_Weekly Planner.pict.8.c.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 42,
+  "name": "Close Palette",
+  "type": "palette",
+  "colors": 256,
+  "file": "Internal/0042_Close Palette.pal.json"
+ },
+ {
+  "lib": "Internal",
+  "num": 43,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 44,
+  "name": "check",
+  "type": "bitmap",
+  "w": 48,
+  "h": 31,
+  "bpp": 8,
+  "regx": 23,
+  "regy": 16,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0044_check.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 45,
+  "name": "Grocery TEST.PICT",
+  "type": "bitmap",
+  "w": 477,
+  "h": 143,
+  "bpp": 8,
+  "regx": 240,
+  "regy": 97,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0045_Grocery TEST.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 46,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 47,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 48,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 49,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 50,
+  "name": "",
+  "type": "field",
+  "text": "Don't forget to save your recipe!"
+ },
+ {
+  "lib": "Internal",
+  "num": 52,
+  "name": "",
+  "type": "field",
+  "text": "Saving data.  Please wait."
+ },
+ {
+  "lib": "Internal",
+  "num": 53,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 54,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 55,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 56,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 57,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 58,
+  "name": "",
+  "type": "field",
+  "text": "Ready, Set, Dinner was produced by \nThe Potato Board \nand Ketchum Communications \nin conjunction with \nRed Sky Interactive.\n\nCopyright 1994    The Potato Board"
+ },
+ {
+  "lib": "Internal",
+  "num": 59,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 60,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 61,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 62,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 63,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 64,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 66,
+  "name": "Recipe Cards.pict.8.c",
+  "type": "bitmap",
+  "w": 519,
+  "h": 89,
+  "bpp": 8,
+  "regx": 320,
+  "regy": 235,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0066_Recipe Cards.pict.8.c.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 67,
+  "name": "Recipe Cards.pict.8.c",
+  "type": "bitmap",
+  "w": 40,
+  "h": 418,
+  "bpp": 8,
+  "regx": -171,
+  "regy": 201,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0067_Recipe Cards.pict.8.c.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 68,
+  "name": "Recipe Cards.pict.8.c",
+  "type": "bitmap",
+  "w": 525,
+  "h": 45,
+  "bpp": 8,
+  "regx": 320,
+  "regy": -180,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0068_Recipe Cards.pict.8.c.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 69,
+  "name": "Recipe Cards.pict.8.c",
+  "type": "bitmap",
+  "w": 29,
+  "h": 420,
+  "bpp": 8,
+  "regx": 320,
+  "regy": 195,
+  "clut": 119,
+  "clutlib": -1,
+  "file": "Internal/0069_Recipe Cards.pict.8.c.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 70,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 71,
+  "name": "Final Ending Logo",
+  "type": "bitmap",
+  "w": 261,
+  "h": 91,
+  "bpp": 8,
+  "regx": 130,
+  "regy": 45,
+  "clut": 42,
+  "clutlib": -1,
+  "file": "Internal/0071_Final Ending Logo.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 72,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 73,
+  "name": "",
+  "type": "field",
+  "text": "Don't forget to back up your Ready, Set, Dinner program occasionally.\n\nSee the README.TXT \nfile for instructions on how to do this."
+ },
+ {
+  "lib": "Internal",
+  "num": 74,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 75,
+  "name": "",
+  "type": "field",
+  "text": "Primary\nIngredient"
+ },
+ {
+  "lib": "Internal",
+  "num": 76,
+  "name": "",
+  "type": "field",
+  "text": "Recipe Type"
+ },
+ {
+  "lib": "Internal",
+  "num": 77,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 78,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 79,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 80,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 81,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 82,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 83,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 84,
+  "name": "_null",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 85,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 86,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 87,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 88,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 89,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 90,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 91,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 93,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 94,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 95,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 96,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 97,
+  "name": "",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 98,
+  "name": "skipIntroButton",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 99,
+  "name": "",
+  "type": "field",
+  "text": "We do."
+ },
+ {
+  "lib": "Internal",
+  "num": 100,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 101,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 102,
+  "name": "Potatoes Graphic.PICT",
+  "type": "bitmap",
+  "w": 468,
+  "h": 94,
+  "bpp": 8,
+  "regx": 234,
+  "regy": 47,
+  "clut": 42,
+  "clutlib": -1,
+  "file": "Internal/0102_Potatoes Graphic.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 104,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 105,
+  "name": "",
+  "type": "transition"
+ },
+ {
+  "lib": "Internal",
+  "num": 106,
+  "name": "",
+  "type": "transition"
+ },
+ {
+  "lib": "Internal",
+  "num": 107,
+  "name": "",
+  "type": "transition"
+ },
+ {
+  "lib": "Internal",
+  "num": 108,
+  "name": "",
+  "type": "transition"
+ },
+ {
+  "lib": "Internal",
+  "num": 109,
+  "name": "",
+  "type": "transition"
+ },
+ {
+  "lib": "Internal",
+  "num": 110,
+  "name": "",
+  "type": "transition"
+ },
+ {
+  "lib": "Internal",
+  "num": 111,
+  "name": "black.rect.for.gFadeToBlack",
+  "type": "shape"
+ },
+ {
+  "lib": "Internal",
+  "num": 112,
+  "name": "play.done.for.gFadeToBlack",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 113,
+  "name": "unPuppetScore.for.gFadeToBlack",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 114,
+  "name": "null.cast",
+  "type": "bitmap",
+  "w": 1,
+  "h": 1,
+  "bpp": 8,
+  "regx": 0,
+  "regy": 0,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0114_null.cast.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 118,
+  "name": "Open Dish Palette",
+  "type": "palette",
+  "colors": 256,
+  "file": "Internal/0118_Open Dish Palette.pal.json"
+ },
+ {
+  "lib": "Internal",
+  "num": 119,
+  "name": "Primary Palette",
+  "type": "palette",
+  "colors": 256,
+  "file": "Internal/0119_Primary Palette.pal.json"
+ },
+ {
+  "lib": "Internal",
+  "num": 144,
+  "name": "",
+  "type": "button",
+  "text": "Yes"
+ },
+ {
+  "lib": "Internal",
+  "num": 145,
+  "name": "",
+  "type": "button",
+  "text": "No"
+ },
+ {
+  "lib": "Internal",
+  "num": 146,
+  "name": "searchButton",
+  "type": "button",
+  "text": "Show\nMe"
+ },
+ {
+  "lib": "Internal",
+  "num": 147,
+  "name": "startOverButton",
+  "type": "button",
+  "text": "Start\nOver"
+ },
+ {
+  "lib": "Internal",
+  "num": 148,
+  "name": "addButton",
+  "type": "button",
+  "text": "Add a New\nRecipe"
+ },
+ {
+  "lib": "Internal",
+  "num": 149,
+  "name": "deleteButton",
+  "type": "button",
+  "text": "Delete"
+ },
+ {
+  "lib": "Internal",
+  "num": 151,
+  "name": "",
+  "type": "button",
+  "text": "Del"
+ },
+ {
+  "lib": "Internal",
+  "num": 153,
+  "name": "noteButton",
+  "type": "button",
+  "text": "Notes"
+ },
+ {
+  "lib": "Internal",
+  "num": 154,
+  "name": "",
+  "type": "button",
+  "text": "Print"
+ },
+ {
+  "lib": "Internal",
+  "num": 170,
+  "name": "ingText",
+  "type": "field",
+  "text": ""
+ },
+ {
+  "lib": "Internal",
+  "num": 171,
+  "name": "instText",
+  "type": "field",
+  "text": ""
+ },
+ {
+  "lib": "Internal",
+  "num": 172,
+  "name": "piRolloverText",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 173,
+  "name": "",
+  "type": "field",
+  "text": "Click anywhere to continue."
+ },
+ {
+  "lib": "Internal",
+  "num": 174,
+  "name": "",
+  "type": "field",
+  "text": "Would you like \nsome Help?"
+ },
+ {
+  "lib": "Internal",
+  "num": 175,
+  "name": "",
+  "type": "field",
+  "text": "Click the Help button for \nanimated explanations of features throughout \nthe program."
+ },
+ {
+  "lib": "Internal",
+  "num": 176,
+  "name": "",
+  "type": "field",
+  "text": "Click the Recipes button \nto find recipes, \nor to add recipes \nof your own."
+ },
+ {
+  "lib": "Internal",
+  "num": 177,
+  "name": "",
+  "type": "field",
+  "text": "Once you've found a recipe,\nadd it to your Weekly Planner\nby clicking this button."
+ },
+ {
+  "lib": "Internal",
+  "num": 178,
+  "name": "",
+  "type": "field",
+  "text": "You can print grocery \nlists for individual recipes \n-- or a week's worth! -- \nby clicking the Groceries button."
+ },
+ {
+  "lib": "Internal",
+  "num": 179,
+  "name": "",
+  "type": "field",
+  "text": "Click the Exit button to end the program.   When it changes to a Back button, it will take you back to a previous screen."
+ },
+ {
+  "lib": "Internal",
+  "num": 180,
+  "name": "",
+  "type": "field",
+  "text": "You need to find a recipe, or have recipes in your Weekly Planner, before you can print a grocery list.\n\nClick the Recipes button first."
+ },
+ {
+  "lib": "Internal",
+  "num": 181,
+  "name": "recipeTitle",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 182,
+  "name": "counterText",
+  "type": "field",
+  "text": "4 of 41"
+ },
+ {
+  "lib": "Internal",
+  "num": 183,
+  "name": "pFact",
+  "type": "field",
+  "text": "There is no need to peel potatoes.  You'll save time and keep all the fiber."
+ },
+ {
+  "lib": "Internal",
+  "num": 184,
+  "name": "",
+  "type": "field",
+  "text": "Once you've selected a recipe, click a day to add it to the Planner."
+ },
+ {
+  "lib": "Internal",
+  "num": 185,
+  "name": "",
+  "type": "field",
+  "text": "Click the Delete buttons to remove any recipe from the Planner."
+ },
+ {
+  "lib": "Internal",
+  "num": 189,
+  "name": "",
+  "type": "field",
+  "text": "Click on a day for:"
+ },
+ {
+  "lib": "Internal",
+  "num": 190,
+  "name": "dropRecipeText",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 191,
+  "name": "sunRecipe",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 192,
+  "name": "monRecipe",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 193,
+  "name": "tueRecipe",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 194,
+  "name": "wedRecipe",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 195,
+  "name": "thuRecipe",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 196,
+  "name": "friRecipe",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 197,
+  "name": "satRecipe",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 205,
+  "name": "Notes",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 206,
+  "name": "piText",
+  "type": "field",
+  "text": "Vegetarian"
+ },
+ {
+  "lib": "Internal",
+  "num": 207,
+  "name": "typeText",
+  "type": "field",
+  "text": "American Favorites"
+ },
+ {
+  "lib": "Internal",
+  "num": 208,
+  "name": "dummyField",
+  "type": "field",
+  "text": "."
+ },
+ {
+  "lib": "Internal",
+  "num": 209,
+  "name": "statusBox1",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 210,
+  "name": "statusBox2",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 211,
+  "name": "ingredientDisplay",
+  "type": "field",
+  "text": "all ingredients"
+ },
+ {
+  "lib": "Internal",
+  "num": 212,
+  "name": "typeDisplay",
+  "type": "field",
+  "text": "all recipe types"
+ },
+ {
+  "lib": "Internal",
+  "num": 213,
+  "name": "",
+  "type": "field",
+  "text": "Click Notes for more information."
+ },
+ {
+  "lib": "Internal",
+  "num": 214,
+  "name": "",
+  "type": "field",
+  "text": "When you here a \"ding\" \nlike this ...."
+ },
+ {
+  "lib": "Internal",
+  "num": 215,
+  "name": "",
+  "type": "field",
+  "text": "it means an operation is \nnot available \nor you have reached \nthe end of a list. "
+ },
+ {
+  "lib": "Internal",
+  "num": 216,
+  "name": "",
+  "type": "field",
+  "text": "Click the Print button below for a weekly menu printout."
+ },
+ {
+  "lib": "Internal",
+  "num": 217,
+  "name": "",
+  "type": "field",
+  "text": "Feel free to\ntype your notes below."
+ },
+ {
+  "lib": "Internal",
+  "num": 231,
+  "name": "Award 2 Palette",
+  "type": "palette",
+  "colors": 256,
+  "file": "Internal/0231_Award 2 Palette.pal.json"
+ },
+ {
+  "lib": "Internal",
+  "num": 232,
+  "name": "RSI Demo Loop PICT0256.PICT",
+  "type": "bitmap",
+  "w": 170,
+  "h": 425,
+  "bpp": 8,
+  "regx": 85,
+  "regy": 212,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "Internal/0232_RSI Demo Loop PICT0256.PICT.png"
+ },
+ {
+  "lib": "Internal",
+  "num": 235,
+  "name": "ding",
+  "type": "sound",
+  "file": "Internal/0235_ding.wav",
+  "rate": 22254,
+  "channels": 1,
+  "bits": 8,
+  "seconds": 0.45
+ },
+ {
+  "lib": "Internal",
+  "num": 237,
+  "name": "ragtime final loop.se",
+  "type": "sound",
+  "file": "Internal/0237_ragtime final loop.se.wav",
+  "rate": 11127,
+  "channels": 1,
+  "bits": 8,
+  "seconds": 12.57
+ },
+ {
+  "lib": "Internal",
+  "num": 238,
+  "name": "bell",
+  "type": "sound",
+  "file": "Internal/0238_bell.wav",
+  "rate": 22050,
+  "channels": 1,
+  "bits": 8,
+  "seconds": 2.32
+ },
+ {
+  "lib": "Internal",
+  "num": 239,
+  "name": "click",
+  "type": "sound",
+  "file": "Internal/0239_click.wav",
+  "rate": 22257,
+  "channels": 1,
+  "bits": 8,
+  "seconds": 0.17
+ },
+ {
+  "lib": "Internal",
+  "num": 261,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 262,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 263,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 264,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 265,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 266,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 267,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 268,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 269,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 270,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 271,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 272,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 273,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 274,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 275,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 276,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 277,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 278,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 279,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 280,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 281,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 282,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 283,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 284,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 285,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 286,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 287,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 288,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 289,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 290,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 291,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 294,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 295,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 296,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 297,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 298,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 299,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 300,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 301,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 302,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 303,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 305,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 306,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 307,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 308,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 309,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 310,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 311,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 312,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 313,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 314,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 315,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 316,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 317,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 318,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 321,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 322,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 323,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 324,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 325,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 326,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 327,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 328,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 329,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 330,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 338,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 339,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 340,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 341,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 342,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 344,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 345,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 346,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 347,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 348,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 349,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 350,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 351,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 352,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 353,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 354,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 355,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 356,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 357,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 358,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 359,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 360,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 361,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 985,
+  "name": "grocery notes",
+  "type": "field",
+  "text": "Notes:"
+ },
+ {
+  "lib": "Internal",
+  "num": 986,
+  "name": "Save Recipe",
+  "type": "button",
+  "text": "Save Recipe"
+ },
+ {
+  "lib": "Internal",
+  "num": 987,
+  "name": "Don't Save",
+  "type": "button",
+  "text": "Don't Save"
+ },
+ {
+  "lib": "Internal",
+  "num": 988,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 989,
+  "name": "Edit/Save",
+  "type": "button",
+  "text": "Edit"
+ },
+ {
+  "lib": "Internal",
+  "num": 992,
+  "name": "TempField",
+  "type": "field",
+  "text": "CT"
+ },
+ {
+  "lib": "Internal",
+  "num": 993,
+  "name": "Print Dump",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 994,
+  "name": "Ingredient Template",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 995,
+  "name": "Directions Template",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 996,
+  "name": "Notes Template",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 997,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 998,
+  "name": "gray matter code",
+  "type": "script"
+ },
+ {
+  "lib": "Internal",
+  "num": 999,
+  "name": "Recipe Index",
+  "type": "field",
+  "text": "Country Pork Chops with Sage Smashed Potatoes~P~A~\nFast and Fit Clam Chowder~S~A~\nGrandma's Chicken Vegetable Soup~U~A~\nHomestyle Scalloped Potatoes and Mushrooms~V~A~\nMom's Crispy Chicken and Potatoes~C~A~\nOne-Pan Potatoes and Chicken Rosemary~C~A~\nRoadhouse Roast Beef and Mashed Potatoes~B~A~\nUptown Supper Salad~D~A~\nBlack Forest Potato Salad~P~W~\nBora Bora Burgers with Potato Nuggets~B~W~\nOne-Pan Potatoes and Chicken Santa Fe~C~W~\nGreek Potato Salad with Dried Tomatoes~D~W~\nFrench Potato-Mint Soup~U~W~\nPan-Pacific Potato-Shrimp Kebabs~S~W~\nPeruvian Potato and Chicken Platter~C~W~\nSouthwest Potato Frittata~V~W~\nBistro Beef and Potatoes Maison~B~T~\nChicken and Potatoes Francais~C~T~\nLean and Luscious Potato Split~V~T~\nMediterranean Grilled Chicken Salad~D~T~\nParchment-Wrapped Potato Parcels~P~T~\nPesto Salmon with Pan-Roasted Potatoes~S~T~\nPotato-Tomato Bisque~U~T~\nOne-Pan Potatoes and Chicken Teriyaki~C~T~\nCheese and Trees Soup~U~K~\nCowboy Pizza~B~K~\nFrankentaters~P~K~\nFrench Fry Pizza Pie~V~K~\nSloppy Turkey Spuds~C~K~\nStuffed Spudwich~D~K~\nSuper Chicken Sandwiches with Skinny Fries~C~K~\nTunasaurus Crunch Casserole~S~K~\nBreakfast Burritos Anytime~P~L~\nHot and Cold Salad Sampler~D~L~\nIn-A-Pinch Potato Pancakes~V~L~\nMinestrone in Minutes~U~L~\nNice and Easy Nicoise Salad~S~L~\nOne-Pan Potatoes and Chicken Dijon~C~L~\nQuick-Fix Steak and Lemon-Pepper Potatoes~B~L~\nSpeedy Spuds with Classic Chicken Topping~C~L~\nThis is my Recipe~C~L~"
+ },
+ {
+  "lib": "Internal",
+  "num": 1000,
+  "name": "Title Field",
+  "type": "field",
+  "text": " "
+ },
+ {
+  "lib": "Internal",
+  "num": 1001,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes, cut into 1-inch chunks\n1 tablespoon olive oil\n1 large clove garlic, pressed\n4 pork chops (3/4 inch thick)\nSalt and pepper, to taste\n1 1/2 tablespoons butter or margarine\n1/2 cup lowfat milk\n1 teaspoon dried sage"
+ },
+ {
+  "lib": "Internal",
+  "num": 1002,
+  "name": "",
+  "type": "field",
+  "text": "1 tablespoon butter or margarine\n1 cup chopped leeks or onions\n1 cup diced red and/or green bell peppers\n2 cans (6 1/2 ounces each) chopped clams in clam juice\n2 pounds (6 medium) potatoes, cut into 1/2-inch cubes\n1 can (14 1/2 ounces) reduced-sodium chicken broth\n2 teaspoons dried thyme \n1 cup lowfat milk\n1 package (10 ounces) frozen whole kernel corn, thawed and drained\n1/8 teaspoon cayenne pepper\nSalt and pepper, to taste"
+ },
+ {
+  "lib": "Internal",
+  "num": 1003,
+  "name": "",
+  "type": "field",
+  "text": "1 can (49 1/2 ounces) reduced-sodium chicken broth\n1/2 cup water\n1 pound (3 medium) potatoes, cut into 1/2-inch cubes\n1 medium carrot, cut into 1/4-inch slices\n1 pound boned and skinned chicken breasts, cut into 1-inch chunks\n1 medium zucchini, cut into 1/4-inch slices\n3 green onions, sliced\n2 teaspoons dried basil\nSalt and pepper, to taste"
+ },
+ {
+  "lib": "Internal",
+  "num": 1004,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes, cut into 1/8-inch slices\n2 teaspoons vegetable oil\n1 pound mushrooms, cut into 1/4-inch slices\n1 tablespoon flour\n1/4 teaspoon each salt and pepper\n1/2 cup grated Parmesan cheese\n3 tablespoons butter or margarine\n3/4 cup lowfat milk\n1 tablespoon chopped parsley"
+ },
+ {
+  "lib": "Internal",
+  "num": 1005,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes\n1 egg \n3 tablespoons water\n1 cup corn flake crumbs\n8 (about 4 1/2 ounces each) skinned chicken thighs\n1 teaspoon dried sage or tarragon \n1 teaspoon each salt and pepper\n1/2 cup prepared barbecue sauce\n1/4 cup honey\n1/4 cup prepared yellow mustard"
+ },
+ {
+  "lib": "Internal",
+  "num": 1006,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes, cut into 1/4-inch slices\n1 pound boned and skinned chicken breasts, cut into 1/2-inch strips\n2 cloves garlic, minced\n2 tablespoons olive oil\n2 teaspoons dried rosemary, crumbled\nSalt and pepper, to taste"
+ },
+ {
+  "lib": "Internal",
+  "num": 1007,
+  "name": "",
+  "type": "field",
+  "text": "Garlic Mashed Potatoes:                           Roast Beef and Gravy:\n1 1/3 pounds (4 medium) potatoes          1 can (10 1/4 oz.) beef gravy\n1 cup lowfat milk                                          1 teaspoon dried thyme\n2 tablespoons butter or margarine            1/8 teaspoon pepper\n3 cloves garlic, minced                                12 oz. sliced deli roast beef         \nSalt and pepper, to taste                                           \n                                                                         \n                                                                        \n"
+ },
+ {
+  "lib": "Internal",
+  "num": 1008,
+  "name": "",
+  "type": "field",
+  "text": "1 pound (3 medium) potatoes, cut into 3/4-inch cubes\n1 pound boned and skinned chicken breasts, cut into 1/3-inch strips\n3/4 cup prepared reduced calorie red wine vinaigrette dressing\n1 1/2 cups halved cherry tomatoes\n1/2 cup chopped red onion\n1 can (2 1/4 ounces) sliced ripe olives, drained\n4 romaine lettuce leaves\n1/3 cup crumbled blue cheese"
+ },
+ {
+  "lib": "Internal",
+  "num": 1009,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes, cut into 1/3-inch slices\n1/3 cup cider vinegar\n2 tablespoons vegetable oil\n2 tablespoons water\n1/4 teaspoon pepper\n1 cup diced tart red apples\n1 pound light Polish sausage, sliced 1/3 inch thick\n1 can (10 ounces) sauerkraut, rinsed and thoroughly drained\n1/4 cup sliced green onions\n1/4 cup chopped parsley\nSalt, to taste"
+ },
+ {
+  "lib": "Internal",
+  "num": 1010,
+  "name": "",
+  "type": "field",
+  "text": "3 1/2 tablespoons prepared teriyaki sauce, divided\n1 teaspoon ground ginger\n1 pound lean ground beef\n1 pound (about 4 cups) frozen potato nuggets\n3/4 cup ketchup\n1/4 teaspoon red pepper flakes\n4 hamburger buns\n4 slices canned pineapple\n4 slices red onion\n4 lettuce leaves"
+ },
+ {
+  "lib": "Internal",
+  "num": 1011,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes, cut into 3/4-inch cubes \n1 pound boned and skinned chicken breasts, cut into 3/4-inch cubes\n2 tablespoons olive oil\n1 cup prepared tomato salsa\n1 can (8 3/4 ounces) whole kernel corn, drained"
+ },
+ {
+  "lib": "Internal",
+  "num": 1012,
+  "name": "",
+  "type": "field",
+  "text": "1 pound (3 medium) potatoes, uniform in size, cut into 1/4-inch slices\n1 cup (1 1/2 ounces) dried tomato halves, halved with kitchen shears\n1 cup sliced seedless cucumber                Lemon Dressing:\n1/2 cup sliced red onion                                 1/4 cup olive oil           \n1 cup crumbled feta cheese                           1/4 cup water\n1/2 cup Greek olives                                       2 1/2 tablespoons lemon juice          \n     or pitted ripe olives                                    1 large clove garlic, pressed\n                                                                          1 tablespoon chopped fresh oregano                 \n                                                                              or 1 teaspoon dried oregano leaves                \n                                                                            1 teaspoon salt\n                                                                           1/2 teaspoon pepper\n"
+ },
+ {
+  "lib": "Internal",
+  "num": 1013,
+  "name": "",
+  "type": "field",
+  "text": "1 tablespoon butter or margarine\n1 1/3 pounds (4 medium) potatoes, cut into 3/4-inch cubes\n2 cans (14 1/2 ounces each) vegetable or chicken broth\n1 1/2 cups water\n1 cup sliced carrots\n1 1/2 cups frozen peas\n1/2 cup sliced green onions\n1/2 cup coarsely chopped mint leaves\nSalt, to taste\n1 to 2 teaspoons lemon juice"
+ },
+ {
+  "lib": "Internal",
+  "num": 1014,
+  "name": "",
+  "type": "field",
+  "text": " 1 1/3 pounds (4 medium) potatoes,                 Pan-Pacific Marinade:  \n       cut into 1 1/2-inch chunks                             2/3 cup rice vinegar\n1 pound large shrimp, peeled                            1/2 cup reduced-sodium soy sauce\n1 each red and green bell pepper,                    1/4 cup minced ginger\n        cut into 1-inch squares                                1/4 cup chopped cilantro\n4 green onions,                                                     4 cloves garlic, minced\n       cut into 1 1/2-inch pieces                              2 tablespoons sugar\n                                                                                 2 teaspoons sesame oil\n                                                                                1 teaspoon red pepper flakes\n"
+ },
+ {
+  "lib": "Internal",
+  "num": 1015,
+  "name": "",
+  "type": "field",
+  "text": "Potatoes and Chicken:\n2 cans (14 1/2 ounces each) reduced-sodium chicken broth\n1 1/3 pounds (4 medium) potatoes, cut into 1-inch chunks\n2 lemons, halved\n2 fresh or canned jalapeno peppers,                       Accompaniments:\n       quartered lengthwise                                          2 hard-cooked eggs, quartered\n2 teaspoons ground cumin                                       1 red bellpepper, cut into thin strips\n1 pound boned and skinned chicken                      3/4 cup pimiento-stuffed green olives\n       breasts                                                                    4 whole green onions                                \n1 cup cilantro sprigs                                                   1 cup prepared chunky tomato salsa\n                                                                    \n                                                                    \n"
+ },
+ {
+  "lib": "Internal",
+  "num": 1016,
+  "name": "",
+  "type": "field",
+  "text": "2/3 pound (2 medium) potatoes, cut into 1/4-inch slices\n1 can (8 3/4 ounces) whole kernel corn, drained\n1 can (4 ounces) diced mild green chiles\n1 can (2 1/4 ounces) sliced ripe olives, drained\n1 jar (2  ounces) sliced pimientos, drained \n3 green onions, sliced\n2 tablespoons chopped cilantro or parsley\n8 eggs or 2 cups egg substitute\n2 tablespoons water\nPepper, to taste\n1/3 cup grated Parmesan cheese"
+ },
+ {
+  "lib": "Internal",
+  "num": 1017,
+  "name": "",
+  "type": "field",
+  "text": "2/3 pound (2 medium) potatoes, cut into 1/2-inch cubes\n2 tablespoons butter, softened\n2 tablespoons Gorgonzola cheese\n1/4 teaspoon dried rosemary\n1/4 teaspoon dried thyme\n1/4 teaspoon pepper\n1/4 cup lowfat milk\n1 teaspoon olive oil\n2 (about 4 ounces each) filet mignon steaks"
+ },
+ {
+  "lib": "Internal",
+  "num": 1018,
+  "name": "",
+  "type": "field",
+  "text": "2/3 pound (2 medium) potatoes, cut into 1/2-inch cubes\n2 green onions, sliced\n2 (about 4 ounces each) boned and skinned chicken breast halves\nSalt and pepper, to taste\n1 clove garlic, minced\n2 teaspoons Dijon-style mustard\n1 teaspoon chopped fresh tarragon or 1/2 teaspoon dried tarragon \n1/3 cup dry white wine or chicken broth\n2 tablespoons light sour cream"
+ },
+ {
+  "lib": "Internal",
+  "num": 1019,
+  "name": "",
+  "type": "field",
+  "text": "1 potato (about 10 ounces)\n1/4 cup lowfat cottage cheese\n2 to 3 tablespoons lowfat milk\n2 tablespoons toasted sunflower nuts\n2 tablespoons chopped green bell pepper\n2 tablespoons chopped carrot\n2 tablespoons sliced green onions\n1/4 cup shredded Cheddar cheese\n1/8 teaspoon pepper\nSalt, to taste\n3 cherry tomatoes, halved"
+ },
+ {
+  "lib": "Internal",
+  "num": 1020,
+  "name": "",
+  "type": "field",
+  "text": "2/3 pound (2 medium) potatoes, cut into 3/4-inch cubes\n4 ounces mushrooms, halved\n4 ounces green beans, halved, and steamed until crisp-tender  \n2 (about 6 ounces each) boned and skinned chicken breast halves\n1/4 cup chopped red onion\nHalved cherry tomatoes,  for garnish\nVinaigrette:\n    1/4 cup olive oil                                          2 teaspoons Dijon-style mustard \n    2 tablespoons white wine vinegar               1/4 teaspoon each \n    1 clove garlic, minced                                     sugar and salt \n    2 teaspoons minced fresh tarragon or         1/8 teaspoon pepper \n           3/4 teaspoon dried tarragon"
+ },
+ {
+  "lib": "Internal",
+  "num": 1021,
+  "name": "",
+  "type": "field",
+  "text": "6 ounces thinly sliced lean cooked ham\n2/3 pound (2 medium) potatoes, cut into 1/8-inch slices\n1 small zucchini, cut into 1/4-inch slices\n1 small crookneck squash, cut into 1/4-inch slices\n1 small red bell pepper, cut into 1-inch squares\n2 tablespoons lemon juice\n1 teaspoon dried basil\n1/4 teaspoon red pepper flakes\nSalt and pepper, to taste"
+ },
+ {
+  "lib": "Internal",
+  "num": 1022,
+  "name": "",
+  "type": "field",
+  "text": "2/3 pound (2 medium) potatoes, cut into 1-inch chunks\n2 salmon steaks (6 to 8 ounces each)\n2 tablespoons prepared pesto (thawed if frozen)\n1 tablespoon olive oil\n2 cloves garlic, minced\nSalt and pepper, to taste"
+ },
+ {
+  "lib": "Internal",
+  "num": 1023,
+  "name": "",
+  "type": "field",
+  "text": "1/2 cup dried tomato halves,  cut into 1/4-inch strips with kitchen shears\n1 1/2 cups water\n1 chicken or vegetable bouillon cube\n8 ounces  potatoes, cut into 3/4-inch cubes\n1/4 cup sliced celery\n1/3 cup frozen whole kernel corn\n1/4 cup sliced green onions\n1/2 cup lowfat milk\n1/4 teaspoon dried thyme \nSalt and pepper, to taste"
+ },
+ {
+  "lib": "Internal",
+  "num": 1024,
+  "name": "",
+  "type": "field",
+  "text": "2/3 pound (2 medium) potatoes, cut into 1/2-inch wedges \n8 ounces boned and skinned chicken breasts, cut into 1/2-inch strips\n1 tablespoon vegetable oil\n1/4 cup sliced green onions\n2 tablespoons prepared teriyaki sauce"
+ },
+ {
+  "lib": "Internal",
+  "num": 1025,
+  "name": "",
+  "type": "field",
+  "text": "1 tablespoon butter or margarine\n1 cup chopped onion\n1 1/3 pounds (4 medium) potatoes, cut into 3/4-inch cubes\n2 1/2 cups water\n2 chicken bouillon cubes\n1 package (10 ounces) frozen chopped broccoli, thawed and drained\n1 1/2 cups shredded Cheddar cheese\nSalt and pepper, to taste"
+ },
+ {
+  "lib": "Internal",
+  "num": 1026,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes cut into  1/4-inch slices\n1 package (10 ounces) refrigerated, prepared pizza dough\n1 pound lean ground beef\n1 cup prepared barbecue sauce, divided\n1 small green bell pepper, cut into 1/4-inch strips\n1 cup shredded Cheddar cheese"
+ },
+ {
+  "lib": "Internal",
+  "num": 1027,
+  "name": "",
+  "type": "field",
+  "text": "2 tablespoons butter or margarine\n1 1/3 pounds (4 medium) potatoes, cut into 1/8-inch slices\n4 (2 ounces each) hot dogs, cut into 1/2-inch slices\n1 tablespoon flour\nSalt and pepper, to taste\n1 cup lowfat milk"
+ },
+ {
+  "lib": "Internal",
+  "num": 1028,
+  "name": "",
+  "type": "field",
+  "text": "1 pound (about 5 cups) frozen French fried shoestring potatoes\n1 cup prepared pizza sauce or spaghetti sauce\n1 teaspoon dried oregano leaves, crumbled\n1/2 green bell pepper, cut into 1/4-inch strips\n2 tablespoons sliced green onions\n2 cups shredded mozzarella cheese\n1/4 cup grated Parmesan cheese"
+ },
+ {
+  "lib": "Internal",
+  "num": 1029,
+  "name": "",
+  "type": "field",
+  "text": "4 (10 ounces each) potatoes\n12 ounces ground turkey\n1 medium onion, chopped\n1 medium green bell pepper, chopped\n1 cup sliced mushrooms\n1 jar or can (14 or 15 ounces) marinara sauce or other vegetarian spaghetti sauce\nSalt and pepper, to taste\n1/4 cup chopped parsley\n1/4 cup grated Parmesan cheese"
+ },
+ {
+  "lib": "Internal",
+  "num": 1030,
+  "name": "",
+  "type": "field",
+  "text": "4 (8 ounces each) potatoes\n1/2 cup light mayonnaise\n1/4 cup sliced green onions\n1/4 cup sliced celery\n1/4 cup pickle relish\n2 teaspoons prepared yellow mustard\n1/4 teaspoon pepper\nSalt, to taste\n4 thin slices cooked ham"
+ },
+ {
+  "lib": "Internal",
+  "num": 1031,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes, cut into 1/2-inch wedges\nGarlic salt or seasoned salt, to taste\n4 (4 ounces each) boned and skinned chicken breast halves\n3/4 cup ketchup\n1/4 cup prepared yellow mustard\n8 slices whole wheat bread, toasted\n4 lettuce leaves\n2 medium tomatoes, sliced into 4 slices each"
+ },
+ {
+  "lib": "Internal",
+  "num": 1032,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes, cut into 1/2-inch cubes\n2 cans (6 1/8 ounces each) tuna packed in water, thoroughly drained\n1 cup frozen peas\n1/3 cup sliced green onions\n1 can (10 3/4 ounces) cream of mushroom soup\n1/4 cup lowfat milk\n1/8 to 1/4 teaspoon pepper\n1 1/2 cups crushed potato chips"
+ },
+ {
+  "lib": "Internal",
+  "num": 1033,
+  "name": "",
+  "type": "field",
+  "text": "10 ounces (about 4 cups) country-style frozen hash brown potatoes\n3 tablespoons vegetable oil\nSalt, to taste\n8 ounces bulk light sausage\n4 eggs, beaten or 1 cup egg substitute\n4 (7- to 8-inch) flour tortillas, warmed\n1/2 cup prepared tomato salsa"
+ },
+ {
+  "lib": "Internal",
+  "num": 1034,
+  "name": "",
+  "type": "field",
+  "text": "1 pound (about 4 cups) frozen potato wedges with skins\n1/4 cup light sour cream\n1/4 cup prepared reduced calorie Italian dressing\n8 lettuce leaves\n12 ounces thinly sliced deli roast beef, ham or turkey\n2 medium tomatoes, cut into wedges\n1 small cucumber, sliced\n1 small red onion, sliced\n1 can (14 ounces) artichoke hearts, drained and halved"
+ },
+ {
+  "lib": "Internal",
+  "num": 1035,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes, cut into 3/4-inch cubes\n1 1/2 cups coarsely chopped peeled apples\n1/4 cup chopped onion\n1 cup shredded sharp Cheddar cheese\n1 egg, beaten\n1 teaspoon salt\n1/4 teaspoon pepper\n1/2 cup unseasoned dry bread crumbs or cornmeal\n1 1/2 tablespoons butter or margarine\n1 1/2 tablespoons vegetable oil"
+ },
+ {
+  "lib": "Internal",
+  "num": 1036,
+  "name": "",
+  "type": "field",
+  "text": "3/4 cup chopped onion\n2 cloves garlic, minced\n1 tablespoon vegetable oil\n2 cans (14 1/2 ounces each) vegetable broth\n2/3 pound (2 medium) potatoes, cut into 1/2-inch cubes\n1 1/2 cups frozen mixed vegetables\n1 can (8 3/4 ounces) red kidney beans, drained\n1 teaspoon dried Italian herb seasoning\nGrated Parmesan cheese"
+ },
+ {
+  "lib": "Internal",
+  "num": 1037,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes, cut into 1/4-inch slices\n2 cans (6 1/8 ounces each) tuna packed in water, \n  thoroughly drained\n3/4 cup prepared reduced calorie red wine vinaigrette dressing, divided\n4 butter lettuce leaves\n8 ounces (half a 16-ounce package) frozen whole green beans, \n  thawed and drained\n1 1/2 cups cherry tomatoes, halved\n1 small red onion, sliced \n1 can (3 1/4 ounces) pitted ripe olives, drained"
+ },
+ {
+  "lib": "Internal",
+  "num": 1038,
+  "name": "",
+  "type": "field",
+  "text": "1 1/3 pounds (4 medium) potatoes, cut into 1/4-inch slices\n1 pound boned and skinned chicken breasts, cut into 1/2-inch slices\n2 tablespoons vegetable oil\n1/4 cup prepared honey-Dijon barbecue sauce\n1 teaspoon dried tarragon"
+ },
+ {
+  "lib": "Internal",
+  "num": 1039,
+  "name": "",
+  "type": "field",
+  "text": "1 cup prepared Italian dressing\n2 tablespoons soy sauce\n1 1/2 pounds flank steak\n1 1/3 pounds (4 medium) potatoes, cut into 2-inch chunks\n1 1/2 tablespoons butter or margarine, cut into small pieces\n1 1/2 tablespoons fresh lemon juice\n1 teaspoon minced garlic\n1 tablespoon chopped parsley\n1 1/2 teaspoons grated lemon peel\n1/4 to 1/2 teaspoon black pepper\nSalt, to taste"
+ },
+ {
+  "lib": "Internal",
+  "num": 1040,
+  "name": "",
+  "type": "field",
+  "text": "4 (8 ounces each) potatoes\n1 can (10 ounces) chunk chicken in water, drained\n3 green onions, sliced\n6 tablespoons fat free mayonnaise \n1/4 cup grated Parmesan cheese, divided"
+ },
+ {
+  "lib": "Internal",
+  "num": 1041,
+  "name": "",
+  "type": "field",
+  "text": "Ingredients\nas;dljf a;sdlas;djf ;alsj f\na;sldj a;'sdkjf \na;sl;sdls\nd;laksj f;als "
+ },
+ {
+  "lib": "Internal",
+  "num": 2001,
+  "name": "",
+  "type": "field",
+  "text": "In 2-quart saucepan over medium heat, cook potatoes, covered, in 2 inches boiling water until tender, about 20 minutes.  While potatoes cook, mix olive oil with garlic and rub on both sides of pork chops.  Coat large nonstick skillet with vegetable cooking spray.  Add chops and over medium heat pan fry until chops are lightly browned and meat is no longer pink, about 10 minutes on each side.  Season with salt and pepper.  Drain potatoes; shake in pan over low heat 1 minute.  Remove from heat and \"smash\" potatoes with fork, leaving them lumpy.  Mix in butter, then milk and sage.  Mix over low heat 2 minutes.  Season with salt and pepper.  Serve chops with potatoes.\n\nMakes 4 servings\n"
+ },
+ {
+  "lib": "Internal",
+  "num": 2002,
+  "name": "",
+  "type": "field",
+  "text": "Place butter in 2 1/2- to 3-quart microwave-safe bowl.  Microwave on HIGH 1 minute.  Add leeks and bell peppers; microwave on HIGH 3 minutes.  Drain juice from clams into microwaved vegetables, reserving clams.  Stir in potatoes, broth and thyme.  Cover with plastic wrap, venting one corner.  Microwave on HIGH 20 minutes.  With slotted spoon remove 4 cups cooked potatoes; set aside. Pour contents of bowl into container of electric blender; add milk, and holding lid down tightly, blend until smooth. Return mixture to bowl.  Stir in reserved clams and potatoes, the corn and cayenne; season with salt and pepper.  Microwave on HIGH 3 minutes until heated through.  If desired, pass bowls of shredded Cheddar cheese, chopped parsley and/or crumbled cooked bacon to stir into soup.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2003,
+  "name": "",
+  "type": "field",
+  "text": "In 3-quart saucepan over medium heat combine broth and water. Cover and bring to boil.  Add potatoes and carrot; cover and cook 5 minutes.  Add chicken, zucchini, onions and basil; bring to boil, reduce heat, cover and cook until chicken is opaque throughout, about 7 minutes.  Season with salt and pepper.\n\nMakes 4  servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2004,
+  "name": "",
+  "type": "field",
+  "text": "Heat oven to 400 degrees.  In 2-quart saucepan over medium heat cook potatoes, covered, in 2 inches boiling water until almost tender, 6 to 8 minutes; drain. In large nonstick skillet over medium heat, heat oil.  Add mushrooms; saute over high heat until tender and liquid has evaporated; set aside.  In small bowl combine flour, salt and pepper.  Coat shallow 1 1/2-quart baking dish with vegetable cooking spray and cover bottom with a layer of potatoes; sprinkle with a little of the flour mixture.  Add a layer of mushrooms.  Sprinkle with some of the cheese; dot with butter.  Repeat layers until all ingredients are used, ending with butter; pour milk over.  Bake 30 minutes until potatoes are tender and top is browned.  Sprinkle with parsley.\n\nMakes 4 servings\n"
+ },
+ {
+  "lib": "Internal",
+  "num": 2005,
+  "name": "",
+  "type": "field",
+  "text": "Heat oven to 375 degrees.  Pierce potatoes with tines of fork; microwave on HIGH 8 minutes.  Meanwhile, in shallow dish beat egg with water; place corn flake crumbs in another shallow dish.  Dip chicken pieces into egg, then crumbs to coat completely.  Coat rimmed baking sheet with vegetable cooking spray; place chicken on sheet.  Cut potatoes into 1-inch chunks; place on sheet with chicken.  Coat potatoes with cooking spray; sprinkle with sage.  Season chicken and potatoes with salt and pepper. Bake about 40 minutes until juices run clear when chicken is pierced and potatoes are golden brown.  Meanwhile, to make sauce:  In bowl mix barbecue sauce, honey and yellow mustard. Serve chicken and potatoes with sauce for dipping.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2006,
+  "name": "",
+  "type": "field",
+  "text": "Place potatoes in shallow 1 1/2- to 2-quart microwave-safe dish. Cover with plastic wrap, venting one corner.  Microwave on HIGH 8 to 10 minutes until just tender.  While potatoes cook, in large nonstick skillet over high heat, toss and brown chicken and garlic in oil 5 minutes.  Add potatoes and rosemary; toss until potatoes are lightly browned.  Season with salt and pepper.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2007,
+  "name": "",
+  "type": "field",
+  "text": "Pierce potatoes with tines of fork; microwave on HIGH 13 minutes until potatoes are fork-tender.  Halve lengthwise; scoop pulp into medium microwave-safe bowl.  Mash potatoes with potato masher or beat with electric hand mixer; reserve.  Place milk, butter and garlic in small microwave-safe bowl.  Microwave on HIGH 2 minutes; thoroughly mix into potato pulp.  Mix in additional milk, if necessary, to reach desired consistency.  Season with salt and pepper.  Microwave on HIGH 1 to 2 minutes until hot.  Meanwhile, in 2-quart saucepan combine gravy, thyme and pepper; bring to simmer over medium heat.  Add beef slices; heat through.  Serve beef and gravy with mashed potatoes.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2008,
+  "name": "",
+  "type": "field",
+  "text": "In 3-quart saucepan over medium heat cook potatoes, covered, in 2 inches boiling water 5 minutes.  Add chicken; bring to boil, reduce heat, cover and cook about 10 minutes until potatoes are tender and juices run clear when chicken is pierced.  Drain  thoroughly.  Add remaining ingredients to potatoes and chicken except lettuce and cheese.  Toss gently over low heat just until warm.  Line platter with lettuce; spoon mixture onto lettuce. Top with cheese.  (Salad also can be served chilled.)\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2009,
+  "name": "",
+  "type": "field",
+  "text": "In 2-quart saucepan over medium heat, cook potatoes, covered, in 2 inches boiling water until tender, about 12 minutes; drain. Meanwhile, in large bowl whisk together vinegar, oil, water and pepper.  Mix in apples.  In large nonstick skillet over medium heat, toss and brown sausage 10 minutes.  Remove with slotted spoon.  Drain on paper towels.  Add potatoes, sauerkraut, onions, parsley and sausage to apple mixture; toss gently.  Season with salt.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2010,
+  "name": "",
+  "type": "field",
+  "text": "Heat oven to 450 degrees.  In large bowl mix 2 tablespoons of the teriyaki sauce and the ginger to blend thoroughly; add beef and mix to blend thoroughly.  Form into 4 patties 1/2 inch thick.  Cook potato nuggets as package directs, baking for 15 to 17 minutes until crisp.  Meanwhile, in small bowl mix the remaining 1 1/2 tablespoons teriyaki sauce, the ketchup and pepper flakes to make sauce for burgers and potatoes; set aside.  In nonstick skillet over medium-high heat pan fry burgers to desired doneness, turning once.  On bottoms of buns layer burgers, pineapple and onion slices and lettuce.  Cover with bun tops.  Serve sauce with potato nuggets and burgers.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2011,
+  "name": "",
+  "type": "field",
+  "text": "Place potatoes in shallow 1 1/2- to 2-quart microwave-safe dish. Cover with plastic wrap, venting one corner.  Microwave on HIGH 8 to 10 minutes until just tender.  While potatoes cook, in large nonstick skillet over high heat toss and brown chicken in oil 5 minutes.  Add potatoes; toss until potatoes are lightly browned.  Add salsa and corn; toss until heated through.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2012,
+  "name": "",
+  "type": "field",
+  "text": "In 2-quart saucepan over medium heat, cook potatoes, covered, in 2 inches boiling water until tender, about 12 minutes; drain and set aside.  Meanwhile, in small bowl, cover tomatoes with boiling water; set aside 10 minutes while you prepare dressing. Thoroughly drain tomatoes and pat dry with paper towels.  Add potatoes, tomatoes and cucumbers to bowl containing dressing; toss to coat.  Mound potato mixture on plate.  Arrange onion, cheese and olives on top.  \n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2013,
+  "name": "",
+  "type": "field",
+  "text": "In 3-quart saucepan over medium-high heat, melt butter.  Add potatoes; cook, tossing occasionally, 5 minutes.  Reduce heat to medium and add broth, water and carrots.  Bring to boil, reduce heat, cover and cook until potatoes and carrots are tender, about 15 minutes.  Add peas, onions and mint.  Continue to cook 5 minutes.  Season with salt and lemon juice.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2014,
+  "name": "",
+  "type": "field",
+  "text": "Place potatoes in shallow 1 1/2- to 2-quart microwave-safe dish.  Cover with plastic wrap, venting one corner.  Microwave on HIGH 8 to 10 minutes until just tender.  Meanwhile, heat broiler. Onto 8 (12-inch) metal or bamboo skewers, alternately thread potatoes, shrimp, bell peppers and onions.  Place on rimmed baking sheet. In bowl whisk together marinade ingredients; pour marinade over skewers. Let stand 10 minutes.  Broil 4 to 5 inches from heat source about 8 minutes, turning once and basting occasionally with marinade, until vegetables are tender and shrimp are opaque throughout.  \n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2015,
+  "name": "",
+  "type": "field",
+  "text": "To prepare potatoes and chicken, in 3-quart saucepan combine broth, potatoes, lemons, jalape\u00f1o peppers and cumin.  Bring to boil, reduce heat, cover and cook 5 minutes.  Add chicken; cover and cook about 15 minutes longer until potatoes are tender and juices run clear when chicken is pierced.  Remove from heat; add cilantro to saucepan.  Let potatoes and chicken cool in broth.  Drain potatoes and chicken, reserving 3/4 cup broth.  Remove cilantro, jalape\u00f1os and lemons.  To assemble, mound potatoes in center of large platter.  Shred chicken and arrange on platter with remaining ingredients except reserved broth and salsa.  Serve reserved broth in sauceboat.  Serve salsa in bowl on the side.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2016,
+  "name": "",
+  "type": "field",
+  "text": "Heat broiler.  Place potatoes in shallow 1 1/2- to 2-quart microwave-safe dish.  Cover with plastic wrap, venting one corner.  Microwave on HIGH 5 minutes.  Coat 10-inch nonstick skillet with vegetable cooking spray; add potatoes and cook over medium heat, turning occasionally, until golden, about 5 minutes.  Meanwhile, in medium bowl mix remaining ingredients except pepper and cheese; season with pepper. Pour mixture over potatoes.  Cover; cook over medium heat until eggs are almost set, about 10 minutes.  Remove cover.  Sprinkle with cheese.  Wrap skillet handle in double thickness of aluminum foil.  Place skillet 4 to 5 inches from heat source. Watching closely, broil 1 to 3 minutes to finish cooking eggs and melt cheese.  Cut into wedges to serve.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2017,
+  "name": "",
+  "type": "field",
+  "text": "Place potatoes in shallow 1-quart microwave-safe dish.  Cover with plastic wrap, venting one corner.  Microwave on HIGH 5 minutes until tender.  Meanwhile, in small bowl thoroughly mix butter, cheese, rosemary, thyme and pepper.  With electric mixer beat potatoes, 3 tablespoons of the butter-cheese mixture and the milk until smooth.  In medium nonstick skillet over medium- high heat add oil and pan fry steaks to desired doneness, turning once.  Microwave potatoes on HIGH 1 to 2 minutes until hot. Top each steak with 1 1/2 teaspoons of the remaining butter-cheese mixture.  Serve with potatoes.\n\nMakes 2 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2018,
+  "name": "",
+  "type": "field",
+  "text": "Place potatoes in shallow 1-quart microwave-safe dish.  Cover with plastic wrap, venting one corner.  Microwave on HIGH 3 minutes.  Coat large nonstick skillet with vegetable cooking spray.  Add potatoes and onions; push to one side and add chicken.  Cook over medium heat, tossing potatoes occasionally and turning chicken once until potatoes are tender and juices run clear when chicken is pierced, about 15 minutes. Season with salt and pepper.  Remove chicken and potatoes to platter; keep hot.  Add garlic to skillet; mix in mustard, tarragon and wine; cook over high heat 1 minute.  Remove from heat; whisk in sour cream. Season with salt and pepper.  Pour sauce over chicken.\n\nMakes 2 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2019,
+  "name": "",
+  "type": "field",
+  "text": "Pierce potato with tines of fork; microwave on HIGH about 8 minutes until potato is fork-tender.  Halve and scoop out potato, leaving 1/4-inch shells.  In bowl mash potato pulp.  Mix in cottage cheese and enough milk for a moist but firm consistency.  Mix in sunflower nuts, green pepper, carrot, onions, half the Cheddar cheese and the pepper to blend thoroughly. Season with salt.  Mound into potato shells, dividing equally.  Sprinkle with remaining Cheddar cheese.  Microwave on HIGH about 2 minutes until cheese is melted and potatoes are heated through.  Garnish with tomatoes.\n\nMakes 2 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2020,
+  "name": "",
+  "type": "field",
+  "text": "In 1-quart saucepan over medium heat cook potatoes, covered, in 2 inches boiling water until tender, about 15 minutes; drain. Meanwhile, make vinaigrette:  In bowl whisk together all vinaigrette ingredients. Place potatoes, mushrooms and beans in separate piles in large shallow dish; drizzle with 1/3 cup of the vinaigrette to coat.  Cover; let stand 15 minutes.  Heat broiler.  Meanwhile, in bowl add chicken to the remaining vinaigrette; cover and let stand 15 minutes.  Remove chicken from vinaigrette (discard vinaigrette); broil 4 to 5 inches from heat source about 8 minutes until juices run clear when chicken is pierced, turning once. To serve, slice chicken breasts and arrange on 4 plates with potatoes, mushrooms and beans, dividing equally.  Sprinkle with onion and garnish with cherry tomatoes.\nMakes 2 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2021,
+  "name": "",
+  "type": "field",
+  "text": "Cut two 15-inch squares kitchen parchment.  For each packet:  Place half the ham on center of parchment square.  Top ham with half the potato slices, overlapping, then top with half the remaining vegetables.  Sprinkle with half the remaining ingredients.  Fold two sides of the parchment over the ham and vegetables in letter fashion.  Grasp the two shorter open ends and pull up to meet.  Fold down the open ends twice to seal.  Repeat for second packet.  Place in single layer in shallow microwave-safe dish.  Microwave on HIGH 7 minutes.  Rotate packets half turn; microwave on HIGH 7 more minutes.  Let stand 3 minutes; open one packet and check to be sure potatoes are tender.  If potatoes are not cooked through, rewrap and microwave on HIGH a little longer.\n\nMakes 2 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2022,
+  "name": "",
+  "type": "field",
+  "text": "Heat oven to 400 degrees.  Place potatoes in shallow 1-quart microwave-safe dish.  Cover with plastic wrap, venting one corner.  Microwave on HIGH 6 minutes until just tender.  Meanwhile, spread top of each salmon steak with pesto, dividing equally.  Place on rimmed baking sheet.  Bake until salmon is opaque throughout, 15 to 20 minutes.  While salmon bakes, in medium nonstick skillet over high heat combine oil and garlic.  Add potatoes.  Pan roast, tossing, 5 to 8 minutes, until golden brown.  Season with salt and pepper.  Serve salmon with potatoes.\n\nMakes 2 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2023,
+  "name": "",
+  "type": "field",
+  "text": "In small bowl cover tomatoes with boiling water; set aside 10 minutes.  In 1 1/2- to 2-quart saucepan bring 1 1/2 cups water and bouillon cube to boil.  Add potatoes; return to boil.  Cover and simmer about 10 minutes, just until tender.  With slotted spoon remove 1/2 cup potatoes; set aside.  Pour contents of saucepan into container of electric blender. Holding lid down tightly, blend until smooth; return to saucepan. Drain and add tomatoes, reserved potatoes, then remaining ingredients except salt and pepper.  Cook over low heat, stirring often, 8 minutes.  Season with salt and pepper.  Thin with a little additional water or milk, if needed.\n\nMakes 2 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2024,
+  "name": "",
+  "type": "field",
+  "text": "Place potatoes in shallow 1-quart microwave-safe dish.  Cover with plastic wrap, venting one corner.  Microwave on HIGH 5 minutes until just tender.  While potatoes cook, in medium nonstick skillet over high heat, toss and brown chicken in oil 5 minutes. Add potatoes; toss until potatoes are lightly browned.  Add onions and teriyaki sauce; toss until heated through.\n\nMakes 2 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2025,
+  "name": "",
+  "type": "field",
+  "text": "In 2- to 3-quart saucepan over medium heat, melt butter. Add onion; saute 5 minutes.  Add potatoes, water and bouillon cubes.  Bring to boil, reduce heat, cover and cook until potatoes are just tender, about 15 minutes.  Remove 1 cup of the potato cubes with slotted spoon; set aside.  Pour contents of saucepan into container of electric blender.  Holding lid down tightly, blend until smooth; return to saucepan.  Mix in reserved potatoes and the broccoli.  Over medium-low heat gradually add cheese, stirring until heated through and cheese is completely melted. Season with salt and pepper.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2026,
+  "name": "",
+  "type": "field",
+  "text": "Heat oven to 425 degrees.  Place potatoes in shallow 1 1/2- to 2-quart microwave-safe dish.  Cover with plastic wrap, venting one corner.  Microwave on HIGH 8 to 10 minutes until just tender; set aside.  Coat 12-inch round pizza pan with vegetable cooking spray; press dough evenly into pan; prick all over with fork.  Bake for 10 minutes; set aside.  Meanwhile, in large nonstick skillet over medium heat saute beef until browned; drain fat.  Mix in 3/4 cup barbecue sauce.  To assemble pizza, spread beef mixture over crust; top evenly with potatoes and bell pepper.  Drizzle with remaining 1/4 cup barbecue sauce.  Sprinkle with cheese.  Bake 10 to 15 minutes until hot throughout and cheese is melted.  Cut into 8 wedges.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2027,
+  "name": "",
+  "type": "field",
+  "text": "Spread half the butter on bottom of 12-inch nonstick skillet. Layer half the potato slices then half the hot dog slices in skillet.  Sprinkle with half the flour.  Dot with half the remaining butter.  Season with salt and pepper.  Repeat layers, ending with salt and pepper.  Pour milk over.  Bring to simmer over high heat.  Reduce heat to medium-low, cover and cook until potato slices are tender, about 20 minutes. Uncover skillet and simmer until sauce thickens, about 7 minutes.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2028,
+  "name": "",
+  "type": "field",
+  "text": "Heat oven to 450 degrees.  Coat 12-inch round pizza pan with vegetable cooking spray.  Arrange frozen potatoes evenly in one layer in pan.  Bake 10 minutes.  Remove pan from oven and cover potatoes with sauce.  Sprinkle with oregano.  Arrange pepper strips on sauce; sprinkle with onions and top with cheeses. Bake about 15 minutes until top is lightly browned.\n\nMakes one 12-inch pizza"
+ },
+ {
+  "lib": "Internal",
+  "num": 2029,
+  "name": "",
+  "type": "field",
+  "text": "Pierce potatoes with tines of fork; microwave on HIGH 20 to 22 minutes until potatoes are fork-tender.  Meanwhile, in large nonstick skillet over medium heat saute turkey until no longer pink, about 6 minutes.  Add onion, bell pepper and mushrooms; saute, stirring, 3 minutes.  Stir in marinara sauce; bring to boil, reduce heat, cover and simmer 10 minutes.  Season with salt and pepper; stir in parsley.  Place potatoes on 4 plates; split and fluff.  Top potatoes with turkey mixture and cheese, dividing equally.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2030,
+  "name": "",
+  "type": "field",
+  "text": "Pierce potatoes with tines of fork; microwave on HIGH 18 to 20 minutes until potatoes are fork-tender; cool 10 minutes. Halve potatoes and carefully scoop pulp into bowl leaving 1/4-inch-thick shells; reserve shells.  Mash potato pulp; mix in remaining ingredients except potato shells and ham.  Fill shells with potato mixture. Sandwich 2 halves together with 1 folded ham slice in middle.  Wrap each \"sandwich\" in a paper napkin to eat out of hand.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2031,
+  "name": "",
+  "type": "field",
+  "text": "Heat oven to 475 degrees.  Coat rimmed baking sheet with vegetable cooking spray.  Place potato wedges on pan cut sides down and coat with additional cooking spray.  Sprinkle lightly with garlic salt.  Bake 18 minutes.  Turn potatoes; coat with more cooking spray and sprinkle with additional garlic salt.  Bake 12 more minutes until potatoes are crisp and golden brown.  Meanwhile, coat 12-inch nonstick skillet with cooking spray.  Heat skillet over medium heat; add chicken and cook about 7 minutes on each side until juices run clear when chicken is pierced. To make sauce:  In bowl mix ketchup and mustard; set aside.  Remove chicken from skillet; cut each breast into 1/2-inch slices.  For each sandwich, spread 2 toast slices on one side with 1 tablespoon sauce each.  Sandwich 1 lettuce leaf, 2 tomato slices and 1 sliced chicken breast between toast slices.  Serve with potatoes and remaining sauce for dipping.   Makes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2032,
+  "name": "",
+  "type": "field",
+  "text": "Heat oven to 400 degrees.  Place potatoes in shallow 1 1/2- to 2-quart microwave-safe dish.  Cover with plastic wrap, venting one corner.  Microwave on HIGH 8 minutes until just tender. Mix in remaining ingredients except potato chips.  Spoon into shallow 2-quart baking dish; level top.  Cover with potato chips.  Bake about 20 minutes until mixture is bubbly and chips are lightly browned.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2033,
+  "name": "",
+  "type": "field",
+  "text": "In large nonstick skillet cook hash browns in oil as package directs.  Season with salt.  In medium skillet over medium heat break up and cook sausage until thoroughly cooked, 5 to 7 minutes; drain fat. Add eggs to skillet; cook and stir until eggs are set. To serve, spoon hash browns and sausage mixture down center of each tortilla, dividing equally.  Fold sides over and secure with picks.  Serve with salsa.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2034,
+  "name": "",
+  "type": "field",
+  "text": "Heat oven to 450 degrees.  Arrange potatoes on baking sheet; bake until lightly browned and crisp, 20 to 25 minutes, as package directs.  Meanwhile, in small bowl mix sour cream and dressing to blend thoroughly; set aside.  Line four serving plates with lettuce.  Arrange beef, tomato, cucumber, onion and artichokes on lettuce, dividing equally.  Add hot potatoes to plates just before serving.  Accompany each serving with a small dish of sour cream mixture for dipping and dressing.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2035,
+  "name": "",
+  "type": "field",
+  "text": "In 2-quart saucepan over medium heat cook potatoes, covered, in 2 inches boiling water until tender, about 15 minutes; drain and mash.  In large bowl combine potatoes, apples, onion, cheese, egg, salt and pepper.  Mix to blend thoroughly.  Form into 8 patties about 3/4 inch thick.  Coat with bread crumbs. In large nonstick skillet over medium heat bring the butter and oil to sizzling.  Fry patties until browned, about 5 minutes on each side.  \n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2036,
+  "name": "",
+  "type": "field",
+  "text": "In 3-quart saucepan over medium heat saute onions and garlic in oil 5 minutes.  Add broth and potatoes; bring to boil, reduce heat, cover and cook until potatoes are just tender, about 10 minutes.  Add vegetables, beans and herb seasoning. Cover and simmer 10 minutes.  Ladle into bowls.  Sprinkle each serving with cheese.  \n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2037,
+  "name": "",
+  "type": "field",
+  "text": "Place potatoes in shallow 1 1/2- to 2-quart microwave-safe dish. Cover with plastic wrap, venting one corner.  Microwave on HIGH 8 to 10 minutes until tender; cool.  In separate bowls lightly toss potatoes and tuna with 2 tablespoons vinaigrette each; set aside.  Line platter with lettuce.  Arrange potatoes, tuna and remaining ingredients except vinaigrette on lettuce.  Drizzle with remaining vinaigrette.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2038,
+  "name": "",
+  "type": "field",
+  "text": "Place potatoes in shallow 1 1/2- to 2-quart microwave-safe dish. Cover with plastic wrap, venting one corner.  Microwave on HIGH 8 to 10 minutes until just tender.  While potatoes cook, in large nonstick skillet over high heat, toss and brown chicken in oil 5 minutes.  Add potatoes; toss until potatoes are lightly browned.  Add barbecue sauce and tarragon; toss until heated through.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2039,
+  "name": "",
+  "type": "field",
+  "text": "In shallow dish or pan mix together dressing and soy sauce.  Add steak, turning to coat; cover and refrigerate at least 20 minutes.  Meanwhile, place potatoes, butter, lemon juice and garlic in shallow 1 1/2- to 2-quart microwave-safe dish; toss. Cover with plastic wrap, venting one corner.  Microwave on HIGH 12 to 16 minutes until just tender.  Meanwhile, heat broiler 10 minutes.  Remove steak from marinade.  Broil 4 to 5 inches from heat source 5 to 10 minutes on each side to desired doneness.  While steak cooks, mix parsley, lemon peel and pepper into cooked potatoes.  Season with salt and microwave on HIGH about 1 minute until hot.  Slice meat diagonally across the grain into thin slices.  Serve with potatoes.\n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2040,
+  "name": "",
+  "type": "field",
+  "text": "Pierce potatoes with tines of fork; microwave on HIGH 18 to 20 minutes until potatoes are fork-tender.  Heat oven to 400 degrees.  Meanwhile, to prepare topping:  In bowl mix remaining ingredients except cheese.  Cut potatoes in half lengthwise; place on baking sheet cut sides up.  Cover potatoes with topping mixture, dividing equally.  Place on baking sheet, sprinkle with cheese and heat in oven about 6 minutes until potatoes and topping are hot and cheese is melted.  \n\nMakes 4 servings"
+ },
+ {
+  "lib": "Internal",
+  "num": 2041,
+  "name": "",
+  "type": "field",
+  "text": "Type directions a\ns;lask;a df\na'lsk;alskfa\na'lskjd f;lak jsdfgasdfas"
+ },
+ {
+  "lib": "Internal",
+  "num": 3001,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Sauteed Apple Wedges, Angel Food Cake\nNutritional Information Per Serving:  390 calories; 20 g fat; \n      90mg cholesterol;130mg sodium; 27g carbohydrate; 2g fiber; \n      26g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3002,
+  "name": "",
+  "type": "field",
+  "text": "NOTE: Microwave cooking times are based on a 700-watt microwave.  \n       Adjust  cooking times to your own oven.\nMenu:  Sesame Breadsticks; Butter Lettuce, Mushroom and Sprout \n       Salad; Frozen Yogurt\nNutritional Information Per Serving (without optional toppings):  \n       370 calories; 7g fat; 75mg cholesterol; 420mg sodium; \n       65g carbohydrate; 5g fiber; 19g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3003,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Toasted French Bread, Grapes with Yogurt and Brown Sugar\nNutritional Information Per Serving:  220 calories; 4g fat; \n      65mg cholesterol;1040mg sodium; 24g carbohydrate; \n      3g fiber; 23g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3004,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Sauteed Green Beans, Baked Apples\nNutritional Information Per Serving:  320 calories; 16g fat; \n       40mg cholesterol; 490mg sodium; 35g carbohydrate; 4g fiber; \n       13g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3005,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Corn on the Cob, Rolls, Apple Crisp\nNutritional Information Per Serving:  480 calories; 12g fat; \n       135mg cholesterol;1300mg sodium; 62g carbohydrate; \n       3g fiber; 30g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3006,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Steamed Broccoli or Asparagus, Brownies and Ice Cream\nNutritional Information Per Serving:  260 calories; 9g fat; \n       45mg cholesterol; 50mg sodium; 26g carbohydrate; \n       2g fiber; 20g protein."
+ },
+ {
+  "lib": "Internal",
+  "num": 3007,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n      microwave.  Adjust cooking times to your own oven.\nMenu:  Peas, Romaine Lettuce and Tomato Salad, Peach Cobbler\nNutritional Information Per Serving:  420 calories; 17g fat; \n       105mg cholesterol; 550mg sodium; 32g carbohydrate; \n       3g fiber; 35g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3008,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Sourdough Rolls, Honeydew Melon with Lime Wedges\nNutritional Information Per Serving:  280 calories; 24 g fat; \n       55 mg cholesterol; 1240 mg sodium; 31 g carbohydrate; \n       4 g fiber; 23 g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3009,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Crusty Peasant Bread, Chocolate Frozen Yogurt \n       with Fudge Sauce and Cherries\nNutritional Information Per Serving:  460 calories; 29g fat; \n       410mg cholesterol; 1340mg sodium; 35g carbohydrate; \n       4g fiber; 20g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3010,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Coleslaw, Frozen Yogurt\nNutritional Information Per Serving:  810 calories; 39g fat; \n       70mg cholesterol; 1990mg sodium; 86g carbohydrate; \n       5g fiber; 30g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3011,
+  "name": "",
+  "type": "field",
+  "text": "NOTE: Microwave cooking times are based on a 700-watt microwave.\n         Adjust cooking times to your own oven.\nMenu:  Warm Corn Tortillas, Orange and Red Onion Salad, \n       Pineapple Spears\nNutritional Information Per Serving:  300 calories; 9g fat; \n       50mg cholesterol; 620mg sodium; 34g carbohydrate; \n       4g fiber; 2g protein."
+ },
+ {
+  "lib": "Internal",
+  "num": 3012,
+  "name": "",
+  "type": "field",
+  "text": "Lemon Dressing:  In large bowl whisk together all dressing \n       ingredients.\nMenu:  Chicken Soup, Warm Pita Bread, Vanilla Ice Cream \n       with Honey and Toasted Walnuts\nNutritional Information Per Serving: 450 calories; 30g fat; \n       60mg cholesterol; 1750mg sodium; 3 g carbohydrate; \n       4g fiber; 14g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3013,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Crusty Rolls, Romaine Salad with Garlic Croutons, \n       Fruit and Cheese\nNutritional Information Per Serving:  230 calories; 4g fat; \n       10mg cholesterol; 1030mg sodium; 43g carbohydrate; \n       6g fiber; 7g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3014,
+  "name": "",
+  "type": "field",
+  "text": "NOTE: Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Sauteed Snow Peas, Sesame Seed Rolls, Mandarin \n       Orange Wedges and Fortune Cookies\nNutritional Information Per Serving:  250 calories; 2g fat; \n       175mg cholesterol; 770mg sodium; 35g carbohydrate; \n      4g fiber; 25g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3015,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Tossed Green Salad, Banana Cake\nNutritional Information Per Serving:  320 calories; 9g fat; \n       160mg cholesterol; 1360mg sodium; 38g carbohydrate; \n       7g fiber; 26g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3016,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Orange and Onion Salad; Warm Corn Tortillas; Strawberries\nNutritional Information Per Serving:  310 calories; 17g fat; \n       435mg cholesterol; 850mg sodium; 24g carbohydrate; \n       3g fiber; 20g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3017,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n        oven.  Adjust cooking times to your own oven.\nMenu:  Tossed Green Salad with Nonfat Dressing, Raspberry Sorbet\nNutritional Information Per Serving:  450 calories; 26g fat; \n       110mg cholesterol; 390mg sodium; 27g carbohydrate; \n       2g fiber; 29g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3018,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Spinach  and Mushroom Salad, Pears with Blue Cheese\nNutritional Information Per Serving:  250 calories; \n       3g fat; 50mg cholesterol; 130mg sodium; 27g carbohydrate; \n       3g fiber; 21g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3019,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt microwave.  \n       Adjust cooking times to your own oven.\nMenu:  Red Leaf Lettuce Salad with Nonfat Dressing, Strawberries \n       or Blueberries with Yogurt and Honey\nNutritional Information Per Serving:  250 calories; 8g fat; \n       10mg cholesterol; 290mg sodium; 32g carbohydrate; 4g fiber; \n       13g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3020,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Garlic Bread, Tangerines or Melon Wedges\nNutritional Information Per Serving:  540 calories; \n       31g fat; 70mg cholesterol; 410mg sodium; 36g carbohydrate; \n       5g fiber; 31g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3021,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Tomato Soup, French Bread, Toasted Pound Cake \n       with Fresh Seasonal Fruit\nNutritional Information Per Serving:  250 calories; 4g fat; \n       25mg cholesterol; 980mg sodium; 3 g carbohydrate; 4g fiber; \n       23g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3022,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Italian Bread, Artichoke Hearts Vinaigrette, Poached Pears\nNutritional Information Per Serving (based on 6-ounce salmon steaks):  \n       360 calories; 14g fat; 35mg cholesterol; 1150mg sodium; \n       29g carbohydrate; 2g fiber; 29g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3023,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Cheese Crackers, Crisp Vegetable Sticks, Ice \n       Cream Sandwiches\nNutritional Information Per Serving:  190 calories; \n       2g fat; 5mg cholesterol; 590mg sodium;  39g carbohydrate; \n       4g fiber; 7g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3024,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Cucumber Salad, Lime Sherbet with Papaya Wedges\nNutritional Information Per Serving:  280 calories; 9g fat; \n       45mg cholesterol; 740mg sodium; 28g carbohydrate; \n       3g fiber; 21g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3025,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Bread Sticks, Carrot-Raisin Salad, Gingerbread \n       with Applesauce\nNutritional Information Per Serving:  360 calories; 18g fat; \n       60mg cholesterol; 640mg sodium; 33g carbohydrate; \n       7g fiber; 18g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3026,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Tossed Green Salad, Strawberries\nNutritional Information Per Serving:  650 calories; 23g fat; \n       85mg cholesterol; 1100mg sodium; 69g carbohydrate; \n       4g fiber; 38g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3027,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Crusty Rolls, Spinach and Apple Salad, \n       Frozen Fruit Bars\nNutritional Information Per Serving:  400 calories; 24g fat; \n        50mg cholesterol; 730mg sodium; 36g carbohydrate; \n        3g fiber; 12g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3028,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Iceberg Lettuce Wedges with Nonfat Italian \n       Dressing, Gelatin Cups\nNutritional Information Per Serving:  400 calories; 19g fat; \n       25mg cholesterol; 750mg sodium; 38g carbohydrate; \n       6g fiber; 23g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3029,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Coleslaw, Fruit Cocktail \nNutritional Information Per Serving:  400 calories; 12g fat; \n       40g cholesterol; 800mg sodium; 65g carbohydrate; \n       7g fiber; 23g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3030,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Fresh Fruit Salad, Pudding Cups\nNutritional Information Per Serving:  280 calories; 9g fat; \n       15mg cholesterol; 390mg sodium; 46g carbohydrate; 4g fiber; \n       7g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3031,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Carrot Sticks, Grapes\nNutritional Information Per Serving:  420 calories; \n       5g fat; 45mg cholesterol; 1210mg sodium; 68g carbohydrate; \n       11g fiber; 27g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3032,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n        microwave.  Adjust cooking times to your own oven.\nMenu:  Sliced Tomatoes with Nonfat French Dressing, Pineapple \n        Rings and Orange Sherbet\nNutritional Information Per Serving:  420 calories; 15g fat; \n        15mg cholesterol; 820mg sodium; 49g carbohydrate; \n        5g fiber; 24g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3033,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Bell Pepper and Carrot Sticks, Broiled Grapefruit Halves \n       Drizzled with Maple Syrup\nNutritional Information Per Serving:  740 calories; 47g fat; \n       255mg cholesterol; 840mg sodium; 63g carbohydrate; \n       3g fiber; 24g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3034,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Tomato Soup, Instant Vanilla Pudding with Toasted \n       Sliced Almonds\nNutritional Information Per Serving:  490 calories; 19g fat; \n       90mg cholesterol; 330mg sodium; 45g carbohydrate; \n       7g fiber; 34g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3035,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Red Cabbage and Celery Slaw, Oatmeal Cookies and \n       Canned Apricots\nNutritional Information Per Serving:  400 calories; 17g fat; \n       80mg cholesterol; 880mg sodium; 49g carbohydrate; \n       4g fiber; 14g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3036,
+  "name": "",
+  "type": "field",
+  "text": "Menu:  Italian Bread, Leafy Salad Greens with Italian Dressing, \n       Biscotti\nNutritional Information Per Serving:  220 calories; 7g fat; \n       5mg cholesterol; 1230mg sodium; 34g carbohydrate; \n       7g fiber; 9g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3037,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Brown-and-Serve Rolls, Lemon Pie\nNutritional Information Per Serving:  290 calories; 21g fat; \n      10mg cholesterol; 1330mg sodium; 4 g carbohydrate; \n       5g fiber; 25g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3038,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Tomato and Red Onion Salad, Cheesecake\nNutritional Information Per Serving:  270 calories; 9g fat; \n       45mg cholesterol; 180mg sodium; 27g carbohydrate; \n       3g fiber; 20g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3039,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt \n       microwave.  Adjust cooking times to your own oven.\nMenu:  Caesar Salad, Raspberry Frozen Yogurt\nNutritional Information Per Serving:  580 calories; \n       33g fat; 140mg cholesterol; 850mg sodium; \n       28g carbohydrate; 3g fiber; 44g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3040,
+  "name": "",
+  "type": "field",
+  "text": "NOTE:  Microwave cooking times are based on a 700-watt microwave.  \n       Adjust cooking times to your own oven.\nMenu:  Cream of Tomato Soup, Orange Wedges\nNutritional Information Per Serving:  290 calories; 5g fat; \n       40mg cholesterol; 510mg sodium; 42g carbohydrate; \n        4 g fiber; 20g protein.\nAdd notes here:"
+ },
+ {
+  "lib": "Internal",
+  "num": 3041,
+  "name": "",
+  "type": "field",
+  "text": "Type notes here.kjhsdl fahs dfla sed\nalshdfajshd flkf;lakd f\n;dfa;s as"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 1,
+  "name": "Utilities",
+  "type": "script"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 2,
+  "name": "StateMgr",
+  "type": "script"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 3,
+  "name": "TimerMgr",
+  "type": "script"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 4,
+  "name": "FlickerMgr",
+  "type": "script"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 5,
+  "name": "NavMgr",
+  "type": "script"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 10,
+  "name": "DotMbr",
+  "type": "bitmap",
+  "w": 1,
+  "h": 1,
+  "bpp": 8,
+  "regx": 0,
+  "regy": 0,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "RSICODE/0010_DotMbr.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 11,
+  "name": "ScreenMask",
+  "type": "bitmap",
+  "w": 1024,
+  "h": 768,
+  "bpp": 1,
+  "regx": 0,
+  "regy": 0,
+  "clut": -1,
+  "clutlib": -1,
+  "file": "RSICODE/0011_ScreenMask.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 12,
+  "name": "",
+  "type": "script"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 13,
+  "name": "nearBlackPalette",
+  "type": "palette",
+  "colors": 256,
+  "file": "RSICODE/0013_nearBlackPalette.pal.json"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 30,
+  "name": "Palette1",
+  "type": "palette",
+  "colors": 256,
+  "file": "RSICODE/0030_Palette1.pal.json"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 31,
+  "name": "Palette2",
+  "type": "palette",
+  "colors": 256,
+  "file": "RSICODE/0031_Palette2.pal.json"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 32,
+  "name": "g_splicebottom",
+  "type": "bitmap",
+  "w": 640,
+  "h": 69,
+  "bpp": 8,
+  "regx": 320,
+  "regy": 34,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0032_g_splicebottom.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 33,
+  "name": "g_splicetop",
+  "type": "bitmap",
+  "w": 640,
+  "h": 56,
+  "bpp": 8,
+  "regx": 320,
+  "regy": 28,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0033_g_splicetop.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 34,
+  "name": "dust1",
+  "type": "bitmap",
+  "w": 17,
+  "h": 16,
+  "bpp": 8,
+  "regx": 8,
+  "regy": 8,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0034_dust1.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 35,
+  "name": "dust2",
+  "type": "bitmap",
+  "w": 6,
+  "h": 4,
+  "bpp": 8,
+  "regx": 3,
+  "regy": 2,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0035_dust2.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 36,
+  "name": "dust3",
+  "type": "bitmap",
+  "w": 13,
+  "h": 8,
+  "bpp": 8,
+  "regx": 6,
+  "regy": 4,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0036_dust3.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 37,
+  "name": "dust4",
+  "type": "bitmap",
+  "w": 7,
+  "h": 5,
+  "bpp": 8,
+  "regx": 3,
+  "regy": 2,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0037_dust4.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 38,
+  "name": "dust5",
+  "type": "bitmap",
+  "w": 16,
+  "h": 7,
+  "bpp": 8,
+  "regx": 8,
+  "regy": 3,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0038_dust5.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 39,
+  "name": "dust6",
+  "type": "bitmap",
+  "w": 18,
+  "h": 6,
+  "bpp": 8,
+  "regx": 9,
+  "regy": 3,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0039_dust6.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 40,
+  "name": "dust7",
+  "type": "bitmap",
+  "w": 14,
+  "h": 8,
+  "bpp": 8,
+  "regx": 7,
+  "regy": 4,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0040_dust7.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 41,
+  "name": "dust8",
+  "type": "bitmap",
+  "w": 10,
+  "h": 19,
+  "bpp": 8,
+  "regx": 5,
+  "regy": 9,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0041_dust8.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 42,
+  "name": "dust9",
+  "type": "bitmap",
+  "w": 21,
+  "h": 13,
+  "bpp": 8,
+  "regx": 10,
+  "regy": 6,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0042_dust9.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 43,
+  "name": "dust10",
+  "type": "bitmap",
+  "w": 9,
+  "h": 7,
+  "bpp": 8,
+  "regx": 4,
+  "regy": 3,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0043_dust10.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 44,
+  "name": "dust11",
+  "type": "bitmap",
+  "w": 3,
+  "h": 5,
+  "bpp": 8,
+  "regx": 1,
+  "regy": 2,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0044_dust11.png"
+ },
+ {
+  "lib": "RSICODE",
+  "num": 45,
+  "name": "dust12",
+  "type": "bitmap",
+  "w": 29,
+  "h": 14,
+  "bpp": 8,
+  "regx": 14,
+  "regy": 7,
+  "clut": 31,
+  "clutlib": -1,
+  "file": "RSICODE/0045_dust12.png"
+ }
+]
