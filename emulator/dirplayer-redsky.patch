@@ -13,6 +13,22 @@ index 0af392c..b26a515 100644
      }
      console.log("VM initialized");
      // Hand the wasm module to the xtra bridge. The bridge's lazy
+diff --git a/vm-rust/lingo.pest b/vm-rust/lingo.pest
+index e911b63..62a698b 100644
+--- a/vm-rust/lingo.pest
++++ b/vm-rust/lingo.pest
+@@ -203,8 +203,10 @@ go_inline = {
+     go_kw ~ !(WHITESPACE* ~ "(")
+     ~ go_to_kw?
+     ~ go_frame_kw?
+-    ~ (term_arg ~ (go_of_kw ~ go_movie_kw? ~ term_arg)?)?
++    ~ (expr ~ (go_of_kw ~ go_movie_kw? ~ expr)?)?
+ }
++// Red Sky preservation build: destinations are full expressions so
++// `do "go to the frame+1"` parses (it was a single term).
+ 
+ // Assignment can be to any expression (identifier, property access, list index, etc.)
+ // The parser will validate that the left side is a valid lvalue
 diff --git a/vm-rust/src/director/chunks/score.rs b/vm-rust/src/director/chunks/score.rs
 index 6d1186d..0c2495e 100644
 --- a/vm-rust/src/director/chunks/score.rs
@@ -189,6 +205,19 @@ index 5ade07b..fabae01 100644
              crate::player::wait_for_handler_gap().await;
              crate::player::hold_draw_for_input_handler();
              // Set command_handler_yielding so that:
+diff --git a/vm-rust/src/player/eval.rs b/vm-rust/src/player/eval.rs
+index 9d1fa62..7411195 100644
+--- a/vm-rust/src/player/eval.rs
++++ b/vm-rust/src/player/eval.rs
+@@ -1085,7 +1085,7 @@ pub fn parse_lingo_rule_runtime(
+             // movie path.
+             let mut args = vec![];
+             for child in pair.into_inner() {
+-                if let Rule::term_arg = child.as_rule() {
++                if let Rule::term_arg | Rule::expr = child.as_rule() {
+                     // Director marker-navigation keywords: `go next` / `go
+                     // previous` / `go loop`. As a bareword these parse as an
+                     // undefined variable (→ VOID) and the go handler rejects
 diff --git a/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs b/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
 index 9ae62c7..7e96833 100644
 --- a/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
@@ -282,10 +311,75 @@ index 9ae62c7..7e96833 100644
                  CastMemberType::Sound(sound_member) => return Some(sound_member.clone()),
                  _ => {
 diff --git a/vm-rust/src/player/handlers/manager.rs b/vm-rust/src/player/handlers/manager.rs
-index 8bcc917..1dbd1fc 100644
+index 8bcc917..afc0d6c 100644
 --- a/vm-rust/src/player/handlers/manager.rs
 +++ b/vm-rust/src/player/handlers/manager.rs
-@@ -1148,7 +1148,23 @@ impl BuiltInHandlerManager {
+@@ -1093,6 +1093,64 @@ impl BuiltInHandlerManager {
+                     } else {
+                         MovieHandlers::go(args).await
+                     }
++                } else if args.is_empty() {
++                    // Red Sky preservation build: `play done` returns to the frame that
++                    // issued the last `play frame X`.
++                    reserve_player_mut(|player| {
++                        let back = player.rs_play_stack.pop();
++                        web_sys::console::log_1(&format!("[rs] play done -> {:?}", back).into());
++                        if let Some(f) = back { player.next_frame = Some(f); }
++                    });
++                    Ok(DatumRef::Void)
++                } else if Self::resolve_flash_sprite_strict(&args[0])?.is_none()
++                    && reserve_player_mut(|player| matches!(player.get_datum(&args[0]).type_enum(),
++                        DatumType::String | DatumType::Symbol | DatumType::Int)) {
++                    // Red Sky preservation build: `play frame X` = go to X and remember
++                    // where we came from for `play done`. When called from an input
++                    // handler (a mouseDown, a keyDown) the calling handler is suspended
++                    // until `play done`, and the score plays meanwhile, so the Lingo
++                    // after `play` runs on return. Red Sky's film-burn sequence
++                    // (check6clicks) depends on this: it restarts the flicker and the
++                    // cowboy only after the projectionist has finished.
++                    let (level, depth, blocking) = reserve_player_mut(|player| {
++                        let cur = player.movie.current_frame;
++                        if player.rs_play_stack.len() < 32 { player.rs_play_stack.push(cur as u32); }
++                        web_sys::console::log_1(&format!("[rs] play frame {:?} from {}", player.get_datum(&args[0]).string_value().ok(), cur).into());
++                        (player.rs_play_stack.len(), player.scope_count,
++                         player.in_mouse_command || player.command_handler_yielding)
++                    });
++                    let r = MovieHandlers::go(args).await?;
++                    if blocking {
++                        let saved = reserve_player_mut(|p| {
++                            let s = (p.in_mouse_command, p.command_handler_yielding, p.is_in_frame_update,
++                                     p.in_frame_script, p.in_enter_frame, p.in_prepare_frame, p.in_event_dispatch);
++                            p.in_mouse_command = false; p.command_handler_yielding = false;
++                            p.is_in_frame_update = false; p.in_frame_script = false; p.in_enter_frame = false;
++                            p.in_prepare_frame = false; p.in_event_dispatch = false;
++                            s
++                        });
++                        let started = chrono::Utc::now().timestamp_millis();
++                        loop {
++                            let _ = async_std::future::timeout(
++                                std::time::Duration::from_millis(16),
++                                std::future::pending::<()>(),
++                            ).await;
++                            let done = reserve_player_ref(|p| {
++                                !p.is_playing
++                                    || (p.rs_play_stack.len() < level && p.scope_count <= depth)
++                            });
++                            if done || chrono::Utc::now().timestamp_millis() - started > 10 * 60 * 1000 {
++                                break;
++                            }
++                        }
++                        reserve_player_mut(|p| {
++                            p.in_mouse_command = saved.0; p.command_handler_yielding = saved.1;
++                            p.is_in_frame_update = saved.2; p.in_frame_script = saved.3; p.in_enter_frame = saved.4;
++                            p.in_prepare_frame = saved.5; p.in_event_dispatch = saved.6;
++                            web_sys::console::log_1(&"[rs] play returned".into());
++                        });
++                    }
++                    Ok(r)
+                 } else {
+                     if !args.is_empty() {
+                         if let Some(sn) = Self::resolve_flash_sprite_strict(&args[0])? {
+@@ -1148,7 +1206,23 @@ impl BuiltInHandlerManager {
              Some(BuiltInSymbol::Stringp) => TypeHandlers::stringp(args),
              Some(BuiltInSymbol::Integerp) => TypeHandlers::integerp(args),
              Some(BuiltInSymbol::Floatp) => TypeHandlers::floatp(args),
@@ -310,7 +404,7 @@ index 8bcc917..1dbd1fc 100644
              Some(BuiltInSymbol::Length) => StringHandlers::length(args),
              Some(BuiltInSymbol::Script) => MovieHandlers::script(args),
              Some(BuiltInSymbol::Void) => TypeHandlers::void(args),
-@@ -2525,6 +2541,10 @@ impl BuiltInHandlerManager {
+@@ -2525,6 +2599,10 @@ impl BuiltInHandlerManager {
                  {
                      return res;
                  }
@@ -321,7 +415,7 @@ index 8bcc917..1dbd1fc 100644
                  let formatted_args = reserve_player_ref(|player| {
                      let mut s = String::new();
                      for arg in args {
-@@ -2535,7 +2555,14 @@ impl BuiltInHandlerManager {
+@@ -2535,7 +2613,14 @@ impl BuiltInHandlerManager {
                  })?;
                  let msg = format!("No built-in handler: {}({})", name, formatted_args);
                  warn!("{msg}");
@@ -450,28 +544,31 @@ index ad5a8a0..758932b 100644
          })
      }
 diff --git a/vm-rust/src/player/mod.rs b/vm-rust/src/player/mod.rs
-index 8fef74e..e7f753e 100644
+index 8fef74e..cb591b7 100644
 --- a/vm-rust/src/player/mod.rs
 +++ b/vm-rust/src/player/mod.rs
-@@ -319,6 +319,8 @@ pub struct DirPlayer {
+@@ -319,6 +319,10 @@ pub struct DirPlayer {
      /// (vector DatumRef, parent transform DatumRef, sub-property name)
      pub transform_sub_refs: Vec<(DatumRef, DatumRef, Symbol)>,
      pub last_mouse_down_time: i64,
 +    pub last_key_down_time: i64,
 +    pub rs_last_paced_draw_ms: f64,
++    /// Red Sky preservation build: return stack for `play frame X` / `play done`.
++    pub rs_play_stack: Vec<u32>,
      pub is_double_click: bool,
      pub mouse_down_sprite: i16,
      pub drag_offset: (i32, i32),
-@@ -775,6 +777,8 @@ impl DirPlayer {
+@@ -775,6 +779,9 @@ impl DirPlayer {
              cursor_is_hidden: false,
              transform_sub_refs: Vec::new(),
              last_mouse_down_time: 0,
 +            last_key_down_time: 0,
 +            rs_last_paced_draw_ms: 0.0,
++            rs_play_stack: Vec::new(),
              is_double_click: false,
              mouse_down_sprite: 0,
              drag_offset: (0, 0),
-@@ -2015,6 +2019,8 @@ impl DirPlayer {
+@@ -2015,6 +2022,8 @@ impl DirPlayer {
          let actor_list_datum = self.alloc_datum(Datum::List(DatumType::List, VecDeque::new(), false));
          self.globals.insert(Symbol::builtin(BuiltInSymbol::ActorList), actor_list_datum);
          self.actor_list_generation = 0;
@@ -480,7 +577,7 @@ index 8fef74e..e7f753e 100644
  
          // Mathematical constant
          let pi_datum = self.alloc_datum(Datum::Float(std::f64::consts::PI));
-@@ -3062,6 +3068,13 @@ impl DirPlayer {
+@@ -3062,6 +3071,13 @@ impl DirPlayer {
                  // Default: return 0 when no sprite context is available
                  Ok(self.alloc_datum(Datum::Int(0)))
              },
@@ -494,7 +591,7 @@ index 8fef74e..e7f753e 100644
              BuiltInSymbol::ActorList => {
                  // Return the reference to the global actorList, not a clone of its contents
                  Ok(self
-@@ -3262,7 +3275,17 @@ impl DirPlayer {
+@@ -3262,7 +3278,17 @@ impl DirPlayer {
              // the load-time logic in `load_movie_from_dir`. Label sources
              // do NOT trigger URL rewriting in net handlers — that's
              // reserved for `movie_path_override`. See `set_movie_path_label`.
@@ -513,7 +610,7 @@ index 8fef74e..e7f753e 100644
                  let label = self.movie_path_label_effective();
                  if let Some(path) = label {
                      let base_path = dir_part_of_path(&path);
-@@ -3495,6 +3518,18 @@ impl DirPlayer {
+@@ -3495,6 +3521,18 @@ impl DirPlayer {
          }
      }
  
@@ -532,7 +629,7 @@ index 8fef74e..e7f753e 100644
      fn get_anim_prop(&mut self, prop_id: u16) -> Result<Datum, ScriptError> {
          let prop_name = get_anim_prop_name(prop_id);
          // `the timer` / `the keyPressed` / `the key` / `the keyCode` are the
-@@ -3507,7 +3542,7 @@ impl DirPlayer {
+@@ -3507,7 +3545,7 @@ impl DirPlayer {
              self.input_polled = true;
          }
          match prop_name {
@@ -541,7 +638,7 @@ index 8fef74e..e7f753e 100644
              BuiltInSymbol::FullColorPermit => Ok(Datum::Int(1)), // Full color mode is permitted
              BuiltInSymbol::Timer => Ok(Datum::Int(get_elapsed_ticks(self.start_time))),
              BuiltInSymbol::TimeoutLength => Ok(Datum::Int(self.movie.timeout_length)),
-@@ -3534,7 +3569,17 @@ impl DirPlayer {
+@@ -3534,7 +3572,17 @@ impl DirPlayer {
              BuiltInSymbol::StageColor => Ok(Datum::Int(0)),
              BuiltInSymbol::DoubleClick => Ok(datum_bool(self.is_double_click)),
              BuiltInSymbol::LastClick | BuiltInSymbol::LastEvent | BuiltInSymbol::LastKey | BuiltInSymbol::LastRoll => {
@@ -560,7 +657,7 @@ index 8fef74e..e7f753e 100644
              }
              BuiltInSymbol::MultiSound => Ok(Datum::Int(1)),
              BuiltInSymbol::PauseState => Ok(datum_bool(self.is_script_paused)),
-@@ -3663,6 +3708,16 @@ impl DirPlayer {
+@@ -3663,6 +3711,16 @@ impl DirPlayer {
                  crate::js_api::JsApi::dispatch_stage_size_changed(w, h, self.center_stage);
                  Ok(())
              },
@@ -577,7 +674,7 @@ index 8fef74e..e7f753e 100644
              Some(BuiltInSymbol::ActorList) => {
                  // Setting actorList - update the global variable
                  match value {
-@@ -4071,6 +4126,30 @@ pub async fn player_call_global_handler(
+@@ -4071,6 +4129,30 @@ pub async fn player_call_global_handler(
      handler_name: Symbol,
      args: &Vec<DatumRef>,
  ) -> Result<DatumRef, ScriptError> {
@@ -608,7 +705,7 @@ index 8fef74e..e7f753e 100644
      // Director 6 `birth(script, args)` constructor: when the first arg is a
      // ScriptRef this is the pre-`new` idiom — allocate a FRESH instance and run
      // its `on birth me, args`. This MUST run before the generic first-arg
-@@ -5807,6 +5886,19 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
+@@ -5807,6 +5889,19 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
  
      stop_movie_sequence().await;
  
@@ -628,7 +725,7 @@ index 8fef74e..e7f753e 100644
      // 3. Load the new movie data (preserving globals and allocator)
      reserve_player_mut(|player| {
          player.is_dispatching_events = prev_dispatching;
-@@ -5845,6 +5937,35 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
+@@ -5845,6 +5940,35 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
          })
      }).await;
  
@@ -664,7 +761,7 @@ index 8fef74e..e7f753e 100644
      // Apply frame target if specified, restore is_playing before init sequence
      reserve_player_mut(|player| {
          match &target {
-@@ -6977,6 +7098,18 @@ pub async fn run_frame_loop() {
+@@ -6977,6 +7101,18 @@ pub async fn run_frame_loop() {
              continue;
          }
  
@@ -683,7 +780,7 @@ index 8fef74e..e7f753e 100644
          // Pre-dispatch Flash members for sprites on the current frame so they start
          // loading before Lingo scripts try to access them.
          reserve_player_mut(|player| {
-@@ -7028,6 +7161,12 @@ pub async fn run_frame_loop() {
+@@ -7028,6 +7164,12 @@ pub async fn run_frame_loop() {
              }
          }
  
@@ -696,7 +793,7 @@ index 8fef74e..e7f753e 100644
          // Tick the sound manager so per-channel fade-in / fade-out
          // progress. Without this, Lingo's `sound fadeIn` sets the
          // channel volume to 0 to start the fade but the ramp never
-@@ -8141,3 +8280,131 @@ mod handler_gap_tests {
+@@ -8141,3 +8283,131 @@ mod handler_gap_tests {
          });
      }
  }

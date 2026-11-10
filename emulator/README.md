@@ -23,6 +23,8 @@ Upstream: https://github.com/igorlira/dirplayer-rs at commit 68376fbb4494a6bbad4
 | Score sound cues read the full cast library + 16-bit member | Sounds outside cast 1 (most pieces) played the wrong member or a bitmap |
 | `puppetPalette` sent to the page as stage brightness (`__rsStageFilter`), with fade time from speed/frames | Film flicker pulse (Palette2, about +6%) and palette fades |
 | `updateStage` paced to 30 per second, yielding so each frame shows (`window.__rsUpdateStageMinMs` overrides, 0 disables) | Lingo animation loops ran at CPU speed and showed no in-between frames |
+| `play frame X` / `play done` with a return stack; from an input handler the caller waits until `play done`, so the Lingo after `play` runs on return | Entertainment's rapid-click film burn and projectionist never started, and the flicker/cowboy restart ran during it |
+| `do "go to the frame+1"`: `go` destinations in evaluated strings are full expressions | Animation callbacks that step the playhead stopped the movie with a parse error |
 
 ## Build
 
