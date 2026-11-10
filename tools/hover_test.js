@@ -1,0 +1,25 @@
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch(); const page = await browser.newPage({ viewport: { width: 700, height: 600 } });
+  page.on('dialog', d => { console.log('[dialog]', d.message()); d.dismiss(); });
+  await page.goto('http://localhost:8766/play.html?m=entertainment_module/entertainment.dir'); await page.click('#cover');
+  const st = await page.$('#stage'); const ev = c => page.evaluate(c => window.__vm.eval_command(c), c);
+  const out = () => page.evaluate(() => window.__vm.mcp_get_console_output(400));
+  await page.waitForTimeout(65000);
+  await ev('set goNavMgr to [#iCurModuleID: #entertainment]');
+  await ev('put "r34", the rect of sprite 34, "m35", the member of sprite 35, the puppet of sprite 35');
+  let o = await out(); const m = o.match(/r34.*rect\((\d+), (\d+), (\d+), (\d+)\)/); console.log(o.split('\n').filter(l => /r34/.test(l)).pop());
+  const r = m.slice(1).map(Number); const b = await st.boundingBox();
+  const cx = b.x + (r[0] + r[2]) / 2, cy = b.y + (r[1] + r[3]) / 2;
+  await page.mouse.move(b.x + 100, b.y + 100); await page.waitForTimeout(500);
+  await page.mouse.move(cx, cy, { steps: 5 }); await page.waitForTimeout(1500);
+  await st.screenshot({ path: process.argv[2] + '/on.png' });
+  await ev('put "on35", the member of sprite 35, the puppet of sprite 35');
+  await page.mouse.move(b.x + 100, b.y + 100, { steps: 5 }); await page.waitForTimeout(1500);
+  await st.screenshot({ path: process.argv[2] + '/off.png' });
+  await ev('put "off35", the member of sprite 35, the puppet of sprite 35, the loc of sprite 35');
+  await page.mouse.move(cx, cy, { steps: 5 }); await page.waitForTimeout(1500);
+  await st.screenshot({ path: process.argv[2] + '/on2.png' });
+  o = await out(); console.log(o.split('\n').filter(l => /on35|off35/.test(l)).join('\n'));
+  await browser.close();
+})();

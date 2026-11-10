@@ -27,6 +27,7 @@ Upstream: https://github.com/igorlira/dirplayer-rs at commit 68376fbb4494a6bbad4
 | `do "go to the frame+1"`: `go` destinations in evaluated strings are full expressions | Animation callbacks that step the playhead stopped the movie with a parse error |
 | puppetPalette on a frame with a built-in palette is measured against the nearest cast palette (e.g. Palette2 vs Palette1) | The Entertainment flicker was far too dark on the cowboy scene |
 | Per-piece speed overrides: `site/speeds.json`, read through `window.__rsTempoOverride` | Score sections authored "as fast as possible" flash by on modern machines |
+| `puppetSprite(n, 0)` on a channel with a Score span hands it back to the Score on the next tick: member, position, size, ink and blend return to the Score's values; behaviors stay | Transient sprites froze on their last frame (the bottle's "Red Sky Work" arrow, the cowboy/pig toggle, the background cowboy and pig) |
 
 ## Build
 

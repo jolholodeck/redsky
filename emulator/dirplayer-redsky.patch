@@ -544,7 +544,7 @@ index ad5a8a0..758932b 100644
          })
      }
 diff --git a/vm-rust/src/player/mod.rs b/vm-rust/src/player/mod.rs
-index 8fef74e..c4002eb 100644
+index 8fef74e..c5ac641 100644
 --- a/vm-rust/src/player/mod.rs
 +++ b/vm-rust/src/player/mod.rs
 @@ -319,6 +319,10 @@ pub struct DirPlayer {
@@ -761,7 +761,17 @@ index 8fef74e..c4002eb 100644
      // Apply frame target if specified, restore is_playing before init sequence
      reserve_player_mut(|player| {
          match &target {
-@@ -6977,6 +7101,18 @@ pub async fn run_frame_loop() {
+@@ -6067,7 +6191,8 @@ pub async fn run_single_frame() -> (bool, bool) {
+     // WITHOUT setting visible=0 and relied on the old immediate wipe to clear it.
+     reserve_player_mut(|player| {
+         let frame = player.movie.current_frame;
+-        if player.movie.score.process_pending_unpuppet_reverts(frame) {
++        let dv = player.movie.dir_version;
++        if player.movie.score.process_pending_unpuppet_reverts(frame, dv) {
+             player.movie.score.invalidate_render_channel_cache();
+             player.stage_dirty = true;
+         }
+@@ -6977,6 +7102,18 @@ pub async fn run_frame_loop() {
              continue;
          }
  
@@ -780,7 +790,7 @@ index 8fef74e..c4002eb 100644
          // Pre-dispatch Flash members for sprites on the current frame so they start
          // loading before Lingo scripts try to access them.
          reserve_player_mut(|player| {
-@@ -7028,6 +7164,12 @@ pub async fn run_frame_loop() {
+@@ -7028,6 +7165,12 @@ pub async fn run_frame_loop() {
              }
          }
  
@@ -793,7 +803,7 @@ index 8fef74e..c4002eb 100644
          // Tick the sound manager so per-channel fade-in / fade-out
          // progress. Without this, Lingo's `sound fadeIn` sets the
          // channel volume to 0 to start the fade but the ramp never
-@@ -8141,3 +8283,148 @@ mod handler_gap_tests {
+@@ -8141,3 +8284,148 @@ mod handler_gap_tests {
          });
      }
  }
@@ -1010,14 +1020,17 @@ index c4a4ab7..371beec 100644
 +    None
 +}
 diff --git a/vm-rust/src/player/score.rs b/vm-rust/src/player/score.rs
-index 25330f7..0b2a6a6 100644
+index 25330f7..74dee4a 100644
 --- a/vm-rust/src/player/score.rs
 +++ b/vm-rust/src/player/score.rs
-@@ -654,10 +654,17 @@ impl Score {
+@@ -653,11 +653,19 @@ impl Score {
+     /// channels are left alone (begin_sprites reloads them). Returns true if any
      /// sprite was reset so the caller can invalidate the render cache. Runs every
      /// frame (not just on frame change) so single-frame movies revert too.
-     pub fn process_pending_unpuppet_reverts(&mut self, frame_num: u32) -> bool {
+-    pub fn process_pending_unpuppet_reverts(&mut self, frame_num: u32) -> bool {
 -        let span_channels: std::collections::HashSet<usize> = self
++    pub fn process_pending_unpuppet_reverts(&mut self, frame_num: u32, dir_version: u16) -> bool {
++        let mut restore: Vec<usize> = Vec::new();
 +        let mut span_channels: std::collections::HashSet<usize> = self
              .active_channel_numbers_for_frame(frame_num)
              .into_iter()
@@ -1032,7 +1045,73 @@ index 25330f7..0b2a6a6 100644
          let mut any = false;
          for channel in &mut self.channels {
              let sprite = &mut channel.sprite;
-@@ -1543,8 +1550,8 @@ impl Score {
+@@ -668,11 +676,65 @@ impl Score {
+             if !sprite.puppet && !span_channels.contains(&channel.number) {
+                 sprite.reset();
+                 any = true;
++            } else if !sprite.puppet {
++                restore.push(channel.number);
++            }
++        }
++        // Red Sky preservation build: a span channel handed back to the Score
++        // takes the Score's member, position and ink again (behaviors stay).
++        // Red Sky's animation manager ends every transient animation (the bottle
++        // arrow, the cowboy/pig, the change button) with puppetSprite(n, 0) and
++        // relies on this to clear its last frame off the stage.
++        for ch in restore {
++            if self.rs_restore_channel_from_score(ch, frame_num, dir_version) {
++                any = true;
+             }
+         }
+         any
+     }
+ 
++    fn rs_restore_channel_from_score(&mut self, channel_number: usize, frame_num: u32, dir_version: u16) -> bool {
++        let span_start = self
++            .sprite_spans
++            .iter()
++            .filter(|sp| sp.channel_number as usize == channel_number && Self::is_span_in_frame(sp, frame_num))
++            .map(|sp| sp.start_frame)
++            .max();
++        let Some(span_start) = span_start else { return false };
++        let data = self
++            .channel_initialization_data
++            .iter()
++            .filter(|(fi, ci, _)| {
++                get_channel_number_from_index(*ci as u32) as usize == channel_number
++                    && fi + 1 >= span_start
++                    && fi + 1 <= frame_num
++            })
++            .max_by_key(|(fi, _, _)| *fi)
++            .map(|(_, _, d)| d.clone());
++        let Some(data) = data else { return false };
++        let sprite = self.get_sprite_mut(channel_number as i16);
++        sprite.member = if data.cast_member == 0 {
++            None
++        } else {
++            let lib = if data.cast_lib == 0 || data.cast_lib == 65535 { 1 } else { data.cast_lib as i32 };
++            Some(CastMemberRef { cast_lib: lib, cast_member: data.cast_member as i32 })
++        };
++        sprite.loc_h = data.pos_x as i32;
++        sprite.loc_v = data.pos_y as i32;
++        if data.width != 0 { sprite.width = data.width as i32; sprite.has_size_changed = true; }
++        if data.height != 0 { sprite.height = data.height as i32; sprite.has_size_changed = true; }
++        sprite.skew = data.skew as f64;
++        sprite.rotation = data.rotation as f64;
++        sprite.moveable = data.moveable;
++        sprite.trails = data.trails;
++        sprite.stretch = data.stretch as i32;
++        sprite.ink = (data.ink & 0x3F) as i32;
++        sprite.blend = convert_raw_blend(data.blend, data.sprite_flags, dir_version);
++        sprite.flip_h = data.flip_h();
++        sprite.flip_v = data.flip_v();
++        true
++    }
++
+     pub fn begin_sprites(&mut self, score_ref: ScoreRef, frame_num: u32) {
+         // Clean up sound channel triggers - but only once per frame to prevent double-triggering
+         // Check if we already processed this frame
+@@ -1543,8 +1605,8 @@ impl Score {
  
          // handle score Sound 1 + Sound 2 in Effects Channels
          // Build a map of (frame_index, channel_index) -> cast_member for quick lookup
@@ -1043,7 +1122,7 @@ index 25330f7..0b2a6a6 100644
              .collect();
  
          for (frame_index, channel_index, sound_data) in self.sound_channel_data.iter() {
-@@ -1562,7 +1569,7 @@ impl Score {
+@@ -1562,7 +1624,7 @@ impl Score {
  
                  let is_new_sound_span = match prev_frame_sound {
                      None => true, // No sound on previous frame
@@ -1052,7 +1131,7 @@ index 25330f7..0b2a6a6 100644
                  };
  
                  if !is_new_sound_span {
-@@ -1599,7 +1606,9 @@ impl Score {
+@@ -1599,7 +1661,9 @@ impl Score {
                                              current_datum
                                          {
                                              return current_cast_ref.cast_member
@@ -1063,7 +1142,7 @@ index 25330f7..0b2a6a6 100644
                                          }
                                      }
                                  }
-@@ -1614,7 +1623,9 @@ impl Score {
+@@ -1614,7 +1678,9 @@ impl Score {
                                              current_datum
                                          {
                                              return current_cast_ref.cast_member
@@ -1074,7 +1153,7 @@ index 25330f7..0b2a6a6 100644
                                          }
                                      }
                                  }
-@@ -1638,15 +1649,18 @@ impl Score {
+@@ -1638,15 +1704,18 @@ impl Score {
                                  }
                                  ScoreRef::Stage => {
                                      // Find the cast member by slot number (global)
@@ -1101,7 +1180,7 @@ index 25330f7..0b2a6a6 100644
                                  }
                              };
  
-@@ -3554,51 +3568,39 @@ impl Score {
+@@ -3554,51 +3623,39 @@ impl Score {
      }
  
      pub fn get_frame_tempo(&self, frame: u32) -> Option<u32> {
@@ -1183,7 +1262,7 @@ index 25330f7..0b2a6a6 100644
          }
      }
  
-@@ -6961,3 +6963,15 @@ mod rect_tests {
+@@ -6961,3 +7018,15 @@ mod rect_tests {
          assert_eq!(normalise_rect([0, 0, 0, 0]), [0, 0, 0, 0]);
      }
  }
