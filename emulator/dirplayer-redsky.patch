@@ -1,0 +1,611 @@
+diff --git a/src/components/VMProvider.tsx b/src/components/VMProvider.tsx
+index 0af392c..b26a515 100644
+--- a/src/components/VMProvider.tsx
++++ b/src/components/VMProvider.tsx
+@@ -63,8 +63,10 @@ function ensureVmGlobalInit(wasmUrl?: string, systemFontPath?: string): Promise<
+     initVmCallbacks();
+     if (wasmUrl) {
+       await init({ module_or_path: wasmUrl });
++      (window as any).__vm = wasm;
+     } else {
+       await init({});
++      (window as any).__vm = wasm;
+     }
+     console.log("VM initialized");
+     // Hand the wasm module to the xtra bridge. The bridge's lazy
+diff --git a/vm-rust/src/lib.rs b/vm-rust/src/lib.rs
+index a5fd98f..fb35966 100644
+--- a/vm-rust/src/lib.rs
++++ b/vm-rust/src/lib.rs
+@@ -2436,3 +2436,25 @@ pub fn start() {
+     }
+     init_player();
+ }
++
++/// Red Sky debug: score spans + sprite detail behaviors for a channel.
++#[wasm_bindgen]
++pub fn rs_debug_channel(channel: u32) -> String {
++    reserve_player_ref(|player| {
++        let score = &player.movie.score;
++        let mut out = String::new();
++        for s in score.sprite_spans.iter().filter(|s| s.channel_number == channel) {
++            out.push_str(&format!("span {}-{} scripts={:?}\n", s.start_frame, s.end_frame,
++                s.scripts.iter().map(|r| (r.cast_lib, r.cast_member)).collect::<Vec<_>>()));
++        }
++        for (f, ci, d) in score.channel_initialization_data.iter() {
++            if (*ci as u32) == channel + 5 && *f < 6 {
++                let idx = d.sprite_list_idx();
++                let beh = score.sprite_details.get(&idx).map(|sd| sd.behaviors.iter().map(|b| (b.cast_lib, b.cast_member)).collect::<Vec<_>>());
++                out.push_str(&format!("frame {} member {}:{} listIdx {} behaviors {:?}\n", f, d.cast_lib, d.cast_member, idx, beh));
++            }
++        }
++        out.push_str(&format!("sprite_details total {}\n", score.sprite_details.len()));
++        out
++    })
++}
+diff --git a/vm-rust/src/player/allocator.rs b/vm-rust/src/player/allocator.rs
+index c9ee82e..0241b2a 100644
+--- a/vm-rust/src/player/allocator.rs
++++ b/vm-rust/src/player/allocator.rs
+@@ -67,6 +67,16 @@ impl<T> Arena<T> {
+         }
+     }
+ 
++    pub fn for_each_mut<F: FnMut(&mut T)>(&mut self, mut f: F) {
++        for chunk in self.chunks.iter_mut() {
++            for slot in chunk.iter_mut() {
++                if let Some(v) = slot.as_mut() {
++                    f(v);
++                }
++            }
++        }
++    }
++
+     #[inline]
+     pub fn alloc(&mut self, value: T) -> usize {
+         self.count += 1;
+diff --git a/vm-rust/src/player/bytecode/get_set.rs b/vm-rust/src/player/bytecode/get_set.rs
+index f811822..60a4e97 100644
+--- a/vm-rust/src/player/bytecode/get_set.rs
++++ b/vm-rust/src/player/bytecode/get_set.rs
+@@ -937,6 +937,17 @@ impl GetSetBytecodeHandler {
+                 )?;
+ 
+                 Ok(player.alloc_datum(Datum::String(last_chunk)))
++            } else if prop_type == 0x04 {
++                // Sound channel properties (`the volume of sound n`)
++                let prop_name = get_sound_prop_name(prop_id as u16);
++                let channel_num_ref = {
++                    let scope = player.scopes.get_mut(ctx.scope_ref).unwrap();
++                    scope.stack.pop().unwrap()
++                };
++                let channel_num = player.get_datum(&channel_num_ref).int_value()?;
++                let sound_channel_datum = player.alloc_datum(Datum::SoundChannel(channel_num as u16));
++                let v = SoundChannelDatumHandlers::get_prop(player, &sound_channel_datum, Symbol::builtin(prop_name))?;
++                Ok(player.alloc_datum(v))
+             } else if prop_type == 0x06 {
+                 // sprite prop
+                 let prop_name = sprite_prop_names().get(&(prop_id as u16));
+diff --git a/vm-rust/src/player/commands.rs b/vm-rust/src/player/commands.rs
+index 5ade07b..fabae01 100644
+--- a/vm-rust/src/player/commands.rs
++++ b/vm-rust/src/player/commands.rs
+@@ -1295,6 +1295,7 @@ pub async fn run_player_command(command: PlayerVMCommand) -> Result<DatumRef, Sc
+             }
+         }
+         PlayerVMCommand::KeyDown(key, code) => {
++            reserve_player_mut(|player| { player.last_key_down_time = chrono::Utc::now().timestamp_millis().abs(); });
+             crate::player::wait_for_handler_gap().await;
+             crate::player::hold_draw_for_input_handler();
+             // Set command_handler_yielding so that:
+diff --git a/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs b/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
+index 9ae62c7..6eea48e 100644
+--- a/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
++++ b/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
+@@ -58,6 +58,25 @@ pub struct SoundSegment {
+     // into the sequence of members, so we only need to track the current member and its loop info.
+ }
+ 
++
++/// Red Sky preservation build: JS bridge for `sound playFile` with external
++/// files (AIFF on the original CD). The host page defines window.__rsPlayFile,
++/// __rsStopFile and __rsFileBusy.
++pub fn rs_js_call(name: &str, args: &[JsValue]) -> JsValue {
++    if let Some(w) = web_sys::window() {
++        if let Ok(f) = Reflect::get(&w, &JsValue::from_str(name)) {
++            if let Some(f) = f.dyn_ref::<js_sys::Function>() {
++                let arr = js_sys::Array::new();
++                for a in args {
++                    arr.push(a);
++                }
++                return f.apply(&JsValue::NULL, &arr).unwrap_or(JsValue::UNDEFINED);
++            }
++        }
++    }
++    JsValue::UNDEFINED
++}
++
+ pub struct SoundChannelDatumHandlers {}
+ 
+ impl SoundChannelDatumHandlers {
+@@ -249,6 +268,11 @@ impl SoundChannelDatumHandlers {
+                 let is_busy = Self::handle_is_busy(player, datum)?;
+                 Ok(player.alloc_datum(Datum::Int(if is_busy { 1 } else { 0 })))
+             }
++            _ if handler_name.to_string().eq_ignore_ascii_case("close") => {
++                // Director 6 `sound close n` == stop and release the channel.
++                Self::handle_stop(player, datum)?;
++                Ok(datum.clone())
++            }
+             _ => Err(ScriptError::new(format!(
+                 "No handler {handler_name} for sound channel"
+             ))),
+@@ -463,6 +487,26 @@ impl SoundChannelDatumHandlers {
+         // Get the channel as Rc<RefCell<SoundChannel>> (do NOT borrow)
+         let channel_rc = Self::get_sound_channel_mut(player, datum)?;
+ 
++        // A string is either a cast member name (puppetSound "name") or an
++        // external sound file (sound playFile n, "W_BACK1.AIF").
++        let member_datum = player.get_datum(member).clone();
++        if let Datum::String(name) = &member_datum {
++            if let Some(r) = player.movie.cast_manager.find_member_ref_by_name(name) {
++                let md = player.alloc_datum(Datum::CastMember(r));
++                return Self::handle_play_file(player, datum, &md, loop_count);
++            }
++            let channel_num = channel_rc.borrow().channel_num;
++            channel_rc.borrow_mut().stop();
++            let base = player.net_manager.base_path.as_ref().map(|u| u.to_string()).unwrap_or_default();
++            rs_js_call("__rsPlayFile", &[
++                JsValue::from_f64(channel_num as f64),
++                JsValue::from_str(&base),
++                JsValue::from_str(name),
++                JsValue::from_f64(loop_count as f64),
++            ]);
++            return Ok(());
++        }
++
+         // Apply the caller's loop count (overwriting any stale value from a
+         // previous sound). `puppet_sound` passes the value derived from the
+         // member's loop flag (0 = loop forever, 1 = play once); direct
+@@ -501,6 +545,7 @@ impl SoundChannelDatumHandlers {
+     pub fn handle_stop(player: &mut DirPlayer, datum: &DatumRef) -> Result<(), ScriptError> {
+         let channel = Self::get_sound_channel_mut(player, datum)?;
+         let channel_num = channel.borrow().channel_num;
++        rs_js_call("__rsStopFile", &[JsValue::from_f64(channel_num as f64)]);
+         channel.borrow_mut().stop();
+         // Release the audio-time sync anchor when sound 1 stops — the score
+         // frame loop returns to its normal tempo'd advance.
+diff --git a/vm-rust/src/player/handlers/manager.rs b/vm-rust/src/player/handlers/manager.rs
+index 8bcc917..ec9d646 100644
+--- a/vm-rust/src/player/handlers/manager.rs
++++ b/vm-rust/src/player/handlers/manager.rs
+@@ -1148,7 +1148,23 @@ impl BuiltInHandlerManager {
+             Some(BuiltInSymbol::Stringp) => TypeHandlers::stringp(args),
+             Some(BuiltInSymbol::Integerp) => TypeHandlers::integerp(args),
+             Some(BuiltInSymbol::Floatp) => TypeHandlers::floatp(args),
+-            Some(BuiltInSymbol::Offset) => StringHandlers::offset(args),
++            Some(BuiltInSymbol::Offset) => {
++                // offset(rect, h, v) shifts a rect; offset(str, str) is a string search.
++                let rect = reserve_player_ref(|player| {
++                    if args.len() >= 3 {
++                        if let Datum::Rect(r, f) = player.get_datum(&args[0]) {
++                            let h = player.get_datum(&args[1]).to_float().unwrap_or(0.0);
++                            let v = player.get_datum(&args[2]).to_float().unwrap_or(0.0);
++                            return Some(Datum::Rect([r[0] + h, r[1] + v, r[2] + h, r[3] + v], *f));
++                        }
++                    }
++                    None
++                });
++                match rect {
++                    Some(d) => reserve_player_mut(|player| Ok(player.alloc_datum(d))),
++                    None => StringHandlers::offset(args),
++                }
++            }
+             Some(BuiltInSymbol::Length) => StringHandlers::length(args),
+             Some(BuiltInSymbol::Script) => MovieHandlers::script(args),
+             Some(BuiltInSymbol::Void) => TypeHandlers::void(args),
+@@ -2535,7 +2551,14 @@ impl BuiltInHandlerManager {
+                 })?;
+                 let msg = format!("No built-in handler: {}({})", name, formatted_args);
+                 warn!("{msg}");
+-                return Err(ScriptError::new(msg));
++                // Red Sky preservation build: treat unknown built-ins (puppetPalette,
++                // finishIdleLoad, quit, legacy XObject calls...) as no-ops.
++                let quiet = matches!(name.to_string().to_ascii_lowercase().as_str(),
++                    "puppetpalette" | "finishidleload" | "getosdirectory");
++                if !quiet {
++                    web_sys::console::warn_1(&format!("[lenient] {msg}").into());
++                }
++                return Ok(DatumRef::Void);
+             }
+         }
+     }
+diff --git a/vm-rust/src/player/handlers/movie.rs b/vm-rust/src/player/handlers/movie.rs
+index f5f820c..f342ac5 100644
+--- a/vm-rust/src/player/handlers/movie.rs
++++ b/vm-rust/src/player/handlers/movie.rs
+@@ -241,9 +241,8 @@ impl MovieHandlers {
+                 .await;
+                 waited_ms += POLL_MS;
+             };
+-            reserve_player_mut(|player| { player.goto_wait_active = false; });
+-
+             if !done {
++                reserve_player_mut(|player| { player.goto_wait_active = false; });
+                 // Fetch never finished — fall back to the deferred frame-loop
+                 // transition so the movie errs loudly instead of freezing.
+                 crate::console_error!(
+@@ -258,6 +257,7 @@ impl MovieHandlers {
+             }
+ 
+             let mounted = crate::player::mount_net_movie(task_id, target, true).await;
++            reserve_player_mut(|player| { player.goto_wait_active = false; });
+             // Success is per-transition noise; a FAILED mount means the calling
+             // handler is about to run against the OLD movie's casts, which is
+             // exactly the bug this path exists to prevent — surface that one.
+@@ -689,11 +689,22 @@ impl MovieHandlers {
+                 // `entered = false` lets the next begin_sprites re-enter the span
+                 // and reload from the score (the deferred revert) when the sprite
+                 // stays unpuppeted; if it is re-puppeted first, it keeps its data.
++                // Red Sky preservation build: a channel with an authored Score
++                // span on the current frame keeps its behaviors and stays
++                // entered (Director's behaviors belong to the span, not to the
++                // puppet state). Movies that loop on one frame never re-enter.
++                let cur_frame = player.movie.current_frame;
++                let has_span = player.movie.score.sprite_spans.iter().any(|sp| {
++                    sp.channel_number == sprite_number as u32
++                        && sp.start_frame <= cur_frame && sp.end_frame >= cur_frame
++                });
+                 let sprite = player.movie.score.get_sprite_mut(sprite_number as i16);
+                 sprite.puppet = false;
+-                sprite.entered = false;
+-                sprite.exited = false;
+-                sprite.script_instance_list.clear();
++                if !has_span {
++                    sprite.entered = false;
++                    sprite.exited = false;
++                    sprite.script_instance_list.clear();
++                }
+                 // Mark for revert on the NEXT frame tick. If the sprite is not
+                 // re-puppeted / re-membered before then it reverts to the Score
+                 // (a reset to empty for a pure-puppet channel with no span). This
+diff --git a/vm-rust/src/player/handlers/types.rs b/vm-rust/src/player/handlers/types.rs
+index ad5a8a0..758932b 100644
+--- a/vm-rust/src/player/handlers/types.rs
++++ b/vm-rust/src/player/handlers/types.rs
+@@ -1360,6 +1360,8 @@ impl TypeHandlers {
+                 // first physics step in spectral-wizard's colliPlayer) and
+                 // pass them straight into abs(); Director tolerates this.
+                 Datum::Void => Datum::Int(0),
++                // Director 6 applies abs() component-wise to points/rects.
++                Datum::Point(v, f) => Datum::Point([v[0].abs(), v[1].abs()], *f),
+                 _ => {
+                     return Err(ScriptError::new(format!(
+                         "Cannot get abs of type: {}",
+@@ -2434,6 +2436,14 @@ impl TypeHandlers {
+                 }
+             }
+ 
++            if !is_busy {
++                let ch_num = channel_rc.borrow().channel_num;
++                let v = crate::player::handlers::datum_handlers::sound_channel::rs_js_call(
++                    "__rsFileBusy", &[wasm_bindgen::JsValue::from_f64(ch_num as f64)]);
++                if v.as_bool() == Some(true) {
++                    is_busy = true;
++                }
++            }
+             Ok(player.alloc_datum(Datum::Int(if is_busy { 1 } else { 0 })))
+         })
+     }
+diff --git a/vm-rust/src/player/mod.rs b/vm-rust/src/player/mod.rs
+index 8fef74e..c329df8 100644
+--- a/vm-rust/src/player/mod.rs
++++ b/vm-rust/src/player/mod.rs
+@@ -319,6 +319,7 @@ pub struct DirPlayer {
+     /// (vector DatumRef, parent transform DatumRef, sub-property name)
+     pub transform_sub_refs: Vec<(DatumRef, DatumRef, Symbol)>,
+     pub last_mouse_down_time: i64,
++    pub last_key_down_time: i64,
+     pub is_double_click: bool,
+     pub mouse_down_sprite: i16,
+     pub drag_offset: (i32, i32),
+@@ -775,6 +776,7 @@ impl DirPlayer {
+             cursor_is_hidden: false,
+             transform_sub_refs: Vec::new(),
+             last_mouse_down_time: 0,
++            last_key_down_time: 0,
+             is_double_click: false,
+             mouse_down_sprite: 0,
+             drag_offset: (0, 0),
+@@ -2015,6 +2017,8 @@ impl DirPlayer {
+         let actor_list_datum = self.alloc_datum(Datum::List(DatumType::List, VecDeque::new(), false));
+         self.globals.insert(Symbol::builtin(BuiltInSymbol::ActorList), actor_list_datum);
+         self.actor_list_generation = 0;
++        let search_path_datum = self.alloc_datum(Datum::List(DatumType::List, VecDeque::new(), false));
++        self.globals.insert(Symbol::builtin(BuiltInSymbol::SearchPath), search_path_datum);
+ 
+         // Mathematical constant
+         let pi_datum = self.alloc_datum(Datum::Float(std::f64::consts::PI));
+@@ -3062,6 +3066,13 @@ impl DirPlayer {
+                 // Default: return 0 when no sprite context is available
+                 Ok(self.alloc_datum(Datum::Int(0)))
+             },
++            BuiltInSymbol::SearchPath | BuiltInSymbol::SearchPaths => {
++                Ok(self
++                    .globals
++                    .get(&Symbol::builtin(BuiltInSymbol::SearchPath))
++                    .unwrap_or(&DatumRef::Void)
++                    .clone())
++            },
+             BuiltInSymbol::ActorList => {
+                 // Return the reference to the global actorList, not a clone of its contents
+                 Ok(self
+@@ -3262,7 +3273,17 @@ impl DirPlayer {
+             // the load-time logic in `load_movie_from_dir`. Label sources
+             // do NOT trigger URL rewriting in net handlers — that's
+             // reserved for `movie_path_override`. See `set_movie_path_label`.
+-            BuiltInSymbol::MoviePath => {
++            BuiltInSymbol::ColorQD | BuiltInSymbol::SwitchColorDepth => {
++                Ok(self.alloc_datum(Datum::Int(1)))
++            },
++            BuiltInSymbol::QuickTimePresent | BuiltInSymbol::VideoForWindowsPresent => {
++                Ok(self.alloc_datum(Datum::Int(0)))
++            },
++            BuiltInSymbol::LastClick | BuiltInSymbol::LastEvent | BuiltInSymbol::LastKey | BuiltInSymbol::LastRoll => {
++                let v = self.rs_last_event_ticks(prop.into_builtin().unwrap());
++                Ok(self.alloc_datum(Datum::Int(v)))
++            },
++            BuiltInSymbol::MoviePath | BuiltInSymbol::PathName => {
+                 let label = self.movie_path_label_effective();
+                 if let Some(path) = label {
+                     let base_path = dir_part_of_path(&path);
+@@ -3495,6 +3516,18 @@ impl DirPlayer {
+         }
+     }
+ 
++    fn rs_last_event_ticks(&self, which: BuiltInSymbol) -> i32 {
++        let now = chrono::Utc::now().timestamp_millis().abs();
++        let since = |t: i64| -> i32 { if t <= 0 { get_elapsed_ticks(self.start_time) } else { ((now - t).max(0) * 60 / 1000) as i32 } };
++        let click = since(self.last_mouse_down_time);
++        let key = since(self.last_key_down_time);
++        match which {
++            BuiltInSymbol::LastClick => click,
++            BuiltInSymbol::LastKey => key,
++            _ => click.min(key),
++        }
++    }
++
+     fn get_anim_prop(&mut self, prop_id: u16) -> Result<Datum, ScriptError> {
+         let prop_name = get_anim_prop_name(prop_id);
+         // `the timer` / `the keyPressed` / `the key` / `the keyCode` are the
+@@ -3507,7 +3540,7 @@ impl DirPlayer {
+             self.input_polled = true;
+         }
+         match prop_name {
+-            BuiltInSymbol::ColorDepth => Ok(Datum::Int(32)),
++            BuiltInSymbol::ColorDepth => Ok(Datum::Int(8)),
+             BuiltInSymbol::FullColorPermit => Ok(Datum::Int(1)), // Full color mode is permitted
+             BuiltInSymbol::Timer => Ok(Datum::Int(get_elapsed_ticks(self.start_time))),
+             BuiltInSymbol::TimeoutLength => Ok(Datum::Int(self.movie.timeout_length)),
+@@ -3534,7 +3567,17 @@ impl DirPlayer {
+             BuiltInSymbol::StageColor => Ok(Datum::Int(0)),
+             BuiltInSymbol::DoubleClick => Ok(datum_bool(self.is_double_click)),
+             BuiltInSymbol::LastClick | BuiltInSymbol::LastEvent | BuiltInSymbol::LastKey | BuiltInSymbol::LastRoll => {
+-                Ok(Datum::Int(get_elapsed_ticks(self.start_time)))
++                // Ticks (1/60 s) since the last click / key / any event.
++                let now = chrono::Utc::now().timestamp_millis().abs();
++                let since = |t: i64| -> i32 { if t <= 0 { get_elapsed_ticks(self.start_time) } else { ((now - t).max(0) * 60 / 1000) as i32 } };
++                let click = since(self.last_mouse_down_time);
++                let key = since(self.last_key_down_time);
++                let v = match prop_name {
++                    BuiltInSymbol::LastClick => click,
++                    BuiltInSymbol::LastKey => key,
++                    _ => click.min(key),
++                };
++                Ok(Datum::Int(v))
+             }
+             BuiltInSymbol::MultiSound => Ok(Datum::Int(1)),
+             BuiltInSymbol::PauseState => Ok(datum_bool(self.is_script_paused)),
+@@ -3663,6 +3706,16 @@ impl DirPlayer {
+                 crate::js_api::JsApi::dispatch_stage_size_changed(w, h, self.center_stage);
+                 Ok(())
+             },
++            Some(BuiltInSymbol::SearchPath) | Some(BuiltInSymbol::SearchPaths) => {
++                match value {
++                    Datum::List(list_type, list_items, sorted) => {
++                        let v = self.alloc_datum(Datum::List(list_type, list_items, sorted));
++                        self.globals.insert(Symbol::builtin(BuiltInSymbol::SearchPath), v);
++                        Ok(())
++                    }
++                    _ => Ok(()),
++                }
++            },
+             Some(BuiltInSymbol::ActorList) => {
+                 // Setting actorList - update the global variable
+                 match value {
+@@ -4071,6 +4124,30 @@ pub async fn player_call_global_handler(
+     handler_name: Symbol,
+     args: &Vec<DatumRef>,
+ ) -> Result<DatumRef, ScriptError> {
++    // Red Sky 98 preservation shims: 1998 hardware probes that busy-wait on
++    // audio start/stop or benchmark the CPU. Meaningless in a browser, and the
++    // audio ones spin forever because sounds start asynchronously here.
++    {
++        let lname = handler_name.to_string().to_ascii_lowercase();
++        let stub: Option<i32> = match lname.as_str() {
++            "animation_testlatency2" | "animation_testlatency3" => Some(0),
++            "machineprofile" => Some(100000),
++            "loadprofile" => Some(1),
++            "doperformancecheck" => Some(0),
++            _ => None,
++        };
++        if let Some(v) = stub {
++            return reserve_player_mut(|player| {
++                if lname.starts_with("animation_testlatency") {
++                    let g = format!("ganimation_latency{}", &lname[lname.len() - 1..]);
++                    let zero = player.alloc_datum(Datum::Int(0));
++                    player.globals.insert(Symbol::from_str(&g), zero);
++                }
++                Ok(player.alloc_datum(Datum::Int(v)))
++            });
++        }
++    }
++
+     // Director 6 `birth(script, args)` constructor: when the first arg is a
+     // ScriptRef this is the pre-`new` idiom — allocate a FRESH instance and run
+     // its `on birth me, args`. This MUST run before the generic first-arg
+@@ -5807,6 +5884,19 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
+ 
+     stop_movie_sequence().await;
+ 
++    // Red Sky preservation build: remember which cast library each slot held,
++    // so script instances that survive the movie switch (Director keeps them
++    // alive with their scripts) can be re-pointed at the same-named cast in
++    // the new movie.
++    let old_cast_keys: Vec<(String, String)> = reserve_player_ref(|player| {
++        player.movie.cast_manager.casts.iter().map(|c| {
++            let fb = c.file_name.replace('\\', "/").replace(':', "/");
++            let fb = fb.rsplit('/').next().unwrap_or("").to_lowercase();
++            let fb = fb.rsplit_once('.').map(|(a, _)| a.to_string()).unwrap_or(fb);
++            (c.name.to_lowercase(), fb)
++        }).collect()
++    });
++
+     // 3. Load the new movie data (preserving globals and allocator)
+     reserve_player_mut(|player| {
+         player.is_dispatching_events = prev_dispatching;
+@@ -5845,6 +5935,35 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
+         })
+     }).await;
+ 
++    reserve_player_mut(|player| {
++        let new_keys: Vec<(String, String)> = player.movie.cast_manager.casts.iter().map(|c| {
++            let fb = c.file_name.replace('\\', "/").replace(':', "/");
++            let fb = fb.rsplit('/').next().unwrap_or("").to_lowercase();
++            let fb = fb.rsplit_once('.').map(|(a, _)| a.to_string()).unwrap_or(fb);
++            (c.name.to_lowercase(), fb)
++        }).collect();
++        let mut remap: Vec<i32> = Vec::with_capacity(old_cast_keys.len() + 1);
++        remap.push(0);
++        for (i, (oname, ofile)) in old_cast_keys.iter().enumerate() {
++            let found = new_keys.iter().position(|(n, f)| {
++                (!oname.is_empty() && n == oname && oname != "internal")
++                    || (!ofile.is_empty() && f == ofile && n != "internal")
++            });
++            remap.push(found.map(|p| p as i32 + 1).unwrap_or((i + 1) as i32));
++        }
++        let mut changed = 0;
++        player.allocator.script_instances.for_each_mut(|entry| {
++            let lib = entry.script_instance.script.cast_lib;
++            if lib > 0 && (lib as usize) < remap.len() && remap[lib as usize] != lib {
++                entry.script_instance.script.cast_lib = remap[lib as usize];
++                changed += 1;
++            }
++        });
++        if changed > 0 {
++            web_sys::console::log_1(&format!("[rs] remapped {} surviving script instances; cast map {:?}", changed, remap).into());
++        }
++    });
++
+     // Apply frame target if specified, restore is_playing before init sequence
+     reserve_player_mut(|player| {
+         match &target {
+@@ -6977,6 +7096,18 @@ pub async fn run_frame_loop() {
+             continue;
+         }
+ 
++        // Red Sky preservation build: while go(frame, movie) is fetching and
++        // mounting the next movie, the OLD movie must not keep stepping
++        // (Director loaded movies synchronously, so its idle/exitFrame never
++        // ran against cleared globals).
++        if reserve_player_ref(|player| player.goto_wait_active) {
++            let _ = async_std::future::timeout(
++                std::time::Duration::from_millis(16),
++                std::future::pending::<()>(),
++            ).await;
++            continue;
++        }
++
+         // Pre-dispatch Flash members for sprites on the current frame so they start
+         // loading before Lingo scripts try to access them.
+         reserve_player_mut(|player| {
+diff --git a/vm-rust/src/player/movie.rs b/vm-rust/src/player/movie.rs
+index c4a4ab7..b2299a7 100644
+--- a/vm-rust/src/player/movie.rs
++++ b/vm-rust/src/player/movie.rs
+@@ -225,7 +225,8 @@ impl Movie {
+             // A score always has at least frame 1, so fall back to 1 rather than 0
+             // when the frame count couldn't be determined.
+             BuiltInSymbol::LastFrame => Ok(Datum::Int(self.score.frame_count.unwrap_or(1).max(1) as i32)),
+-            BuiltInSymbol::MoviePath => {
++            BuiltInSymbol::IdleReadChunkSize | BuiltInSymbol::IdleHandlerPeriod | BuiltInSymbol::IdleLoadMode | BuiltInSymbol::IdleLoadPeriod => Ok(Datum::Int(0)),
++            BuiltInSymbol::MoviePath | BuiltInSymbol::PathName => {
+                 let mut result = self.base_path.clone();
+                 if !result.is_empty() && !result.ends_with(PATH_SEPARATOR) {
+                     result.push_str(PATH_SEPARATOR);
+@@ -362,7 +363,7 @@ impl Movie {
+             // Scripting Dictionary, valid values 1/2/4/8/16/32). The web
+             // canvas is true-color, so report 32. Setting it is a no-op
+             // (see set_prop), matching a monitor that can't change depth.
+-            BuiltInSymbol::ColorDepth => Ok(Datum::Int(32)),
++            BuiltInSymbol::ColorDepth => Ok(Datum::Int(8)),
+             // A SYMBOL, per the Scripting Dictionary: "The possible values of the
+             // active3dRenderer property are #openGL, #directX7_0, #directx9,
+             // #directX5_2, and #software". Returning the string "#openGL" made
+@@ -568,7 +569,7 @@ impl Movie {
+                 self.puppet_tempo = value.int_value()? as u32;
+                 Ok(())
+             },
+-            BuiltInSymbol::ColorDepth | BuiltInSymbol::UseFastQuads | BuiltInSymbol::RomanLingo | BuiltInSymbol::AllowSaveLocal | BuiltInSymbol::CpuHogTicks
++            BuiltInSymbol::IdleReadChunkSize | BuiltInSymbol::IdleHandlerPeriod | BuiltInSymbol::IdleLoadMode | BuiltInSymbol::IdleLoadPeriod | BuiltInSymbol::ColorDepth | BuiltInSymbol::UseFastQuads | BuiltInSymbol::RomanLingo | BuiltInSymbol::AllowSaveLocal | BuiltInSymbol::CpuHogTicks
+             | BuiltInSymbol::PreLoadEventAbort => {
+                 // Read-only / no-op in practice; ignore sets like Director does.
+                 // preLoadEventAbort gates whether a preload event handler may
+diff --git a/vm-rust/src/player/score.rs b/vm-rust/src/player/score.rs
+index 25330f7..925896a 100644
+--- a/vm-rust/src/player/score.rs
++++ b/vm-rust/src/player/score.rs
+@@ -654,10 +654,17 @@ impl Score {
+     /// sprite was reset so the caller can invalidate the render cache. Runs every
+     /// frame (not just on frame change) so single-frame movies revert too.
+     pub fn process_pending_unpuppet_reverts(&mut self, frame_num: u32) -> bool {
+-        let span_channels: std::collections::HashSet<usize> = self
++        let mut span_channels: std::collections::HashSet<usize> = self
+             .active_channel_numbers_for_frame(frame_num)
+             .into_iter()
+             .collect();
++        // Red Sky preservation build: any channel with an authored Score span
++        // on this frame keeps its sprite (and its behaviors) when unpuppeted.
++        for span in self.sprite_spans.iter() {
++            if Self::is_span_in_frame(span, frame_num) {
++                span_channels.insert(span.channel_number as usize);
++            }
++        }
+         let mut any = false;
+         for channel in &mut self.channels {
+             let sprite = &mut channel.sprite;
+diff --git a/vm-rust/src/player/symbols/builtin.rs b/vm-rust/src/player/symbols/builtin.rs
+index 9369949..7240b5f 100644
+--- a/vm-rust/src/player/symbols/builtin.rs
++++ b/vm-rust/src/player/symbols/builtin.rs
+@@ -224,6 +224,11 @@ define_builtin_symbols! {
+     "long time" => LongTime,
+     "lastChannel" => LastChannel,
+     "moviePath" => MoviePath,
++    "pathName" => PathName,
++    "idleReadChunkSize" => IdleReadChunkSize,
++    "idleHandlerPeriod" => IdleHandlerPeriod,
++    "idleLoadMode" => IdleLoadMode,
++    "idleLoadPeriod" => IdleLoadPeriod,
+     "frame" => Frame,
+     "path" => Path,
+     "timer" => Timer,
+@@ -245,6 +250,8 @@ define_builtin_symbols! {
+     "labelList" => LabelList,
+     "clickOn" => ClickOn,
+     "actorList" => ActorList,
++    "searchPath" => SearchPath,
++    "searchPaths" => SearchPaths,
+     "pi" => Pi,
+     "void" => Void,
+     "empty" => Empty,
