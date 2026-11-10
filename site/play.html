@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Red Sky 98 Player</title>
+<style>
+  :root { --bg:#0b0907; --fg:#ece3d2; --muted:#968a76; --accent:#c8492c; color-scheme: dark; }
+  html,body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 "Courier New",ui-monospace,monospace}
+  body{padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:16px}
+  #wrap{max-width:640px;margin:0 auto}
+  #bar{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  #bar a{color:var(--fg)}
+  #what{color:var(--muted)}
+  #frame{position:relative;width:100%;aspect-ratio:4/3;max-width:100%;overflow:hidden;background:#000}
+  #stage{position:absolute;left:0;top:0;width:640px;height:480px;transform-origin:0 0}
+  #stage > *{width:640px !important;height:480px !important}
+  #cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#000;color:var(--fg);border:0;font:inherit;cursor:pointer;width:100%}
+  #cover b{font-size:18px;letter-spacing:.12em}
+  #cover span{color:var(--muted)}
+  #cover:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+  #keys{color:var(--muted);margin-top:10px}
+  kbd{font:inherit;border:1px solid #3a3229;padding:0 4px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="bar"><span id="what"></span><a href="index.html">All pieces</a></div>
+  <div id="frame">
+    <div id="stage"></div>
+    <button id="cover" type="button"><b>CLICK TO START</b><span id="status">Loads about 10–40 MB, the size of the original CD files</span></button>
+  </div>
+  <p id="keys">Original CD keys: <kbd>Ctrl-E</kbd> Entertainment · <kbd>Ctrl-W</kbd> Work · <kbd>Ctrl-X</kbd> Exit · <kbd>Enter</kbd> back to the Work menu · <kbd>Space</kbd> skips intros</p>
+</div>
+<script>
+// Scale the fixed 640x480 stage to the available width.
+(function(){
+  const frame = document.getElementById('frame'), stage = document.getElementById('stage');
+  const fit = () => { stage.style.transform = 'scale(' + (frame.clientWidth / 640) + ')'; };
+  new ResizeObserver(fit).observe(frame); fit();
+})();
+
+// ---- Path mapping. The 1998 Lingo asks for "WORK_MODULE\WORK.DIR", "new_fangled\hp_pong\hp_pong6",
+// "RSICODE.cct" and so on. Every file is stored lowercased and gzipped; requests are resolved
+// against files.txt and decompressed in the browser.
+(function(){
+  const ROOT = new URL('rs/', location.href).href;
+  const FILES = new Map(); const BYBASE = {};
+  const ready = fetch('files.txt').then(r => r.text()).then(t => {
+    for (const line of t.split('\n')) {
+      if (!line) continue;
+      const [f, pub] = line.split('\t');
+      FILES.set(f, pub || f);
+      const b = f.split('/').pop(), stem = b.replace(/\.(dir|dxr|dcr|cst|cxt|cct)$/, '');
+      (BYBASE[b] ||= []).push(f); if (stem !== b) (BYBASE[stem] ||= []).push(f);
+    }
+  });
+  const rootPath = new URL(ROOT).pathname, sitePath = new URL('.', location.href).pathname;
+  function resolve(url){
+    let u; try { u = new URL(url, location.href); } catch(e){ return null; }
+    if (u.origin !== location.origin) return null;
+    let p = decodeURIComponent(u.pathname);
+    if (!p.startsWith(rootPath)) { if (p.startsWith(sitePath) && !p.endsWith('.gz') && !p.endsWith('.txt') && !p.endsWith('.html')) p = rootPath + p.slice(sitePath.length); else return null; }
+    const rel = p.slice(rootPath.length).replace(/\\/g,'/').toLowerCase().replace(/^\/+/, '');
+    if (FILES.has(rel)) return rel;
+    const stem = rel.replace(/\.(dir|dxr|dcr|cst|cxt|cct)$/, '');
+    for (const ext of ['.dir', '.cst']) if (FILES.has(stem + ext)) return stem + ext;
+    const hits = BYBASE[stem.split('/').pop()] || BYBASE[rel.split('/').pop()];
+    if (hits && hits.length) { const dir = rel.split('/').slice(0, -1).join('/'); return hits.find(h => h.startsWith(dir)) || hits[0]; }
+    return null;
+  }
+  const origFetch = window.fetch.bind(window);
+  const cache = new Map();
+  async function load(rel){
+    if (!cache.has(rel)) cache.set(rel, (async () => {
+      const res = await origFetch(ROOT + FILES.get(rel) + '.gz');
+      if (!res.ok) throw new Error('HTTP ' + res.status + ' for ' + rel);
+      return await new Response(res.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+    })());
+    return cache.get(rel);
+  }
+  window.fetch = async function(input, init){
+    await ready;
+    const url = typeof input === 'string' ? input : (input && input.url);
+    const rel = url ? resolve(url) : null;
+    if (rel) {
+      try { const buf = await load(rel); return new Response(buf.slice(0), { status: 200, headers: { 'Content-Type': 'application/octet-stream', 'Content-Length': String(buf.byteLength) } }); }
+      catch (e) { console.warn('[rs] load failed', rel, e); return new Response('', { status: 404 }); }
+    }
+    return origFetch(input, init);
+  };
+  window.__rsReady = ready;
+
+  // ---- `sound playFile n, "file"`: the CD's loose AIFF files, converted to WAV under their original names.
+  let actx = null; const chans = {}; const decoded = {};
+  window.__rsPlayFile = function(ch, base, name, loops){
+    window.__rsStopFile(ch);
+    const relName = String(name).replace(/\\/g, '/').replace(/:/g, '/');
+    const rel = resolve(new URL(relName, base || ROOT).href) || resolve(new URL(relName.split('/').pop(), base || ROOT).href);
+    if (!rel) { console.warn('[rs] playFile: not found', name); return; }
+    actx ||= new (window.AudioContext || window.webkitAudioContext)();
+    const token = {}; chans[ch] = { busy: true, token };
+    (decoded[rel] ||= load(rel).then(b => actx.decodeAudioData(b.slice(0))))
+      .then(buf => {
+        const c = chans[ch]; if (!c || c.token !== token) return;
+        const src = actx.createBufferSource(); src.buffer = buf; src.loop = (loops === 0);
+        src.connect(actx.destination);
+        src.onended = () => { if (chans[ch] && chans[ch].token === token) chans[ch].busy = false; };
+        c.src = src; src.start();
+      })
+      .catch(e => { console.warn('[rs] playFile failed', name, e); if (chans[ch]) chans[ch].busy = false; });
+  };
+  window.__rsStopFile = function(ch){ const c = chans[ch]; if (!c) return; try { c.src && c.src.stop(); } catch(e){} delete chans[ch]; };
+  window.__rsFileBusy = function(ch){ return !!(chans[ch] && chans[ch].busy); };
+})();
+
+const params = new URLSearchParams(location.search);
+const hashMovie = location.hash.slice(1);
+const movie = (params.get('m') || hashMovie.replace(/-/g, '/') || 'redsky98.dir').replace(/[^a-z0-9_\/.]/gi, '');
+document.getElementById('what').textContent = params.get('t') || 'Red Sky Interactive · 1998 demo CD';
+
+async function start(){
+  const cover = document.getElementById('cover'), status = document.getElementById('status');
+  if (location.protocol === 'file:') {
+    status.innerHTML = 'This page was opened as a file, and browsers block that.<br>Start it with \u201cStart Red Sky 98.command\u201d in this folder (see README.txt), then use the page it opens.';
+    return;
+  }
+  cover.disabled = true; status.textContent = 'Loading the Director player…';
+  try {
+    await window.__rsReady;
+    const e = document.createElement('embed');
+    e.setAttribute('src', 'rs/' + movie);
+    e.setAttribute('width', '640'); e.setAttribute('height', '480');
+    e.setAttribute('type', 'application/x-director');
+    document.getElementById('stage').appendChild(e);
+    const res = await fetch('dirplayer-polyfill.js.gz');
+    const js = await new Response(res.body.pipeThrough(new DecompressionStream('gzip'))).text();
+    const s = document.createElement('script'); s.textContent = js; document.body.appendChild(s);
+    status.textContent = 'Loading the movie…';
+    setTimeout(() => cover.remove(), 1500);
+  } catch (err) {
+    status.textContent = 'Could not start the player: ' + err.message;
+    cover.disabled = false;
+  }
+}
+document.getElementById('cover').addEventListener('click', start);
+</script>
+</body>
+</html>
