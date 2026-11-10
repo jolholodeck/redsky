@@ -113,6 +113,16 @@
   window.__rsStopFile = function(ch){ const c = chans[ch]; if (!c) return; try { c.src && c.src.stop(); } catch(e){} delete chans[ch]; };
   window.__rsFileBusy = function(ch){ return !!(chans[ch] && chans[ch].busy); };
 
+  // ---- Per-piece speed overrides (speeds.json): frames per second for score
+  // sections authored "as fast as possible" in 1998, keyed by movie file name.
+  let SPEEDS = {};
+  fetch('speeds.json').then(r => r.ok ? r.json() : {}).then(j => { SPEEDS = j || {}; }).catch(() => {});
+  window.__rsTempoOverride = function(file, frame){
+    const list = SPEEDS[String(file).toLowerCase()]; if (!list) return 0;
+    for (const s of list) { const [a, b] = String(s.frames).split('-').map(Number); if (frame >= a && frame <= (b || a)) return s.fps; }
+    return 0;
+  };
+
   // ---- puppetPalette, expressed as stage brightness (the film flicker and palette fades).
   window.__rsStageFilter = function(brightness, durationMs){
     const st = document.getElementById('stage'); if (!st) return;

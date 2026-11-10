@@ -25,6 +25,8 @@ Upstream: https://github.com/igorlira/dirplayer-rs at commit 68376fbb4494a6bbad4
 | `updateStage` paced to 30 per second, yielding so each frame shows (`window.__rsUpdateStageMinMs` overrides, 0 disables) | Lingo animation loops ran at CPU speed and showed no in-between frames |
 | `play frame X` / `play done` with a return stack; from an input handler the caller waits until `play done`, so the Lingo after `play` runs on return | Entertainment's rapid-click film burn and projectionist never started, and the flicker/cowboy restart ran during it |
 | `do "go to the frame+1"`: `go` destinations in evaluated strings are full expressions | Animation callbacks that step the playhead stopped the movie with a parse error |
+| puppetPalette on a frame with a built-in palette is measured against the nearest cast palette (e.g. Palette2 vs Palette1) | The Entertainment flicker was far too dark on the cowboy scene |
+| Per-piece speed overrides: `site/speeds.json`, read through `window.__rsTempoOverride` | Score sections authored "as fast as possible" flash by on modern machines |
 
 ## Build
 
