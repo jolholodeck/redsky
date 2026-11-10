@@ -1,0 +1,52 @@
+      RED SKY INTERACTIVE 1998 DEMO CD 
+ 
+
+
+B E F O R E    R U N N I N G    T H E    D E M O
+ 
+   1. Make sure the monitor is set to 256 colors:
+       - Right-click anywhere on the desktop.
+       - Choose 'Properties' in the pop-up menu.
+       - Click the 'Settings' tab.
+       - Select 256 Color from the 'Color Palette' list.
+       - Select 640 x 480 from the 'Desktop Area' list. 
+       - Click OK.
+ 
+   2. Quit any other open applications.
+
+   3. To run the demo, double-click on Red_Sky_98.exe in the CD window.
+ 
+ 
+ 
+ 
+D E M O    N A V I G A T I O N
+ 
+   When launched, the demo starts by displaying a black splash screen with the RSI logo. At
+   this point, you can simply click the logo to start the Entertainment module, or 
+   Shift-click to go directly to the Work Module.
+ 
+   Once you have entered the first module, you can use the following navigation commands at
+   any time:
+
+   Control-E\tab Go to Entertainment Module
+   Control-W\tab Go to Work Module 
+   Control-X\tab Go to Exit Module
+   Control-Q\tab Quit immediately
+ 
+   Additionally, each module provides navigation buttons to navigate directly by using the
+   mouse.
+
+   When viewing the assets contained in the Work Module, you can press ENTER to go back
+   to the Work Module's main menu.
+
+   Please note that once you have gone to the Exit Module, you can no longer return to any
+   other module. After the exit sequence is completed, the program will automatically quit.
+ 
+
+   Spacebar Shortcuts:
+
+   In the Entertainment module, you can press the spacebar through the introductory screens to reach the
+   actual presentation more quickly.
+
+   In the Exit Module, you can press the spacebar to cut straight from the cowboy exit animation to the
+   credits roll, and press the spacebar (several times) during the credits roll to quit immediately.
