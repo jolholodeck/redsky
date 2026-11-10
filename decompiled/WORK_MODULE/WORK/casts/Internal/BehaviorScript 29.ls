@@ -1,0 +1,7 @@
+on mouseDown
+  global goWorkMgr
+  if the lastClick > 15 then
+    exit
+  end if
+  mPresentation(goWorkMgr)
+end

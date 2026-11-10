@@ -1,0 +1,5 @@
+on mouseUp
+  puppetSound("dog1")
+  updateStage()
+  go("n1")
+end
