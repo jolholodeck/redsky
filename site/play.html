@@ -112,6 +112,13 @@
   };
   window.__rsStopFile = function(ch){ const c = chans[ch]; if (!c) return; try { c.src && c.src.stop(); } catch(e){} delete chans[ch]; };
   window.__rsFileBusy = function(ch){ return !!(chans[ch] && chans[ch].busy); };
+
+  // ---- puppetPalette, expressed as stage brightness (the film flicker and palette fades).
+  window.__rsStageFilter = function(brightness, durationMs){
+    const st = document.getElementById('stage'); if (!st) return;
+    st.style.transition = durationMs > 0 ? 'filter ' + Math.round(durationMs) + 'ms linear' : 'none';
+    st.style.filter = Math.abs(brightness - 1) < 0.001 ? '' : 'brightness(' + brightness.toFixed(3) + ')';
+  };
 })();
 
 const params = new URLSearchParams(location.search);

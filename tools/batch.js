@@ -12,7 +12,7 @@ const fs = require('fs');
     page.on('console', msg => { const t = msg.text(); if (/lenient|error|Error|RUNAWAY|warn/i.test(t) && !/GL Driver|ruffle|xtra-registry|Failed to load resource/.test(t)) logs.push(t.slice(0, 300)); });
     page.on('crash', () => logs.push('[CRASH]'));
     try {
-      await page.goto('http://localhost:8765/play.html?m=' + m);
+      await page.goto('http://localhost:8766/play.html?m=' + m); await page.click('#cover');
       await page.waitForTimeout(9000);
       const st = await page.$('#stage');
       await st.screenshot({ path: `${outdir}/${key}_1.png`, timeout: 15000 });

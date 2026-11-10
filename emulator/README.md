@@ -18,6 +18,11 @@ Upstream: https://github.com/igorlira/dirplayer-rs at commit 68376fbb4494a6bbad4
 | Unpuppeting keeps a sprite's score behaviors | Work menu rows and buttons lost their scripts |
 | `the quickTimePresent` reports 0 | Pieces take their non-QuickTime path |
 | `rs_debug_channel` export | Debugging score behaviors |
+| Score tempo waits: wait N seconds (247), wait for click (248), wait until a score sound ends (254 = first sound row, 255 = second) | 51 timed waits and 15 sound waits were ignored, so scenes rushed |
+| Frame rate carried through wait frames | Playback dropped to the movie default after every wait |
+| Score sound cues read the full cast library + 16-bit member | Sounds outside cast 1 (most pieces) played the wrong member or a bitmap |
+| `puppetPalette` sent to the page as stage brightness (`__rsStageFilter`), with fade time from speed/frames | Film flicker pulse (Palette2, about +6%) and palette fades |
+| `updateStage` paced to 30 per second, yielding so each frame shows (`window.__rsUpdateStageMinMs` overrides, 0 disables) | Lingo animation loops ran at CPU speed and showed no in-between frames |
 
 ## Build
 

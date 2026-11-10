@@ -13,6 +13,97 @@ index 0af392c..b26a515 100644
      }
      console.log("VM initialized");
      // Hand the wasm module to the xtra bridge. The bridge's lazy
+diff --git a/vm-rust/src/director/chunks/score.rs b/vm-rust/src/director/chunks/score.rs
+index 6d1186d..0c2495e 100644
+--- a/vm-rust/src/director/chunks/score.rs
++++ b/vm-rust/src/director/chunks/score.rs
+@@ -474,27 +474,30 @@ pub struct ScoreFrameDataHeader {
+ 
+ #[derive(Clone, Debug)]
+ pub struct SoundChannelData {
+-    pub cast_member: u8,
++    /// Cast library (D5+ score records carry it; 0 = unspecified / default cast).
++    pub cast_lib: u16,
++    pub cast_member: u16,
+ }
+ 
+ impl SoundChannelData {
++    /// D6+ sound channel record: castLib (u16), member (u16), ...
++    /// (Red Sky preservation build: previously only the low byte of the member
++    /// was read and the cast library ignored, so sounds in any cast other than
++    /// the first, or numbered above 255, played the wrong member.)
+     pub fn read(reader: &mut BinaryReader) -> Result<SoundChannelData, String> {
+-        let _unk0 = reader
+-            .read_u8()
+-            .map_err(|e| format!("Failed to read unk0: {:?}", e))?;
+-        let _unk1 = reader
+-            .read_u8()
+-            .map_err(|e| format!("Failed to read unk1: {:?}", e))?;
+-        let _unk2 = reader
+-            .read_u8()
+-            .map_err(|e| format!("Failed to read unk2: {:?}", e))?;
++        let cast_lib = reader
++            .read_u16()
++            .map_err(|e| format!("Failed to read sound castLib: {:?}", e))?;
+         let cast_member = reader
+-            .read_u8()
+-            .map_err(|e| format!("Failed to read cast_member: {:?}", e))?;
+-        
+-        Ok(SoundChannelData {
+-            cast_member,
+-        })
++            .read_u16()
++            .map_err(|e| format!("Failed to read sound member: {:?}", e))?;
++        Ok(SoundChannelData { cast_lib, cast_member })
++    }
++
++    /// Global slot number: (castLib - 1) << 16 | member (castLib 0 means cast 1).
++    pub fn slot_number(&self) -> u32 {
++        let lib = if self.cast_lib == 0 { 1 } else { self.cast_lib as u32 };
++        ((lib - 1) << 16) | self.cast_member as u32
+     }
+ }
+ 
+@@ -757,7 +760,8 @@ impl ScoreFrameData {
+                     if sound1_member != 0 {
+                         debug!("D4 Sound 1 in frame {}: cast_member={}", frame_index, sound1_member);
+                         sound_channel_data.push((frame_index, 3, SoundChannelData {
+-                            cast_member: sound1_member as u8,
++                            cast_lib: 0,
++                            cast_member: sound1_member,
+                         }));
+                     }
+ 
+@@ -767,7 +771,8 @@ impl ScoreFrameData {
+                     if sound2_member != 0 {
+                         debug!("D4 Sound 2 in frame {}: cast_member={}", frame_index, sound2_member);
+                         sound_channel_data.push((frame_index, 4, SoundChannelData {
+-                            cast_member: sound2_member as u8,
++                            cast_lib: 0,
++                            cast_member: sound2_member,
+                         }));
+                     }
+ 
+@@ -874,7 +879,8 @@ impl ScoreFrameData {
+                     if sound1_member != 0 {
+                         debug!("Sound 1 in frame {}: cast_member={}", frame_index, sound1_member);
+                         sound_channel_data.push((frame_index, 3, SoundChannelData {
+-                            cast_member: sound1_member as u8,
++                            cast_lib: 0,
++                            cast_member: sound1_member,
+                         }));
+                     }
+ 
+@@ -884,7 +890,8 @@ impl ScoreFrameData {
+                     if sound2_member != 0 {
+                         debug!("Sound 2 in frame {}: cast_member={}", frame_index, sound2_member);
+                         sound_channel_data.push((frame_index, 4, SoundChannelData {
+-                            cast_member: sound2_member as u8,
++                            cast_lib: 0,
++                            cast_member: sound2_member,
+                         }));
+                     }
+ 
 diff --git a/vm-rust/src/lib.rs b/vm-rust/src/lib.rs
 index a5fd98f..fb35966 100644
 --- a/vm-rust/src/lib.rs
@@ -99,7 +190,7 @@ index 5ade07b..fabae01 100644
              crate::player::hold_draw_for_input_handler();
              // Set command_handler_yielding so that:
 diff --git a/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs b/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
-index 9ae62c7..6eea48e 100644
+index 9ae62c7..7e96833 100644
 --- a/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
 +++ b/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
 @@ -58,6 +58,25 @@ pub struct SoundSegment {
@@ -175,8 +266,23 @@ index 9ae62c7..6eea48e 100644
          channel.borrow_mut().stop();
          // Release the audio-time sync anchor when sound 1 stops — the score
          // frame loop returns to its normal tempo'd advance.
+@@ -1688,7 +1733,13 @@ impl SoundChannel {
+     fn resolve_sound_member(player: &DirPlayer, datum: &Datum) -> Option<SoundMember> {
+         // Case 1: Direct CastMember reference
+         if let Datum::CastMember(member_ref) = datum {
+-            let cast_member = player.movie.cast_manager.find_member_by_ref(member_ref)?;
++            let found = player.movie.cast_manager.find_member_by_ref(member_ref);
++            if found.is_none() {
++                web_sys::console::warn_1(&format!("[rs] sound member not found: {:?} (casts: {})", member_ref, player.movie.cast_manager.casts.len()).into());
++            } else if !matches!(found.map(|m| &m.member_type), Some(CastMemberType::Sound(_))) {
++                web_sys::console::warn_1(&format!("[rs] member {:?} is not a sound: {}", member_ref, found.map(|m| m.member_type.type_string().to_string()).unwrap_or_default()).into());
++            }
++            let cast_member = found?;
+             match &cast_member.member_type {
+                 CastMemberType::Sound(sound_member) => return Some(sound_member.clone()),
+                 _ => {
 diff --git a/vm-rust/src/player/handlers/manager.rs b/vm-rust/src/player/handlers/manager.rs
-index 8bcc917..ec9d646 100644
+index 8bcc917..1dbd1fc 100644
 --- a/vm-rust/src/player/handlers/manager.rs
 +++ b/vm-rust/src/player/handlers/manager.rs
 @@ -1148,7 +1148,23 @@ impl BuiltInHandlerManager {
@@ -204,7 +310,18 @@ index 8bcc917..ec9d646 100644
              Some(BuiltInSymbol::Length) => StringHandlers::length(args),
              Some(BuiltInSymbol::Script) => MovieHandlers::script(args),
              Some(BuiltInSymbol::Void) => TypeHandlers::void(args),
-@@ -2535,7 +2551,14 @@ impl BuiltInHandlerManager {
+@@ -2525,6 +2541,10 @@ impl BuiltInHandlerManager {
+                 {
+                     return res;
+                 }
++                if name.to_string().eq_ignore_ascii_case("puppetPalette") {
++                    crate::player::rs_puppet_palette(args);
++                    return Ok(DatumRef::Void);
++                }
+                 let formatted_args = reserve_player_ref(|player| {
+                     let mut s = String::new();
+                     for arg in args {
+@@ -2535,7 +2555,14 @@ impl BuiltInHandlerManager {
                  })?;
                  let msg = format!("No built-in handler: {}({})", name, formatted_args);
                  warn!("{msg}");
@@ -221,7 +338,7 @@ index 8bcc917..ec9d646 100644
          }
      }
 diff --git a/vm-rust/src/player/handlers/movie.rs b/vm-rust/src/player/handlers/movie.rs
-index f5f820c..f342ac5 100644
+index f5f820c..08716b4 100644
 --- a/vm-rust/src/player/handlers/movie.rs
 +++ b/vm-rust/src/player/handlers/movie.rs
 @@ -241,9 +241,8 @@ impl MovieHandlers {
@@ -269,6 +386,41 @@ index f5f820c..f342ac5 100644
                  // Mark for revert on the NEXT frame tick. If the sprite is not
                  // re-puppeted / re-membered before then it reverts to the Score
                  // (a reset to empty for a pure-puppet channel with no span). This
+@@ -1368,6 +1379,34 @@ impl MovieHandlers {
+         // Director's updateStage() forces an immediate stage redraw even from
+         // inside enterFrame/prepareFrame loops. Yielding to the browser event loop
+         // is only needed for busy-wait input handlers.
++        // Red Sky preservation build: pace explicit redraws to a 1998-like rate.
++        // Lingo animation loops (`repeat ... updateStage`) otherwise run at full
++        // CPU speed, and without a yield the browser never shows the frames in
++        // between. Default 30 per second; the host page may override per piece
++        // with window.__rsUpdateStageMinMs (0 disables).
++        let pace_ms = reserve_player_mut(|player| {
++            let min_ms = web_sys::window()
++                .and_then(|w| js_sys::Reflect::get(&w, &wasm_bindgen::JsValue::from_str("__rsUpdateStageMinMs")).ok())
++                .and_then(|v| v.as_f64())
++                .unwrap_or(1000.0 / 30.0);
++            let now = js_sys::Date::now();
++            if min_ms <= 0.0 {
++                player.rs_last_paced_draw_ms = now;
++                return 0.0;
++            }
++            let next = player.rs_last_paced_draw_ms + min_ms;
++            if next > now && now - player.rs_last_paced_draw_ms < 1000.0 {
++                player.rs_last_paced_draw_ms = next;
++                next - now
++            } else {
++                player.rs_last_paced_draw_ms = now;
++                0.0
++            }
++        });
++        if pace_ms >= 1.0 {
++            async_std::task::sleep(std::time::Duration::from_millis(pace_ms as u64)).await;
++        }
++
+         reserve_player_mut(|player| { player.stage_dirty = true; });
+         crate::rendering::draw_frame_immediate();
+ 
 diff --git a/vm-rust/src/player/handlers/types.rs b/vm-rust/src/player/handlers/types.rs
 index ad5a8a0..758932b 100644
 --- a/vm-rust/src/player/handlers/types.rs
@@ -298,26 +450,28 @@ index ad5a8a0..758932b 100644
          })
      }
 diff --git a/vm-rust/src/player/mod.rs b/vm-rust/src/player/mod.rs
-index 8fef74e..c329df8 100644
+index 8fef74e..e7f753e 100644
 --- a/vm-rust/src/player/mod.rs
 +++ b/vm-rust/src/player/mod.rs
-@@ -319,6 +319,7 @@ pub struct DirPlayer {
+@@ -319,6 +319,8 @@ pub struct DirPlayer {
      /// (vector DatumRef, parent transform DatumRef, sub-property name)
      pub transform_sub_refs: Vec<(DatumRef, DatumRef, Symbol)>,
      pub last_mouse_down_time: i64,
 +    pub last_key_down_time: i64,
++    pub rs_last_paced_draw_ms: f64,
      pub is_double_click: bool,
      pub mouse_down_sprite: i16,
      pub drag_offset: (i32, i32),
-@@ -775,6 +776,7 @@ impl DirPlayer {
+@@ -775,6 +777,8 @@ impl DirPlayer {
              cursor_is_hidden: false,
              transform_sub_refs: Vec::new(),
              last_mouse_down_time: 0,
 +            last_key_down_time: 0,
++            rs_last_paced_draw_ms: 0.0,
              is_double_click: false,
              mouse_down_sprite: 0,
              drag_offset: (0, 0),
-@@ -2015,6 +2017,8 @@ impl DirPlayer {
+@@ -2015,6 +2019,8 @@ impl DirPlayer {
          let actor_list_datum = self.alloc_datum(Datum::List(DatumType::List, VecDeque::new(), false));
          self.globals.insert(Symbol::builtin(BuiltInSymbol::ActorList), actor_list_datum);
          self.actor_list_generation = 0;
@@ -326,7 +480,7 @@ index 8fef74e..c329df8 100644
  
          // Mathematical constant
          let pi_datum = self.alloc_datum(Datum::Float(std::f64::consts::PI));
-@@ -3062,6 +3066,13 @@ impl DirPlayer {
+@@ -3062,6 +3068,13 @@ impl DirPlayer {
                  // Default: return 0 when no sprite context is available
                  Ok(self.alloc_datum(Datum::Int(0)))
              },
@@ -340,7 +494,7 @@ index 8fef74e..c329df8 100644
              BuiltInSymbol::ActorList => {
                  // Return the reference to the global actorList, not a clone of its contents
                  Ok(self
-@@ -3262,7 +3273,17 @@ impl DirPlayer {
+@@ -3262,7 +3275,17 @@ impl DirPlayer {
              // the load-time logic in `load_movie_from_dir`. Label sources
              // do NOT trigger URL rewriting in net handlers — that's
              // reserved for `movie_path_override`. See `set_movie_path_label`.
@@ -359,7 +513,7 @@ index 8fef74e..c329df8 100644
                  let label = self.movie_path_label_effective();
                  if let Some(path) = label {
                      let base_path = dir_part_of_path(&path);
-@@ -3495,6 +3516,18 @@ impl DirPlayer {
+@@ -3495,6 +3518,18 @@ impl DirPlayer {
          }
      }
  
@@ -378,7 +532,7 @@ index 8fef74e..c329df8 100644
      fn get_anim_prop(&mut self, prop_id: u16) -> Result<Datum, ScriptError> {
          let prop_name = get_anim_prop_name(prop_id);
          // `the timer` / `the keyPressed` / `the key` / `the keyCode` are the
-@@ -3507,7 +3540,7 @@ impl DirPlayer {
+@@ -3507,7 +3542,7 @@ impl DirPlayer {
              self.input_polled = true;
          }
          match prop_name {
@@ -387,7 +541,7 @@ index 8fef74e..c329df8 100644
              BuiltInSymbol::FullColorPermit => Ok(Datum::Int(1)), // Full color mode is permitted
              BuiltInSymbol::Timer => Ok(Datum::Int(get_elapsed_ticks(self.start_time))),
              BuiltInSymbol::TimeoutLength => Ok(Datum::Int(self.movie.timeout_length)),
-@@ -3534,7 +3567,17 @@ impl DirPlayer {
+@@ -3534,7 +3569,17 @@ impl DirPlayer {
              BuiltInSymbol::StageColor => Ok(Datum::Int(0)),
              BuiltInSymbol::DoubleClick => Ok(datum_bool(self.is_double_click)),
              BuiltInSymbol::LastClick | BuiltInSymbol::LastEvent | BuiltInSymbol::LastKey | BuiltInSymbol::LastRoll => {
@@ -406,7 +560,7 @@ index 8fef74e..c329df8 100644
              }
              BuiltInSymbol::MultiSound => Ok(Datum::Int(1)),
              BuiltInSymbol::PauseState => Ok(datum_bool(self.is_script_paused)),
-@@ -3663,6 +3706,16 @@ impl DirPlayer {
+@@ -3663,6 +3708,16 @@ impl DirPlayer {
                  crate::js_api::JsApi::dispatch_stage_size_changed(w, h, self.center_stage);
                  Ok(())
              },
@@ -423,7 +577,7 @@ index 8fef74e..c329df8 100644
              Some(BuiltInSymbol::ActorList) => {
                  // Setting actorList - update the global variable
                  match value {
-@@ -4071,6 +4124,30 @@ pub async fn player_call_global_handler(
+@@ -4071,6 +4126,30 @@ pub async fn player_call_global_handler(
      handler_name: Symbol,
      args: &Vec<DatumRef>,
  ) -> Result<DatumRef, ScriptError> {
@@ -454,7 +608,7 @@ index 8fef74e..c329df8 100644
      // Director 6 `birth(script, args)` constructor: when the first arg is a
      // ScriptRef this is the pre-`new` idiom — allocate a FRESH instance and run
      // its `on birth me, args`. This MUST run before the generic first-arg
-@@ -5807,6 +5884,19 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
+@@ -5807,6 +5886,19 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
  
      stop_movie_sequence().await;
  
@@ -474,7 +628,7 @@ index 8fef74e..c329df8 100644
      // 3. Load the new movie data (preserving globals and allocator)
      reserve_player_mut(|player| {
          player.is_dispatching_events = prev_dispatching;
-@@ -5845,6 +5935,35 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
+@@ -5845,6 +5937,35 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
          })
      }).await;
  
@@ -510,7 +664,7 @@ index 8fef74e..c329df8 100644
      // Apply frame target if specified, restore is_playing before init sequence
      reserve_player_mut(|player| {
          match &target {
-@@ -6977,6 +7096,18 @@ pub async fn run_frame_loop() {
+@@ -6977,6 +7098,18 @@ pub async fn run_frame_loop() {
              continue;
          }
  
@@ -529,6 +683,151 @@ index 8fef74e..c329df8 100644
          // Pre-dispatch Flash members for sprites on the current frame so they start
          // loading before Lingo scripts try to access them.
          reserve_player_mut(|player| {
+@@ -7028,6 +7161,12 @@ pub async fn run_frame_loop() {
+             }
+         }
+ 
++        // Red Sky preservation build: honor the score tempo channel's waits on
++        // the frame just entered (wait N seconds, wait for click, wait for a
++        // score sound to finish). Idle, sound fades and input keep running; a
++        // handler that jumps elsewhere ends the wait, as in Director.
++        rs_hold_for_frame_wait().await;
++
+         // Tick the sound manager so per-channel fade-in / fade-out
+         // progress. Without this, Lingo's `sound fadeIn` sets the
+         // channel volume to 0 to start the fade but the ramp never
+@@ -8141,3 +8280,131 @@ mod handler_gap_tests {
+         });
+     }
+ }
++
++
++/// Red Sky preservation build: see the call site in the frame loop.
++async fn rs_hold_for_frame_wait() {
++    use crate::player::score::FrameWait;
++    let (wait, frame) = reserve_player_ref(|player| {
++        let f = player.movie.current_frame;
++        (player.movie.score.get_frame_wait(f), f)
++    });
++    let Some(wait) = wait else { return };
++    let started = chrono::Utc::now().timestamp_millis().abs();
++    let limit_ms: i64 = match wait {
++        FrameWait::Seconds(s) => (s as i64) * 1000,
++        _ => 10 * 60 * 1000, // safety cap for click/sound waits
++    };
++    loop {
++        let now = chrono::Utc::now().timestamp_millis().abs();
++        let elapsed = now - started;
++        let (done, interrupted) = reserve_player_ref(|player| {
++            let interrupted = !player.is_playing
++                || player.goto_wait_active
++                || player.movie.current_frame != frame;
++            let done = match wait {
++                FrameWait::Seconds(_) => elapsed >= limit_ms,
++                FrameWait::Click => player.last_mouse_down_time > started,
++                FrameWait::SoundRow(row) => {
++                    // Score row 3 plays on sound channel 2, row 4 on channel 1
++                    // (see the score sound trigger in score.rs).
++                    let idx = if row == 3 { 1 } else { 0 };
++                    let busy = player
++                        .sound_manager
++                        .get_channel(idx)
++                        .map(|ch| {
++                            let c = ch.borrow();
++                            c.status == crate::player::handlers::datum_handlers::sound_channel::SoundStatus::Playing
++                                || c.status == crate::player::handlers::datum_handlers::sound_channel::SoundStatus::Loading
++                        })
++                        .unwrap_or(false);
++                    // give a just-triggered sound a moment to start loading
++                    !busy && elapsed > 150
++                }
++            };
++            (done || elapsed >= limit_ms, interrupted)
++        });
++        if done || interrupted {
++            break;
++        }
++        let _ = async_std::future::timeout(
++            std::time::Duration::from_millis(16),
++            std::future::pending::<()>(),
++        ).await;
++        tick_sound_manager(0.016);
++        let active = reserve_player_ref(|player| {
++            player.is_playing && !player.is_script_paused && !player.pending_movie_init
++        });
++        if active {
++            let _ = player_invoke_frame_and_movie_scripts(Symbol::from_str("idle"), &vec![]).await;
++        }
++    }
++}
++
++
++/// Red Sky preservation build: `puppetPalette(palette, speed, frames)`.
++/// DirPlayer renders in full color, so instead of swapping the stage palette
++/// the change is expressed as a stage brightness: the target palette's
++/// luminance relative to the frame's palette over the entries that differ.
++/// Palette2 (the film-flicker palette) gives a ~5% lift; a near-black palette
++/// gives a fade to black; `puppetPalette(0)` restores. Applied by the host
++/// page's `__rsStageFilter(brightness, durationMs)`.
++pub fn rs_puppet_palette(args: &[DatumRef]) {
++    use crate::director::lingo::datum::Datum;
++    use crate::player::bitmap::bitmap::PaletteRef;
++    let result = reserve_player_ref(|player| {
++        let palette_colors = |r: &CastMemberRef| -> Option<Vec<(u8, u8, u8)>> {
++            let m = player.movie.cast_manager.find_member_by_ref(r)?;
++            match &m.member_type {
++                crate::player::cast_member::CastMemberType::Palette(p) => Some(p.colors.clone()),
++                _ => None,
++            }
++        };
++        let target_ref: Option<CastMemberRef> = match args.first().map(|a| player.get_datum(a)) {
++            Some(Datum::String(n)) => player.movie.cast_manager.find_member_ref_by_name(n),
++            Some(Datum::CastMember(r)) => Some(r.clone()),
++            Some(Datum::Int(n)) if *n > 0 => Some(CastMemberRef { cast_lib: 1, cast_member: *n }),
++            _ => None,
++        };
++        let speed = args.get(1).and_then(|a| player.get_datum(a).int_value().ok()).unwrap_or(60);
++        let frames = args.get(2).and_then(|a| player.get_datum(a).int_value().ok()).unwrap_or(0);
++        let duration_ms = if frames > 0 {
++            frames as f64 * player.movie.get_frame_delay_ms()
++        } else if speed >= 60 || speed <= 0 {
++            0.0
++        } else {
++            (60 - speed) as f64 / 59.0 * 2000.0
++        };
++        let Some(target_ref) = target_ref else { return (1.0, duration_ms) };
++        let Some(target) = palette_colors(&target_ref) else { return (1.0, duration_ms) };
++        let reference = match player.movie.score.get_frame_palette(player.movie.current_frame) {
++            PaletteRef::Member(r) => palette_colors(&r),
++            _ => None,
++        };
++        let lum = |c: &(u8, u8, u8)| 0.299 * c.0 as f64 + 0.587 * c.1 as f64 + 0.114 * c.2 as f64;
++        let factor = match reference {
++            Some(refc) => {
++                let (mut a, mut b) = (0.0, 0.0);
++                for (t, r) in target.iter().zip(refc.iter()) {
++                    if t != r { a += lum(t); b += lum(r); }
++                }
++                if b > 0.0 { a / b } else { 1.0 }
++            }
++            None => {
++                // No frame palette to compare with: use the mean luminance
++                // against a neutral mid-gray reference.
++                let mean = target.iter().map(lum).sum::<f64>() / target.len().max(1) as f64;
++                (mean / 127.5).clamp(0.0, 2.0)
++            }
++        };
++        (factor.clamp(0.0, 3.0), duration_ms)
++    });
++    #[cfg(target_arch = "wasm32")]
++    {
++        crate::player::handlers::datum_handlers::sound_channel::rs_js_call(
++            "__rsStageFilter",
++            &[wasm_bindgen::JsValue::from_f64(result.0), wasm_bindgen::JsValue::from_f64(result.1)],
++        );
++    }
++    let _ = result;
++}
 diff --git a/vm-rust/src/player/movie.rs b/vm-rust/src/player/movie.rs
 index c4a4ab7..b2299a7 100644
 --- a/vm-rust/src/player/movie.rs
@@ -562,7 +861,7 @@ index c4a4ab7..b2299a7 100644
                  // Read-only / no-op in practice; ignore sets like Director does.
                  // preLoadEventAbort gates whether a preload event handler may
 diff --git a/vm-rust/src/player/score.rs b/vm-rust/src/player/score.rs
-index 25330f7..925896a 100644
+index 25330f7..0b2a6a6 100644
 --- a/vm-rust/src/player/score.rs
 +++ b/vm-rust/src/player/score.rs
 @@ -654,10 +654,17 @@ impl Score {
@@ -584,6 +883,173 @@ index 25330f7..925896a 100644
          let mut any = false;
          for channel in &mut self.channels {
              let sprite = &mut channel.sprite;
+@@ -1543,8 +1550,8 @@ impl Score {
+ 
+         // handle score Sound 1 + Sound 2 in Effects Channels
+         // Build a map of (frame_index, channel_index) -> cast_member for quick lookup
+-        let sound_by_frame_channel: HashMap<(u32, u16), u8> = self.sound_channel_data.iter()
+-            .map(|(frame_idx, ch_idx, data)| ((*frame_idx, *ch_idx), data.cast_member))
++        let sound_by_frame_channel: HashMap<(u32, u16), u32> = self.sound_channel_data.iter()
++            .map(|(frame_idx, ch_idx, data)| ((*frame_idx, *ch_idx), data.slot_number()))
+             .collect();
+ 
+         for (frame_index, channel_index, sound_data) in self.sound_channel_data.iter() {
+@@ -1562,7 +1569,7 @@ impl Score {
+ 
+                 let is_new_sound_span = match prev_frame_sound {
+                     None => true, // No sound on previous frame
+-                    Some(&prev_cast_member) => prev_cast_member != sound_data.cast_member, // Different sound
++                    Some(&prev_slot) => prev_slot != sound_data.slot_number(), // Different sound
+                 };
+ 
+                 if !is_new_sound_span {
+@@ -1599,7 +1606,9 @@ impl Score {
+                                             current_datum
+                                         {
+                                             return current_cast_ref.cast_member
+-                                                == sound_data.cast_member as i32;
++                                                == sound_data.cast_member as i32
++                                                && (sound_data.cast_lib == 0
++                                                    || current_cast_ref.cast_lib == sound_data.cast_lib as i32);
+                                         }
+                                     }
+                                 }
+@@ -1614,7 +1623,9 @@ impl Score {
+                                             current_datum
+                                         {
+                                             return current_cast_ref.cast_member
+-                                                == sound_data.cast_member as i32;
++                                                == sound_data.cast_member as i32
++                                                && (sound_data.cast_lib == 0
++                                                    || current_cast_ref.cast_lib == sound_data.cast_lib as i32);
+                                         }
+                                     }
+                                 }
+@@ -1638,15 +1649,18 @@ impl Score {
+                                 }
+                                 ScoreRef::Stage => {
+                                     // Find the cast member by slot number (global)
++                                    // Red Sky preservation build: build the ref from the
++                                    // score's own cast library + member. The old code
++                                    // re-derived it from `m.number` (the member's number
++                                    // within its cast), which always decoded to cast 1.
++                                    let ref_ = CastMemberRefHandlers::member_ref_from_slot_number(sound_data.slot_number());
++                                    let cast_member_ref = CastMemberRef {
++                                        cast_lib: ref_.cast_lib as i32,
++                                        cast_member: ref_.cast_member as i32,
++                                    };
+                                     player.movie.cast_manager
+-                                        .find_member_by_slot_number(sound_data.cast_member as u32)
+-                                        .map(|m| {
+-                                            let ref_ = CastMemberRefHandlers::member_ref_from_slot_number(m.number);
+-                                            (m, CastMemberRef {
+-                                                cast_lib: ref_.cast_lib as i32,
+-                                                cast_member: ref_.cast_member as i32,
+-                                            })
+-                                        })
++                                        .find_member_by_ref(&cast_member_ref)
++                                        .map(|m| (m, cast_member_ref))
+                                 }
+                             };
+ 
+@@ -3554,51 +3568,39 @@ impl Score {
+     }
+ 
+     pub fn get_frame_tempo(&self, frame: u32) -> Option<u32> {
+-        // Search through tempo_channel_data to find the most recent tempo change
+-        // at or before the requested frame.
+-        // Note: frame_idx is 0-based (from score parsing), frame is 1-based (current_frame).
+-        // frame_idx 0 = Director frame 1, so we need frame_idx < frame.
+-        let tempo_data = self.tempo_channel_data
++        // Most recent FRAME-RATE setting at or before `frame` (frame_idx is
++        // 0-based, `frame` 1-based). Red Sky preservation build: wait entries
++        // (247 delay, 248 click, 249 video, 254/255 sound) are not frame rates
++        // and are skipped, so the rate set before a wait frame carries through
++        // it, as in Director. Previously the newest entry won even when it was a
++        // wait, dropping playback to the movie's default rate after every wait.
++        self.tempo_channel_data
+             .iter()
+             .rev()
+-            .find(|(frame_idx, _)| *frame_idx < frame)
+-            .map(|(_, td)| td)?;
+-
+-        let tempo = tempo_data.tempo;
+-        if tempo == 0 {
+-            return None;
+-        }
++            .filter(|(frame_idx, _)| *frame_idx < frame)
++            .find_map(|(_, td)| match td.tempo {
++                246 => if td.tempo_cue_point > 0 { Some(td.tempo_cue_point as u32) } else { None },
++                1..=120 => Some(td.tempo as u32),
++                _ => None,
++            })
++    }
+ 
+-        // D6+ tempo encoding: special codes 246-255
+-        match tempo {
+-            246 => {
+-                // FPS mode: actual FPS is in tempo_cue_point
+-                let fps = tempo_data.tempo_cue_point;
+-                if fps > 0 { Some(fps as u32) } else { None }
+-            }
+-            247 => {
+-                // Delay mode: tempo_cue_point is delay in seconds
+-                // Convert to a very low FPS to approximate the delay
+-                // (actual wait-for-delay should be handled separately)
+-                None // Fall back to movie frame rate; delay handled elsewhere
+-            }
+-            248 => {
+-                // Wait for mouse click - not an FPS value
+-                None
+-            }
+-            254 | 255 => {
+-                // Wait for sound channel - not an FPS value
+-                None
+-            }
+-            1..=120 => {
+-                // Direct FPS value (valid for all versions)
+-                Some(tempo as u32)
+-            }
+-            _ => {
+-                // Other values: pre-D6 special codes or video wait
+-                // For safety, treat as no tempo change
+-                None
+-            }
++    /// Red Sky preservation build: the tempo channel's wait instruction on
++    /// exactly this frame (1-based), if any.
++    pub fn get_frame_wait(&self, frame: u32) -> Option<FrameWait> {
++        let td = self
++            .tempo_channel_data
++            .iter()
++            .find(|(frame_idx, _)| *frame_idx + 1 == frame)
++            .map(|(_, td)| td)?;
++        match td.tempo {
++            247 => Some(FrameWait::Seconds(td.tempo_cue_point as u32)),
++            248 => Some(FrameWait::Click),
++            // 254 waits on the score's first sound row (channel index 3),
++            // 255 on the second (index 4); cue 0xFFFE = until the sound ends.
++            254 => Some(FrameWait::SoundRow(3)),
++            255 => Some(FrameWait::SoundRow(4)),
++            _ => None,
+         }
+     }
+ 
+@@ -6961,3 +6963,15 @@ mod rect_tests {
+         assert_eq!(normalise_rect([0, 0, 0, 0]), [0, 0, 0, 0]);
+     }
+ }
++
++
++/// Red Sky preservation build: a score tempo-channel wait.
++#[derive(Clone, Copy, Debug, PartialEq)]
++pub enum FrameWait {
++    /// Hold the frame this many seconds.
++    Seconds(u32),
++    /// Hold until the mouse is clicked.
++    Click,
++    /// Hold until the sound started from this score sound row (3 or 4) ends.
++    SoundRow(u16),
++}
 diff --git a/vm-rust/src/player/symbols/builtin.rs b/vm-rust/src/player/symbols/builtin.rs
 index 9369949..7240b5f 100644
 --- a/vm-rust/src/player/symbols/builtin.rs
