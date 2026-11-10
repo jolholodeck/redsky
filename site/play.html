@@ -98,7 +98,7 @@
     const relName = String(name).replace(/\\/g, '/').replace(/:/g, '/');
     const rel = resolve(new URL(relName, base || ROOT).href) || resolve(new URL(relName.split('/').pop(), base || ROOT).href);
     if (!rel) { console.warn('[rs] playFile: not found', name); return; }
-    actx ||= new (window.AudioContext || window.webkitAudioContext)();
+    actx ||= window.__rsAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
     const token = {}; chans[ch] = { busy: true, token };
     (decoded[rel] ||= load(rel).then(b => actx.decodeAudioData(b.slice(0))))
       .then(buf => {
@@ -133,7 +133,32 @@
 
 const params = new URLSearchParams(location.search);
 const hashMovie = location.hash.slice(1);
-const movie = (params.get('m') || hashMovie.replace(/-/g, '/') || 'redsky98.dir').replace(/[^a-z0-9_\/.]/gi, '');
+const via = ({ entertainment: 'entertainment', work: 'work' })[params.get('via')] || null;
+const movie = via ? 'redsky98.dir' : (params.get('m') || hashMovie.replace(/-/g, '/') || 'redsky98.dir').replace(/[^a-z0-9_\/.]/gi, '');
+
+// Modules are entered through the CD's startup movie, as on the CD: it builds the
+// navigation and state managers that Entertainment and Work rely on (space to
+// skip, Ctrl-E/W/X, returning from a piece). Once they exist, jump to the module.
+function enterModule(cover){
+  let tries = 0;
+  const tick = () => {
+    const vm = window.__vm;
+    if (vm && vm.eval_command) {
+      try {
+        vm.eval_command('put "RSNAV", objectp(goNavMgr)');
+        const out = String(vm.mcp_get_console_output(20) || '');
+        if (/RSNAV 1/.test(out)) {
+          if (via === 'entertainment') vm.eval_command('gotoDemo()');
+          else { vm.eval_command('go("black")'); vm.eval_command('mGotoModule(goNavMgr, #work)'); }
+          setTimeout(() => cover.remove(), 1500);
+          return;
+        }
+      } catch (e) {}
+    }
+    if (++tries < 120) setTimeout(tick, 250); else cover.remove();
+  };
+  tick();
+}
 document.getElementById('what').textContent = params.get('t') || 'Red Sky Interactive · 1998 demo CD';
 
 async function start(){
@@ -142,6 +167,21 @@ async function start(){
     status.innerHTML = 'This page was opened as a file, and browsers block that.<br>Start it with \u201cStart Red Sky 98.command\u201d in this folder (see README.txt), then use the page it opens.';
     return;
   }
+  // Create and unlock the audio context inside this click, so the first sounds
+  // play (Safari and Chrome keep a context made later, after loading, muted
+  // until the next click). The player's own `new AudioContext()` gets this one.
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC(); ctx.resume();
+    const src = ctx.createBufferSource(); src.buffer = ctx.createBuffer(1, 1, 22050); src.connect(ctx.destination); src.start(0);
+    window.__rsAudioCtx = ctx;
+    let handed = false;
+    const Shared = function(opts){ if (!handed) { handed = true; return ctx; } return new AC(opts); };
+    Shared.prototype = AC.prototype;
+    window.AudioContext = Shared; if (window.webkitAudioContext) window.webkitAudioContext = Shared;
+    const wake = () => { if (ctx.state !== 'running') ctx.resume(); };
+    addEventListener('pointerdown', wake, true); addEventListener('keydown', wake, true);
+  } catch (e) { console.warn('[rs] audio unlock failed', e); }
   cover.disabled = true; status.textContent = 'Loading the Director player…';
   try {
     await window.__rsReady;
@@ -153,14 +193,37 @@ async function start(){
     const res = await fetch('dirplayer-polyfill.js.gz');
     const js = await new Response(res.body.pipeThrough(new DecompressionStream('gzip'))).text();
     const s = document.createElement('script'); s.textContent = js; document.body.appendChild(s);
-    status.textContent = 'Loading the movie…';
-    setTimeout(() => cover.remove(), 1500);
+    status.textContent = via ? 'Loading the ' + (via === 'work' ? 'Work' : 'Entertainment') + ' module…' : 'Loading the movie…';
+    if (via) enterModule(cover); else setTimeout(() => cover.remove(), 1500);
   } catch (err) {
     status.textContent = 'Could not start the player: ' + err.message;
     cover.disabled = false;
   }
 }
 document.getElementById('cover').addEventListener('click', start);
+
+// The player only hears keys while its stage has keyboard focus, and the start
+// button that had focus is gone once the movie runs. Keep the focus on the
+// stage, and hand it any key pressed elsewhere on the page (space to skip,
+// Ctrl-E/W/X, Return), so the keys work without clicking the stage first.
+function stageEl(){ return document.querySelector('#stage [tabindex]'); }
+function focusStage(){ const el = stageEl(); if (el && document.activeElement !== el && !el.contains(document.activeElement)) el.focus({ preventScroll: true }); return !!el; }
+(function waitForStage(){ if (!focusStage()) setTimeout(waitForStage, 250); })();
+document.getElementById('frame').addEventListener('pointerdown', () => setTimeout(focusStage, 0));
+for (const type of ['keydown', 'keyup']) {
+  document.addEventListener(type, e => {
+    const el = stageEl();
+    if (!el || e.__rsForwarded || el.contains(e.target) || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    if (e.key === 'Tab') return;
+    e.preventDefault();
+    focusStage();
+    const f = new KeyboardEvent(type, { key: e.key, code: e.code, shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey, repeat: e.repeat, bubbles: true, cancelable: true });
+    Object.defineProperty(f, 'keyCode', { get: () => e.keyCode });
+    Object.defineProperty(f, 'which', { get: () => e.which });
+    f.__rsForwarded = true;
+    el.dispatchEvent(f);
+  }, true);
+}
 </script>
 </body>
 </html>

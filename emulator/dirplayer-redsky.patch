@@ -121,10 +121,21 @@ index 6d1186d..0c2495e 100644
                      }
  
 diff --git a/vm-rust/src/lib.rs b/vm-rust/src/lib.rs
-index a5fd98f..fb35966 100644
+index a5fd98f..e942017 100644
 --- a/vm-rust/src/lib.rs
 +++ b/vm-rust/src/lib.rs
-@@ -2436,3 +2436,25 @@ pub fn start() {
+@@ -1938,7 +1938,9 @@ pub fn eval_command(command: String) {
+     crate::player::spawn_player_local(async move {
+         JsApi::dispatch_debug_message(&command);
+         let result = eval_lingo_command(command).await;
+-        if let Err(err) = result {
++        // Red Sky preservation build: `abort` ends the command normally, as it
++        // does for any other handler (NavMgr's mGotoModule ends with abort()).
++        if let Err(err) = result.map(|_| ()).or_else(|e| if e.code == crate::player::ScriptErrorCode::Abort { Ok(()) } else { Err(e) }) {
+             reserve_player_ref(|player| {
+                 JsApi::dispatch_script_error(player, &err);
+             });
+@@ -2436,3 +2438,25 @@ pub fn start() {
      }
      init_player();
  }
@@ -218,6 +229,74 @@ index 9d1fa62..7411195 100644
                      // Director marker-navigation keywords: `go next` / `go
                      // previous` / `go loop`. As a bareword these parse as an
                      // undefined variable (→ VOID) and the go handler rejects
+diff --git a/vm-rust/src/player/events.rs b/vm-rust/src/player/events.rs
+index 5acf223..0f97f01 100644
+--- a/vm-rust/src/player/events.rs
++++ b/vm-rust/src/player/events.rs
+@@ -119,9 +119,18 @@ pub fn dispatch_rollover_events() {
+     let (now_hovered, prev_hovered) = reserve_player_mut(|player| {
+         let (x, y) = player.mouse_loc;
+         let prev_hovered = std::mem::take(&mut player.hovered_sprites);
++        // Red Sky preservation build: rollover events follow the front-most
++        // ACTIVE sprite (one with a behavior or a cast member script), the same
++        // rule clicks use; sprites with no scripts don't block them. Red Sky's
++        // Entertainment module hides two matte "puff zone" bitmaps (with cast
++        // member scripts) under its unscripted full-screen backdrop and tracks
++        // the pointer with their mouseEnter/mouseLeave to choose near or far
++        // dust kicks.
+         let now_hovered: Vec<i16> = crate::player::score::get_sprites_at(player, x, y)
+-            .first()
+-            .map(|num| *num as i16)
++            .into_iter()
++            .find(|num| player.movie.score.get_sprite(*num as i16)
++                .map_or(false, |sp| crate::player::score::is_active_sprite(player, sp)))
++            .map(|num| num as i16)
+             .into_iter()
+             .collect();
+         player.hovered_sprites = now_hovered.clone();
+@@ -133,6 +142,7 @@ pub fn dispatch_rollover_events() {
+     for sprite_num in &prev_hovered {
+         if !now_hovered.contains(sprite_num) {
+             player_dispatch_event_to_sprite(Symbol::from_str(&"mouseLeave".to_string()), &vec![], *sprite_num as u16);
++            rs_call_member_script(*sprite_num, "mouseLeave");
+         }
+     }
+     for sprite_num in &now_hovered {
+@@ -142,6 +152,34 @@ pub fn dispatch_rollover_events() {
+             "mouseEnter"
+         };
+         player_dispatch_event_to_sprite(Symbol::from_str(&handler.to_string()), &vec![], *sprite_num as u16);
++        rs_call_member_script(*sprite_num, handler);
++    }
++}
++
++/// Red Sky preservation build: run a sprite's cast member script handler (if it
++/// has one) for a rollover event; the targeted dispatch above only reaches
++/// behaviors.
++fn rs_call_member_script(sprite_num: i16, handler_name: &str) {
++    let handler = reserve_player_mut(|player| {
++        let sprite = player.movie.score.get_sprite(sprite_num)?;
++        let member_ref = sprite.member.clone()?;
++        let member = player.movie.cast_manager.find_member_by_ref(&member_ref)?;
++        let sym = Symbol::from_str(&handler_name.to_string());
++        if let Some(script_ref) = member.get_member_script_ref() {
++            if let Some(script) = player.movie.cast_manager.get_script_by_ref(script_ref) {
++                if let Some(h) = script.get_own_handler_ref(sym.clone()) {
++                    return Some(h);
++                }
++            }
++        }
++        let script_id = member.get_script_id()?;
++        let script = player.movie.cast_manager.get_cast_mut(member_ref.cast_lib as u32).get_behavior_script_from_lctx(script_id)?;
++        script.get_own_handler_ref(sym)
++    });
++    if let Some(h) = handler {
++        crate::player::spawn_player_local(async move {
++            let _ = crate::player::player_call_script_handler(None, h, &vec![]).await;
++        });
+     }
+ }
+ 
 diff --git a/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs b/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
 index 9ae62c7..7e96833 100644
 --- a/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs

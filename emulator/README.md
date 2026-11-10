@@ -28,6 +28,8 @@ Upstream: https://github.com/igorlira/dirplayer-rs at commit 68376fbb4494a6bbad4
 | puppetPalette on a frame with a built-in palette is measured against the nearest cast palette (e.g. Palette2 vs Palette1) | The Entertainment flicker was far too dark on the cowboy scene |
 | Per-piece speed overrides: `site/speeds.json`, read through `window.__rsTempoOverride` | Score sections authored "as fast as possible" flash by on modern machines |
 | `puppetSprite(n, 0)` on a channel with a Score span hands it back to the Score on the next tick: member, position, size, ink and blend return to the Score's values; behaviors stay | Transient sprites froze on their last frame (the bottle's "Red Sky Work" arrow, the cowboy/pig toggle, the background cowboy and pig) |
+| Rollover events (mouseEnter/Within/Leave) go to the front-most *active* sprite (with a behavior or cast member script), and reach cast member scripts | Entertainment's dust kicks: two hidden puff-zone bitmaps under the unscripted backdrop never saw the pointer |
+| `abort` ends an evaluated command quietly | Starting a module through the front door (`play.html?via=`) showed a "Script error: abort" alert |
 
 ## Build
 
@@ -39,3 +41,9 @@ The Rust standard library has to be built from source for WebAssembly when rustu
 4. Run `tools/buildvm.sh` (cargo + wasm-bindgen 0.2.108 + vite). Copy `dist-polyfill/dirplayer-polyfill.js`, gzipped, to `site/dirplayer-polyfill.js.gz`.
 
 With a normal rustup install, step 2 and 3 are replaced by `rustup target add wasm32-unknown-unknown`.
+
+## Page-level changes (site/play.html)
+
+- `?via=entertainment` / `?via=work` start the CD's startup movie and jump to the module, so the navigation and state managers exist (space to skip, Ctrl-E/W/X, returning from pieces). Loading a module directly skipped them.
+- The audio context is created and unlocked inside the Start click, so the first sounds play.
+- Keyboard focus is kept on the stage, and keys pressed elsewhere on the page are forwarded to it.

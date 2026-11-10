@@ -83,7 +83,7 @@
       <p class="lede">The agency's 1998 demo CD, recovered from its original Director 6 files and playing in the browser. Click the logo to ride into the Entertainment module, or go straight to the Work.</p>
       <div class="actions">
         <a class="btn primary" href="play.html">▶ Play the full CD</a>
-        <a class="btn" href="play.html?m=work_module/work.dir&amp;t=Work%20Module">Open the Work</a>
+        <a class="btn" href="play.html?via=work&amp;t=Work%20Module">Open the Work</a>
       </div>
     </div>
     <figure class="screen" style="margin:0">
@@ -118,7 +118,7 @@
         <ul>
           <li>Mia Hamm draws its 2-bit graphics as blank boxes.</li>
           <li>QuickTime clips don't play; pieces fall back to the CD's own non-QuickTime paths.</li>
-          <li>The palette-flicker film effect is skipped, and the Speaker and Exit modules are untested.</li>
+          <li>The Speaker and Exit modules are untested.</li>
           <li>The CD's hardware checks (256 colors, CPU and audio-latency tests) are bypassed.</li>
         </ul>
       </div>
@@ -164,11 +164,12 @@ const P = [
   ['work_module/plumb_loco/virtual_bully/virtual_bully6.dir','virtual_bully6','Red Sky Interactive','Virtual Bully'],
  ]],
 ];
+const VIA = {'entertainment_module/entertainment.dir': 'entertainment', 'work_module/work.dir': 'work'};
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 document.getElementById('m').innerHTML = P.map(([sec, sub, items]) =>
   `<section><div class="sec-head"><h2>${esc(sec)}</h2><p>${esc(sub)} · ${items.length}</p></div><div class="grid">` +
   items.map(([m, th, client, title, note]) =>
-    `<a class="card" href="play.html?m=${encodeURIComponent(m)}&amp;t=${encodeURIComponent(client + ' · ' + title)}">` +
+    `<a class="card" href="play.html?${VIA[m] ? 'via=' + VIA[m] : 'm=' + encodeURIComponent(m)}&amp;t=${encodeURIComponent(client + ' · ' + title)}">` +
     `<img loading="lazy" src="thumbs/${th}.jpg" alt="${esc(title)}"><div class="meta"><span class="client">${esc(client)}</span>` +
     `<span class="title">${esc(title)}</span>${note ? `<span class="note">${esc(note)}</span>` : ''}</div></a>`
   ).join('') + '</div></section>').join('');

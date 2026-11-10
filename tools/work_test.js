@@ -1,7 +1,7 @@
 const { chromium } = require('playwright');
 (async () => {
   const browser = await chromium.launch(); const page = await browser.newPage({ viewport: { width: 700, height: 600 } });
-  await page.goto('http://localhost:8766/play.html?m=work_module/work.dir'); await page.click('#cover');
+  await page.goto('http://localhost:8766/play.html?via=work'); await page.click('#cover');
   const st = await page.$('#stage'); const b = await st.boundingBox();
   const shot = n => st.screenshot({ path: `/root/shots/work_${n}.png` });
   await page.waitForTimeout(15000); await shot('1');
