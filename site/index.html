@@ -44,7 +44,7 @@ fetch('works.json').then(r => r.json()).then(({ works }) => {
       <div class="entries">${f.entries.map((e, i) => `<a class="play${i ? ' alt' : ''}" href="${esc(e.href)}" title="${esc(e.detail)}">${esc(e.title)}</a>`).join('')}</div>
       <a class="more" href="work.html?w=${f.slug}">About this disc</a>
     </div>
-    <a class="screen" href="${esc(f.entries[0].href)}" tabindex="-1"><img src="thumbs/feature-redsky98.jpg" alt="The Entertainment module: a cowboy in a black-and-white western town"></a>`;
+    <a class="screen" href="${esc(f.entries[0].href)}" tabindex="-1"><img src="thumbs/feature-redsky98.jpg" alt="The Entertainment module: a cowboy grinning at the camera in a black-and-white western town"></a>`;
 
   // Every other module: whole works, and every piece inside a disc, newest first.
   const items = [];
