@@ -434,7 +434,8 @@
       "changes": [
         "Beatnik music and soundscapes play through NeoBAE, the open-source Beatnik engine, with its General MIDI bank in place of the one installed on 2000-era Macs.",
         "Starts directly at the MoodMaker window rather than through the projector stub."
-      ]
+      ],
+      "caveat": "Not working yet: MoodMaker checks its installed Xtras and files at startup and stops when they don't match, so the radio stays blank. Restoration in progress."
     },
     {
       "slug": "datazord",
@@ -478,7 +479,8 @@
       "thumb": "thumbs/spider-man.jpg",
       "changes": [
         "Played from the original Shockwave data inside the projector; the score plays through NeoBAE.",
-        "The disk image in the upload was empty, so anything only on it is missing."
+        "The disk image in the upload was empty, so anything only on it is missing.",
+        "After loading, the piece waits on the web (the code calls this mode the harp) for the mouse."
       ],
       "clientApprox": true
     }
