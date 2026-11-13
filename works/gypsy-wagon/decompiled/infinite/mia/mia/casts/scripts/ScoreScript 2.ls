@@ -1,0 +1,3 @@
+on exitFrame
+  initStateVars()
+end

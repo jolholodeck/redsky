@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Red Sky Interactive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<div class="wrap topbar"><a href="index.html">Red Sky Interactive</a></div>
+<header class="hero"><div class="wrap hero-grid" id="hero"></div></header>
+<main class="wrap" id="body"></main>
+<script>
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const slug = new URLSearchParams(location.search).get('w');
+function playHref(w, s) {
+  s = s || w.start || {};
+  if (s.via) return 'play.html?w=' + w.slug + '&via=' + s.via;
+  return 'play.html?w=' + w.slug + (s.movie ? '&m=' + encodeURIComponent(s.movie) : '');
+}
+fetch('works.json').then(r => r.json()).then(({ works }) => {
+  const w = works.find(x => x.slug === slug) || works[0];
+  document.title = w.title + ' | Red Sky Interactive';
+  const entries = w.entries
+    ? w.entries.map((e, i) => `<a class="play${i ? ' alt' : ''}" href="${esc(e.href)}" title="${esc(e.detail)}">${esc(e.title)}</a>`).join('')
+    : `<a class="play" href="${playHref(w)}">Play</a>`;
+  document.getElementById('hero').innerHTML = `
+    <div>
+      <h1 class="display">${esc(w.title)}</h1>
+      <p class="facts"><span>${esc(w.client)}</span><span>${w.year}${w.yearApprox ? ', approximately' : ''}</span><span>${esc(w.kind)}</span><span>${esc(w.platform)}</span></p>
+      <p>${esc(w.summary)}</p>
+      ${w.caveat ? `<p class="caveat">${esc(w.caveat)}</p>` : ''}
+      <div class="entries">${entries}</div>
+    </div>
+    <img src="${esc(w.thumb)}" alt="">`;
+  const groups = (w.groups || []).map(g => `
+    <section class="group">
+      <h2 class="display">${esc(g.title)}</h2><p>${esc(g.subtitle)}</p>
+      <ul class="pieces">${g.pieces.map(p => `<li><a href="${playHref(w, { movie: p.movie })}&amp;t=${encodeURIComponent(p.client + ': ' + p.title)}">
+        ${p.thumb ? `<img src="${esc(p.thumb)}" alt="" loading="lazy">` : '<div class="noimg"></div>'}
+        <strong>${esc(p.title)}</strong><span>${esc(p.client)}</span>${p.note ? `<em>${esc(p.note)}</em>` : ''}</a></li>`).join('')}</ul>
+    </section>`).join('');
+  const intro = w.groups ? `<p style="max-width:40em;margin:32px 0 0">Each piece below opens on its own. To leave one, use the back button.</p>` : '';
+  document.getElementById('body').innerHTML = intro + groups + (w.changes ? `<section class="notes"><h2>Restoration notes</h2><ul>${w.changes.map(c => `<li>${esc(c)}</li>`).join('')}</ul></section>` : '<div style="height:64px"></div>');
+});
+</script>
+</body>
+</html>

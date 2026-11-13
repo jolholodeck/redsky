@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head><script src="../../../../../../shared/shockwave-page.js"></script>
+<title>Absolut DJ - UFO</title>
+
+<script language="Javascript">
+<!--// 
+if (document.images)
+	{
+	maptexton = new Image();
+	maptexton.src = "media/uf_md_3on.gif";
+	maptextoff = new Image();
+	maptextoff.src = "media/uf_md_3off.gif";
+
+	biotexton = new Image();
+	biotexton.src = "media/uf_md_7on.gif";
+	biotextoff = new Image();
+	biotextoff.src = "media/uf_md_7off.gif";
+	}
+function img_act(imgName) {
+               if (document.images) {
+	               imgOn = eval(imgName + "on.src");
+			       document [imgName].src = imgOn;
+		           }
+	       		}
+function img_inact(imgName) {
+               if (document.images) {
+	               imgOff = eval(imgName + "off.src");
+			       document [imgName].src = imgOff;
+	               }
+	       		}
+//-->
+</script>			
+</head>
+
+
+<body bgcolor="#000000">
+
+<SCRIPT LANGUAGE="JavaScript1.1">
+<!--
+
+function Cookie(document, name, hours, path, domain, secure)
+{
+    this.$document = document;
+    this.$name = name;
+    if (hours)
+        this.$expiration = new Date((new Date()).getTime() + hours*3600000);
+    else this.$expiration = null;
+    if (path) this.$path = path; else this.$path = null;
+    if (domain) this.$domain = domain; else this.$domain = null;
+    if (secure) this.$secure = true; else this.$secure = false;
+}
+
+// This function is the store() method of the Cookie object
+function _Cookie_store()
+{
+	var cookieval = "";
+    for(var prop in this) {
+        // ignore properties with names that begin with '$' and also methods
+        if ((prop.charAt(0) == '$') || ((typeof this[prop]) == 'function')) 
+            continue;
+        if (cookieval != "") cookieval += '&';
+        cookieval += prop + ':' + escape(this[prop]);
+    }
+
+    var cookie = this.$name + '=' + cookieval;
+    if (this.$expiration)
+        cookie += '; expires=' + this.$expiration.toGMTString();
+    if (this.$path) cookie += '; path=' + this.$path;
+    if (this.$domain) cookie += '; domain=' + this.$domain;
+    if (this.$secure) cookie += '; secure';
+
+    // Now store the cookie by setting the magic Document.cookie property
+    this.$document.cookie = cookie;
+}
+
+// This function is the load() method of the Cookie object
+function _Cookie_load()
+{
+    var allcookies = this.$document.cookie;
+    if (allcookies == "") return false;
+    var start = allcookies.indexOf(this.$name + '=');
+    if (start == -1) return false;   // cookie not defined for this page.
+    start += this.$name.length + 1;  // skip name and equals sign.
+    var end = allcookies.indexOf(';', start);
+    if (end == -1) end = allcookies.length;
+    var cookieval = allcookies.substring(start, end);
+
+    var a = cookieval.split('&');  // break it into array of name/value pairs
+    for(var i=0; i < a.length; i++)  // break each pair into an array
+        a[i] = a[i].split(':');
+
+    for(var i = 0; i < a.length; i++) {
+        this[a[i][0]] = unescape(a[i][1]);
+    }
+
+    return true;
+}
+
+// This function is the remove() method of the Cookie object.
+function _Cookie_remove()
+{
+    var cookie;
+    cookie = this.$name + '=';
+    if (this.$path) cookie += '; path=' + this.$path;
+    if (this.$domain) cookie += '; domain=' + this.$domain;
+    cookie += '; expires=Fri, 02-Jan-1970 00:00:00 GMT';
+    this.$document.cookie = cookie;
+}
+
+// Create a dummy Cookie object, so we can use the prototype object to make
+// the functions above into methods.
+new Cookie();
+Cookie.prototype.store = _Cookie_store;
+Cookie.prototype.load = _Cookie_load;
+Cookie.prototype.remove = _Cookie_remove;
+
+// DON'T EDIT ABOVE HERE. DON'T EDIT ABOVE HERE. DON'T EDIT ABOVE HERE. DON'T EDIT ABOVE HERE. 
+
+// syntax = new Cookie(document, cookie name, expiration time in hours)
+var absolutcookie = new Cookie(document, "dj1", 2400);
+			
+function checkCookie() {
+	if (!absolutcookie.load()) {
+	    cookie = "No"
+		//document.write('cookie = "No"<br>');
+	}
+	else {
+		cookie = "Yes"
+		//document.write('cookie = "Yes"<br>');
+	}
+}
+
+// Our cookie is empty but in order to save it we need some variable
+// we will use dummy = fish for this purpose
+
+absolutcookie.dummy = "Fish";
+
+function setCookie() {
+	absolutcookie.store();
+}
+
+checkCookie();
+
+//-->
+</SCRIPT>
+
+<script language="Javascript">   var scriptVersion = 1.0</script>
+<script language="Javascript1.1">var scriptVersion = 1.1</script>
+
+<script language="JavaScript">
+<!--
+// Note that this is not a JS1.1 block. this is so that the older browsers will
+// be able to get into this chunk.
+
+//document.write('Javascript version = ' + scriptVersion + '<p>');
+
+if (scriptVersion >= 1.1) {
+	if (cookie == "No") {
+		var instructionsMode = 1; // show instructions
+		setCookie(); // set a cookie for hidden instructions next time
+	}
+	else {
+		var instructionsMode = 0; // hide instructions
+	}
+}
+else {
+	var instructionsMode = 1; // show instructions
+}
+//document.write(instructionsMode);
+//-->
+</script>
+<center>
+<table border="0" cellpadding="0" cellspacing="0" width="576">
+<tr>
+	<td valign="top" width="94"><img src="media/uf_md_1.gif" width="94" height="106" border="0"></td>
+	<td valign="top" width="33"><img src="media/uf_md_2.gif" width="33" height="56" border="0"><br>
+	<a href="../index.htm" onMouseover = "img_act('maptext')" onMouseout = "img_inact('maptext')"><img src="media/uf_md_3off.gif" width="33" height="11" border="0" name="maptext"></a><br>
+	<img src="media/uf_md_4.gif" width="33" height="39" border="0"></td>
+	
+      <td valign="top" width="118"><img src="media/uf_md_5.gif" width="118" height="106" border="0" name="button" usemap="#buttons"></td>
+	<td valign="top" width="84"><img src="media/uf_md_6.gif" width="84" height="19" border="0"><br>
+	<a href="bio/index.htm" onMouseover = "img_act('biotext')" onMouseout = "img_inact('biotext')"><img src="media/uf_md_7off.gif" width="84" height="12" border="0" name="biotext"></a><br>
+	<img src="media/uf_md_8.gif" width="84" height="75" border="0"></td>
+	<td valign="top" width=""><img src="media/uf_md_9.gif" width="247" height="106" border="0"></td>
+</tr>
+<tr>
+<script language="JavaScript">
+<!--
+	document.write('<td valign="top" width="576" colspan="5"><object classid="clsid:166B1BCA-3F9C-11CF-8075-444553540000" codebase="http://active.macromedia.com/director/cabs/sw.cab#version=6,0,0,0" width="576" height="224" NAME="externalParam"><param name="BGCOLOR" value="#330033"><param name="SRC" value="media/intronew_ufo03.dcr"><param name="sw2" value=' + instructionsMode + '><EMBED SRC="media/intronew_ufo03.dcr" PLUGINSPAGE="http://www.macromedia.com/shockwave/download/" WIDTH="576" HEIGHT="224" sw2=' + instructionsMode + ' bgcolor="#330033"></embed></object></td>');
+//-->
+</script>
+</tr>
+<tr>
+	<td valign="top" width="576" colspan="5"><img src="media/uf_md_10.gif" width="576" height="70" border="0"></td>
+</tr>
+</table>
+</center><p><center><font size="-3" color="#808080" face="verdana">Enjoy our quality responsibly.</font>
+</center>
+<map name="buttons">
+  <area shape="circle" coords="86,31,21" href="bio/index.htm" onMouseover = "img_act('biotext')" onMouseout = "img_inact('biotext')">  
+  <area shape="circle" coords="21,80,15" href="../index.htm" onMouseover = "img_act('maptext')" onMouseout = "img_inact('maptext')">
+</map>
+</body>
+</html>

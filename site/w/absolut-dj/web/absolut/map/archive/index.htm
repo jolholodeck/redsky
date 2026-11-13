@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head><script src="../../../../../../shared/shockwave-page.js"></script>
+<title>Absolut Archive</title>
+<script language="Javascript">
+<!--// 
+if (document.images)
+	{
+	maptexton = new Image();
+	maptexton.src = "media/ar_1_3on.gif";
+	maptextoff = new Image();
+	maptextoff.src = "media/ar_1_3off.gif";
+	a = new Image();
+	a.src = "media/ar_3_3kelly.gif";
+	b = new Image();
+	b.src = "media/ar_3_3panu.gif";
+	
+	}
+function img_act(imgName) {
+               if (document.images) {
+	               imgOn = eval(imgName + "on.src");
+			       document [imgName].src = imgOn;
+		           }
+	       		}
+function img_inact(imgName) {
+               if (document.images) {
+	               imgOff = eval(imgName + "off.src");
+			       document [imgName].src = imgOff;
+	               }
+	       		}
+function msover2(img1,ref1,img2,ref2)
+        {
+                if (document.images)
+                        {
+                        document.images[img1].src = ref1;
+                        document.images[img2].src = ref2;
+                        }
+        }
+function msout2(img1,ref1,img2,ref2)
+        {
+                if (document.images)
+                        {
+                        document.images[img1].src = ref1;
+                        document.images[img2].src = ref2;
+                        }
+        }
+//-->
+</script>	
+</head>
+<body bgcolor="#000000">
+<center>
+<table border="0" cellpadding="0" cellspacing="0" width="580">
+	<tr>
+		
+      <td valign="top" width="415"><img src="media/ar_1_1.gif" width="415" height="115" border="0" usemap="#mapmap"></td>
+		<td valign="top" width="35"><img src="media/ar_1_2.gif" width="35" height="69" border="0"><br>
+		<a href="../index.htm" onMouseover = "img_act('maptext')" onMouseout = "img_inact('maptext')"><img src="media/ar_1_3off.gif" width="35" height="13" border="0" name="maptext"></a><br>
+		<img src="media/ar_1_4.gif" width="35" height="33" border="0"></td>
+		<td valign="top" width="130"><img src="media/ar_1_5.gif" width="130" height="115" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" width="580" colspan="3"><img src="media/ar_2_1.gif" width="235" height="11" border="0"><a href="http://panushka.absolutdj.com/kelly/1-1.html" onmouseover="msover2('kelly','media/ar_2_2on.gif','offstate','media/ar_3_3kelly.gif')" onmouseout="msout2('kelly','media/ar_2_2off.gif','offstate','media/ar_3_3off.gif')"><img src="media/ar_2_2off.gif" width="85" height="11" border="0" name="kelly"></a><img src="media/ar_2_3.gif" width="17" height="11" border="0"><a href="http://panushka.absolutdj.com/" onmouseover="msover2('panush','media/ar_2_4on.gif','offstate','media/ar_3_3panu.gif')" onmouseout="msout2('panush','media/ar_2_4off.gif','offstate','media/ar_3_3off.gif')"><img src="media/ar_2_4off.gif" width="113" height="11" border="0" name="panush"></a><img src="media/ar_2_5.gif" width="130" height="11" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" width="580" colspan="3"><img src="media/ar_3_1.gif" width="580" height="26" border="0"><br>
+		<img src="media/ar_3_2.gif" width="247" height="90" border="0"><img src="media/ar_3_3off.gif" width="333" height="90" border="0" name="offstate"><br>
+		<img src="media/ar_3_4.gif" width="320" height="93" border="0"><img src="../../shared_media/black.gif" hspace="129" width="2" height="1" border="0"></td>
+	</tr>
+</table>
+</center>
+<map name="mapmap">
+  <area shape="circle" coords="386,66,28" href="../index.htm" onMouseover = "img_act('maptext')" onMouseout = "img_inact('maptext')">
+</map>
+</body>
+</html>
+

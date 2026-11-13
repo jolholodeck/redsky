@@ -1,0 +1,3 @@
+on exitFrame
+  updateJohnsonRollOver()
+end

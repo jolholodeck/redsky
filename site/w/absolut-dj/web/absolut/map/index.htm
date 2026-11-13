@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head><script src="../../../../../shared/shockwave-page.js"></script>
+<title>Absolut DJ</title>
+<script language="Javascript">
+<!--// 
+if (document.images)
+	{
+
+	faqon = new Image();
+	faqon.src = "media/mp_3_4on.gif";
+	faqoff = new Image();
+	faqoff.src = "media/mp_3_4off.gif";
+	creditson = new Image();
+	creditson.src = "media/mp_3_8on.gif";
+	creditsoff = new Image();
+	creditsoff.src = "media/mp_3_8off.gif";
+	
+
+	archiveon = new Image();
+	archiveon.src = "media/mp_3_12on.gif";
+	archiveoff = new Image();
+	archiveoff.src = "media/mp_3_12off.gif";
+	
+	histexton = new Image();
+	histexton.src = "media/mp_4_2on.gif";
+	histextoff = new Image();
+	histextoff.src = "media/mp_4_2off.gif";
+	comtexton = new Image();
+	comtexton.src = "media/mp_2_3on.gif";
+	comtextoff = new Image();
+	comtextoff.src = "media/mp_2_3off.gif";
+
+	spookytexton = new Image();
+	spookytexton.src = "media/mp_2_8spooky_on.gif";
+	spookytextoff = new Image();
+	spookytextoff.src = "media/mp_2_8spooky_off.gif";
+	
+	ufotexton = new Image();
+	ufotexton.src = "media/mp_2_8ufo_on.gif";
+	ufotextoff = new Image();
+	ufotextoff.src = "media/mp_2_8ufo_off.gif";
+	
+	coldcuttexton = new Image();
+	coldcuttexton.src = "media/mp_2_8coldcut_on.gif";
+	coldcuttextoff = new Image();
+	coldcuttextoff.src = "media/mp_2_8coldcut_off.gif";
+	}
+function img_act(imgName) {
+               if (document.images) {
+	               imgOn = eval(imgName + "on.src");
+			       document [imgName].src = imgOn;
+		           }
+	       		}
+function img_inact(imgName) {
+               if (document.images) {
+	               imgOff = eval(imgName + "off.src");
+			       document [imgName].src = imgOff;
+	               }
+	       		}
+
+//-->
+</script>	
+<script language="JavaScript">
+<!--
+//sound script
+var now = new Date();
+var dName = now.getDay() + 1;
+var tName = now.getDay() + 1;
+var nName = now.getDay() + 1;
+var rName = now.getDay() + 1;
+var oName = now.getDay() + 1;
+var hName = now.getDay() + 1;
+//dcr source
+if(dName==1) Day = "media/bluebuttonspooky30.dcr";
+if(dName==2) Day = "media/button_one_ufo03.dcr";
+if(dName==3) Day = "media/coldcut_button01.dcr";
+if(dName==4) Day = "media/bluebuttonspooky30.dcr";
+if(dName==5) Day = "media/button_one_ufo03.dcr";
+if(dName==6) Day = "media/coldcut_button01.dcr";
+if(dName==7) Day = "media/button_one_ufo03.dcr";
+var todaysDate = (Day);
+//img src
+if(tName==1) Daya = "media/mp_2_8spooky_off.gif";
+if(tName==2) Daya = "media/mp_2_8ufo_off.gif";
+if(tName==3) Daya = "media/mp_2_8coldcut_off.gif";
+if(tName==4) Daya = "media/mp_2_8spooky_off.gif";
+if(tName==5) Daya = "media/mp_2_8ufo_off.gif";
+if(tName==6) Daya = "media/mp_2_8coldcut_off.gif";
+if(tName==7) Daya = "media/mp_2_8ufo_off.gif";
+var todaysaDate = (Daya);
+//img name
+if(nName==1) Dayn = "spookytext";
+if(nName==2) Dayn = "ufotext";
+if(nName==3) Dayn = "coldcuttext";
+if(nName==4) Dayn = "spookytext";
+if(nName==5) Dayn = "ufotext";
+if(nName==6) Dayn = "coldcuttext";
+if(nName==7) Dayn = "ufotext";
+var todaysnDate = (Dayn);
+//rollover
+if(rName==1) Dayr = "img_act('spookytext')";
+if(rName==2) Dayr = "img_act('ufotext')";
+if(rName==3) Dayr = "img_act('coldcuttext')";
+if(rName==4) Dayr = "img_act('spookytext')";
+if(rName==5) Dayr = "img_act('ufotext')";
+if(rName==6) Dayr = "img_act('coldcuttext')";
+if(rName==7) Dayr = "img_act('ufotext')";
+var todaysRdate = (Dayr);
+//rolloff
+if(oName==1) Dayo = "img_inact('spookytext')";
+if(oName==2) Dayo = "img_inact('ufotext')";
+if(oName==3) Dayo = "img_inact('coldcuttext')";
+if(oName==4) Dayo = "img_inact('spookytext')";
+if(oName==5) Dayo = "img_inact('ufotext')";
+if(oName==6) Dayo = "img_inact('coldcuttext')";
+if(oName==7) Dayo = "img_inact('ufotext')";
+var todaysODate = (Dayo);
+//link
+if(hName==1) Dayh = "spooky/sp_index.htm"
+if(hName==2) Dayh = "ufo/uf_index.htm"
+if(hName==3) Dayh = "coldcut/cl_index.htm"
+if(hName==4) Dayh = "spooky/sp_index.htm"
+if(hName==5) Dayh = "ufo/uf_index.htm"
+if(hName==6) Dayh = "coldcut/cl_index.htm"
+if(hName==7) Dayh = "ufo/uf_index.htm"
+var todaysHDate = (Dayh);
+var ftButton = '<object classid="clsid:166B1BCA-3F9C-11CF-8075-444553540000" codebase="http://active.macromedia.com/director/cabs/sw.cab#version=6,0,0,0" width="128" height="128"><param name="SRC" value=' + todaysDate + '><param name="BGCOLOR" value="#000000"><embed src=' + todaysDate + ' pluginspage="http://www.macromedia.com/shockwave/download/" height="128" width="128" bgcolor="#000000"></embed></object>';
+var ftText2 = '<a href=' + todaysHDate + ' onMouseover = ' + todaysRdate + ' onMouseout = ' + todaysODate + '><img src=' + todaysaDate + ' width="167" height="56" border="0" name= ' + todaysnDate + '></a>';
+//-->
+</script>
+</head>
+<body bgcolor="#000000">
+<center>
+<table border="0" cellpadding="0" cellspacing="0" width="580">
+	<tr>
+		<td valign="top" width="580" colspan="3"><img src="media/mp_1_1.gif" width="580" height="25" border="0"></td>
+	</tr>
+	<tr>
+	    <td valign="top" width="236"><img src="media/mp_2_1.gif" width="236" height="67" border="0" name="compbutton" usemap="#combut"></td>
+		<td valign="top" width="152"><img src="media/mp_2_2.gif" width="152" height="19" border="0"><br>
+		<a href="compilation/index.htm" onMouseover = "img_act('comtext')" onMouseout = "img_inact('comtext')"><img src="media/mp_2_3off.gif" width="116" height="30" border="0" name="comtext"></a><img src="media/mp_2_4.gif" width="36" height="30" border="0"><br>
+		<img src="media/mp_2_5.gif" width="152" height="18" border="0"></td>
+		<td valign="top" width="192"><img src="media/mp_2_6.gif" width="192" height="11" border="0"><br>
+		<img src="media/mp_2_7.gif" width="25" height="56" border="0"><script language="Javascript">
+																		<!--
+																		document.write(ftText2);
+																		//-->
+																		</script></td>		
+	</tr>
+	<tr>
+		<td valign="top" width="236" rowspan="2"><img src="media/mp_3_1.gif" width="236" height="118" border="0"><br>
+		<img src="media/mp_3_2.gif" width="236" height="15" border="0"><br>
+		<img src="media/mp_3_3.gif" width="92" height="25" border="0"><a href="faq/index.htm" onMouseover = "img_act('faq')" onMouseout = "img_inact('faq')"><img src="media/mp_3_4off.gif" width="22" height="25" border="0" name="faq"></a><img src="media/mp_3_5.gif" width="122" height="25" border="0"><br>
+        <img src="media/mp_3_6.gif" width="236" height="25" border="0" usemap="#creditsmap"><br>
+		<img src="media/mp_3_7.gif" width="92" height="11" border="0"><a href="credits/index.htm" onMouseover = "img_act('credits')" onMouseout = "img_inact('credits')"><img src="media/mp_3_8off.gif" width="38" height="11" border="0" name="credits"></a><img src="media/mp_3_9.gif" width="106" height="11" border="0"><br>
+        <img src="media/mp_3_10.gif" width="236" height="23" border="0" usemap="#archivemap"><br>
+		<img src="media/mp_3_11.gif" width="114" height="12" border="0"><a href="archive/index.htm" onMouseover = "img_act('archive')" onMouseout = "img_inact('archive')"><img src="media/mp_3_12off.gif" width="41" height="12" border="0" name="archive"></a><img src="media/mp_3_13.gif" width="81" height="12" border="0"><br>
+		<img src="media/mp_3_14.gif" width="236" height="79" border="0"></td>
+		<td valign="top" width="152"><img src="media/mp_3_19.gif" width="152" height="128" border="0"></td>
+		<td valign="top" width="192"><script language="Javascript">
+											<!--
+											document.write(ftButton);
+											//-->
+											</script><img src="media/mp_3_20.gif" width="64" height="128" border="0"></td>
+	</tr>
+	<tr>
+		
+      <td valign="top" width="344" colspan="2"><img src="media/mp_4_1.gif" width="344" height="47" border="0" name="historybut" usemap="#hisbut"><br>      
+		<a href="history/index.htm" onMouseover = "img_act('histext')" onMouseout = "img_inact('histext')"><img src="media/mp_4_2off.gif" width="238" height="15" border="0" name="histext"></a><img src="media/mp_4_3.gif" width="106" height="15" border="0"><br>
+		<img src="media/mp_4_4.gif" width="344" height="118" border="0"></td>
+	</tr>
+</table>
+</center>
+<map name="combut">
+  <area shape="circle" coords="207,32,28" href="compilation/index.htm" onMouseover = "img_act('comtext')" onMouseout = "img_inact('comtext')">  
+</map>
+<map name="hisbut">
+  <area shape="circle" coords="34,24,18" href="history/index.htm" onMouseover = "img_act('histext')" onMouseout = "img_inact('histext')">  
+</map>
+<map name="creditsmap">
+  <area shape="rect" coords="101,10,120,23" href="credits/index.htm" onMouseover = "img_act('credits')" onMouseout = "img_inact('credits')">
+</map> <map name="archivemap">
+  <area shape="rect" coords="119,9,141,21" href="archive/index.htm" onMouseover = "img_act('archive')" onMouseout = "img_inact('archive')">
+</map>
+</body>
+</html>
+

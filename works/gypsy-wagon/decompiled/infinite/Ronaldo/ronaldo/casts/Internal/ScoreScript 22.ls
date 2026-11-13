@@ -1,0 +1,16 @@
+global gWordList, gZotSpr, gComplete
+
+on exitFrame
+  checkList()
+  if gComplete = 1 then
+    payoff(3)
+  end if
+  if getProp(gWordList, "listening") = 1 then
+    set the visible of sprite gZotSpr to 0
+    makeLightning(8, 4)
+    go(the frame)
+  end if
+  if not rollOver(6) then
+    go("go3")
+  end if
+end

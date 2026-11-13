@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<title>Absolut DJ History</title>
+<script language="Javascript">
+<!--// 
+if (document.images)
+	{
+	mapon = new Image(56, 23);
+    mapon.src = "media/hs_1_3on.gif"; 
+	mapoff = new Image(56, 23);
+	mapoff.src = "media/hs_1_3off.gif";
+	}
+
+function img_act(imgName) {
+               if (document.images) {
+	               imgOn = eval(imgName + "on.src");
+			       document [imgName].src = imgOn;
+		           }
+	       		}
+function img_inact(imgName) {
+               if (document.images) {
+	               imgOff = eval(imgName + "off.src");
+			       document [imgName].src = imgOff;
+	               }
+	       		}
+var pcshocksrc = "media//history03.dcr"
+var macshocksrc = "media/history03_mac.dcr"			
+var showme = '<object classid="clsid:166B1BCA-3F9C-11CF-8075-444553540000" codebase="http://active.macromedia.com/director/cabs/sw.cab#version=6,0,0,0" width="576" height="304"><param name="SRC" value=' + macshocksrc + '><param name="BGCOLOR" value="#000000"><embed src=' + macshocksrc + ' pluginspage="http://www.macromedia.com/shockwave/download/" width="576" height="304" bgcolor="#000000"></embed></object>';
+
+	if (navigator.userAgent.indexOf("Win95")>=0 || navigator.userAgent.indexOf("Windows NT")>=0)
+	{
+	var showme = '<object classid="clsid:166B1BCA-3F9C-11CF-8075-444553540000" codebase="http://active.macromedia.com/director/cabs/sw.cab#version=6,0,0,0" width="576" height="304"><param name="SRC" value=' + pcshocksrc + '><param name="BGCOLOR" value="#000000"><embed src=' + pcshocksrc + ' pluginspage="http://www.macromedia.com/shockwave/download/" width="576" height="304" bgcolor="#000000"></embed></object>';				
+	}
+	else
+	{
+	var showme = '<object classid="clsid:166B1BCA-3F9C-11CF-8075-444553540000" codebase="http://active.macromedia.com/director/cabs/sw.cab#version=6,0,0,0" width="576" height="304"><param name="SRC" value=' + macshocksrc + '><param name="BGCOLOR" value="#000000"><embed src=' + macshocksrc + ' pluginspage="http://www.macromedia.com/shockwave/download/" width="576" height="304" bgcolor="#000000"></embed></object>';
+	}
+//document.write(navigator.userAgent)
+//-->
+</script>	
+</head>
+<body bgcolor="#000000">
+<center>
+<table border="0" cellpadding="0" cellspacing="0" width="576">
+	<tr>
+		<td valign="top" width="520"><img src="media/hs_1_1.gif" width="520" height="90" border="0" name="button" usemap="#mapbutton"></td>
+		<td valign="top" width=""><img src="media/hs_1_2.gif" width="56" height="53" border="0"><br>
+		<a href="../index.htm" onMouseover = "img_act('map')" onMouseout = "img_inact('map')"><img src="media/hs_1_3off.gif" width="56" height="23" border="0" name="map"></a><br>
+		<img src="media/hs_1_4.gif" width="56" height="14" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" width="576" colspan="2"><script language="Javascript">
+																		<!--
+																		document.write(showme);
+																		//-->
+																		</script></td>
+	</tr>
+</table>
+</center>
+<map name="mapbutton">
+  <area shape="circle" coords="493,57,27" href="../index.htm" onMouseover = "img_act('map')" onMouseout = "img_inact('map')">  
+</map>
+</body>
+</html>

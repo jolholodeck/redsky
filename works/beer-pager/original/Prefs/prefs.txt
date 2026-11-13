@@ -1,0 +1,1 @@
+-- Preferences file for Miller Lite Beer Mailer-- Last saved:Monday, January 24, 2005 [#sound: 0, #autocheck: 1, #showLogin: 1, #sScreenName: "muskrat", #sPassword: "O)2%F:NY````", #proxy: ""]

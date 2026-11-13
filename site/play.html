@@ -3,54 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Red Sky 98 Player</title>
+<title>Red Sky Interactive player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
 <style>
-  :root { --bg:#0b0907; --fg:#ece3d2; --muted:#968a76; --accent:#c8492c; color-scheme: dark; }
-  html,body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 "Courier New",ui-monospace,monospace}
-  body{padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:16px}
-  #wrap{max-width:640px;margin:0 auto}
-  #bar{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
-  #bar a{color:var(--fg)}
-  #what{color:var(--muted)}
-  #frame{position:relative;width:100%;aspect-ratio:4/3;max-width:100%;overflow:hidden;background:#000}
-  #stage{position:absolute;left:0;top:0;width:640px;height:480px;transform-origin:0 0}
-  #stage > *{width:640px !important;height:480px !important}
-  #cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#000;color:var(--fg);border:0;font:inherit;cursor:pointer;width:100%}
-  #cover b{font-size:18px;letter-spacing:.12em}
-  #cover span{color:var(--muted)}
-  #cover:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
-  #keys{color:var(--muted);margin-top:10px}
-  kbd{font:inherit;border:1px solid #3a3229;padding:0 4px}
+  body{padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:14px}
+  #wrap{max-width:var(--stage-w,640px);margin:0 auto}
+  #bar{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px;font-size:15px}
+  #bar a{color:var(--haze);text-decoration:none} #bar a:hover{color:var(--bone)}
+  #what{color:var(--bone);font-stretch:112%;font-weight:700}
+  #frame{position:relative;width:100%;aspect-ratio:var(--stage-ratio,4/3);max-width:100%;overflow:hidden;background:#000;border-radius:3px}
+  #stage{position:absolute;left:0;top:0;width:var(--stage-w,640px);height:var(--stage-h,480px);transform-origin:0 0}
+  #stage > :not(video){width:var(--stage-w,640px) !important;height:var(--stage-h,480px) !important}
+  #cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(180deg,var(--sky-deep),var(--sky));color:var(--bone);border:0;font:inherit;cursor:pointer;width:100%;padding:16px;text-align:center}
+  #cover b{font-stretch:125%;font-weight:800;font-size:24px}
+  #cover span{color:var(--bone);opacity:.85;font-size:15px}
+  #cover:focus-visible{outline:3px solid var(--ember);outline-offset:-6px}
+  #keys{color:var(--haze);margin-top:12px;font-size:14px}
+  kbd{font:inherit;border:1px solid var(--line);border-radius:3px;padding:0 5px}
 </style>
 </head>
 <body>
 <div id="wrap">
-  <div id="bar"><span id="what"></span><a href="index.html">All pieces</a></div>
+  <div id="bar"><span id="what"></span><a id="back" href="index.html">All works</a></div>
   <div id="frame">
     <div id="stage"></div>
-    <button id="cover" type="button"><b>CLICK TO START</b><span id="status">Loads about 10–40 MB, the size of the original CD files</span></button>
+    <button id="cover" type="button"><b>Start</b><span id="status">Loads the original files, a few megabytes to a few dozen</span></button>
   </div>
-  <p id="keys">Original CD keys: <kbd>Ctrl-E</kbd> Entertainment · <kbd>Ctrl-W</kbd> Work · <kbd>Ctrl-X</kbd> Exit · <kbd>Enter</kbd> back to the Work menu · <kbd>Space</kbd> skips intros</p>
+  <p id="keys"></p>
 </div>
+<script src="beatnik/rsbae.js"></script>
+<script src="beatnik/beatnik.js"></script>
 <script>
 // Scale the fixed 640x480 stage to the available width.
 (function(){
   const frame = document.getElementById('frame'), stage = document.getElementById('stage');
-  const fit = () => { stage.style.transform = 'scale(' + (frame.clientWidth / 640) + ')'; };
-  new ResizeObserver(fit).observe(frame); fit();
+  const fit = () => { const w = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--stage-w')) || 640; stage.style.transform = 'scale(' + (frame.clientWidth / w) + ')'; };
+  new ResizeObserver(fit).observe(frame); fit(); window.__rsFit = fit;
 })();
 
 // ---- Path mapping. The 1998 Lingo asks for "WORK_MODULE\WORK.DIR", "new_fangled\hp_pong\hp_pong6",
 // "RSICODE.cct" and so on. Every file is stored lowercased and gzipped; requests are resolved
 // against files.txt and decompressed in the browser.
+const WORK = (new URLSearchParams(location.search).get('w') || 'redsky98').replace(/[^a-z0-9-]/g, '');
+const WBASE = 'w/' + WORK + '/';
 (function(){
-  const ROOT = new URL('rs/', location.href).href;
-  const FILES = new Map(); const BYBASE = {};
-  const ready = fetch('files.txt').then(r => r.text()).then(t => {
+  const ROOT = new URL(WBASE + 'rs/', location.href).href;
+  const FILES = new Map(); const ORIG = new Map(); const BYBASE = {};
+  const ready = fetch(WBASE + 'files.txt').then(r => r.text()).then(t => {
     for (const line of t.split('\n')) {
       if (!line) continue;
-      const [f, pub] = line.split('\t');
-      FILES.set(f, pub || f);
+      const [f, pub, orig] = line.split('\t');
+      ORIG.set(f, orig || f);
+      FILES.set(f, pub || f); if (pub && pub !== f && !FILES.has(pub)) FILES.set(pub, pub);
       const b = f.split('/').pop(), stem = b.replace(/\.(dir|dxr|dcr|cst|cxt|cct)$/, '');
       (BYBASE[b] ||= []).push(f); if (stem !== b) (BYBASE[stem] ||= []).push(f);
     }
@@ -113,10 +120,120 @@
   window.__rsStopFile = function(ch){ const c = chans[ch]; if (!c) return; try { c.src && c.src.stop(); } catch(e){} delete chans[ch]; };
   window.__rsFileBusy = function(ch){ return !!(chans[ch] && chans[ch].busy); };
 
+  // ---- Files a movie or an Xtra opens by name (Beatnik songs, text files).
+  window.__rsFetchFile = async function(name, base){
+    await ready;
+    const rel = resolve(new URL(name, base || ROOT).href) || resolve(new URL(String(name).split('/').pop(), base || ROOT).href);
+    if (!rel) throw new Error('not found: ' + name);
+    return (await load(rel)).slice(0);
+  };
+
+  // ---- Xtras implemented on this page (see emulator/README: jsbridge). Unknown handlers
+  // answer 0 ("no error"), which is what most 1990s Xtras returned on success.
+  window.__rsXtra = function(xtra, id, handler, args, base){
+    const h = (window.__rsXtraHandlers || {})[xtra];
+    if (h) { try { return h(id, handler, args, base); } catch (e) { console.warn('[rs] xtra', xtra, handler, e); return 0; } }
+    if (handler !== 'new') console.info('[rs] xtra', xtra + '.' + handler, 'not implemented');
+    return 0;
+  };
+
+  // ---- FileXtra-style globals, answered from this work's file list.
+  function relDir(path, base){
+    let p = String(path || '');
+    try { p = decodeURIComponent(new URL(p.replace(/\\/g, '/'), base || ROOT).pathname); } catch (e) {}
+    const root = decodeURIComponent(new URL(ROOT).pathname);
+    if (p.startsWith(root)) p = p.slice(root.length);
+    return p.replace(/^\/+/, '').replace(/\/+$/, '').toLowerCase();
+  }
+  const STATIC = {
+    directoryexists(path, base){ const d = relDir(path, base); if (!d) return 1; for (const k of FILES.keys()) if (k.startsWith(d + '/')) return 1; return 0; },
+    fileexists(path, base){ const d = relDir(path, base); return FILES.has(d) || !!resolve(new URL(d, ROOT).href) ? 1 : 0; },
+    directorytolist(path, base){
+      const d = relDir(path, base), out = new Set();
+      for (const [k] of FILES) {
+        if (d && !k.startsWith(d + '/')) continue;
+        const rest = d ? k.slice(d.length + 1) : k, parts = rest.split('/');
+        const origParts = (ORIG.get(k) || k).split('/');
+        out.add(origParts[origParts.length - parts.length]);
+      }
+      return [...out].sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+    },
+  };
+  window.__rsXtraStaticHas = name => Object.prototype.hasOwnProperty.call(STATIC, String(name).toLowerCase());
+  window.__rsXtraStatic = (name, args, base) => STATIC[String(name).toLowerCase()](args[0], base);
+
+  window.__rsXtraHas = function(xtra, handler){
+    const m = (window.__rsXtraMethods || {})[xtra];
+    return !!(m && m.includes(String(handler).toLowerCase()));
+  };
+
+  // ---- QuickTime sprites (see emulator rs_video.rs): a <video> per sprite channel, laid
+  // over the stage at the sprite's rect. Files were converted to MP4 under the same name.
+  const VID = new Map();
+  function videoRel(file, base){
+    const n = String(file || '').replace(/\\/g, '/').replace(/:/g, '/').replace(/^@\/?/, '');
+    const mp4 = n.replace(/\.(mov|moov|avi|qt)$/i, '') + '.mp4';
+    for (const cand of [mp4, mp4.split('/').pop()]) {
+      try { const r = resolve(new URL(cand, base || ROOT).href); if (r) return r; } catch (e) {}
+    }
+    const b = mp4.split('/').pop().toLowerCase();
+    for (const k of FILES.keys()) if (k.endsWith('/' + b) || k === b) return k;
+    return null;
+  }
+  function videoFor(ch, file, base){
+    let v = VID.get(ch);
+    if (v && v.file === file) return v;
+    if (v) { v.el.remove(); VID.delete(ch); }
+    const el = document.createElement('video');
+    el.playsInline = true; el.preload = 'auto'; el.autoplay = true;
+    el.style.cssText = 'position:absolute;left:0;top:0;object-fit:fill;pointer-events:none;background:transparent';
+    document.getElementById('stage').appendChild(el);
+    v = { el, file, rate: 1, ready: false }; VID.set(ch, v);
+    const rel = videoRel(file, base);
+    if (!rel) { console.warn('[rs] video not found', file); return v; }
+    load(rel).then(buf => {
+      el.src = URL.createObjectURL(new Blob([buf], { type: 'video/mp4' }));
+      el.addEventListener('loadedmetadata', () => { v.ready = true; }, { once: true });
+      if (v.rate) el.play().catch(() => {});
+    });
+    return v;
+  }
+  window.__rsVideoFrame = function(list){
+    window.__rsVideoFrames = (window.__rsVideoFrames || 0) + 1;
+    const seen = new Set();
+    for (const s of list) {
+      seen.add(s.channel);
+      const v = videoFor(s.channel, s.file, s.base);
+      const st = v.el.style;
+      let { left, top, width, height } = s;
+      if (!(width > 0 && height > 0) && v.el.videoWidth) {   // no size in the score: natural size, centred on the loc
+        width = v.el.videoWidth; height = v.el.videoHeight; left -= width / 2; top -= height / 2;
+      }
+      st.left = left + 'px'; st.top = top + 'px'; st.width = width + 'px'; st.height = height + 'px';
+    }
+    for (const [ch, v] of VID) if (!seen.has(ch)) { v.el.pause(); v.el.remove(); VID.delete(ch); }
+  };
+  window.__rsVideo = function(op, ch, file, value){
+    const v = ch ? VID.get(ch) : [...VID.values()].find(x => x.file === file);
+    const el = v && v.el;
+    switch (op) {
+      case 'get:movierate': return el ? (el.paused || el.ended ? 0 : 1) : 0;
+      case 'get:movietime': return el ? Math.round(el.currentTime * 60) : 0;
+      case 'get:duration': case 'get:stoptime': return el && isFinite(el.duration) ? Math.round(el.duration * 60) : 0;
+      case 'get:starttime': return 0;
+      case 'get:volume': return el ? Math.round(el.volume * 255) : 255;
+      case 'get:mediaready': return v && v.ready ? 1 : 0;
+      case 'set:movierate': if (v) { v.rate = value; if (value) el.play().catch(() => {}); else el.pause(); } return 0;
+      case 'set:movietime': if (el) el.currentTime = value / 60; return 0;
+      case 'set:volume': if (el) el.volume = Math.max(0, Math.min(1, value / 255)); return 0;
+    }
+    return 0;
+  };
+
   // ---- Per-piece speed overrides (speeds.json): frames per second for score
   // sections authored "as fast as possible" in 1998, keyed by movie file name.
   let SPEEDS = {};
-  fetch('speeds.json').then(r => r.ok ? r.json() : {}).then(j => { SPEEDS = j || {}; }).catch(() => {});
+  fetch(WBASE + 'speeds.json').then(r => r.ok ? r.json() : {}).then(j => { SPEEDS = j || {}; }).catch(() => {});
   window.__rsTempoOverride = function(file, frame){
     const list = SPEEDS[String(file).toLowerCase()]; if (!list) return 0;
     for (const s of list) { const [a, b] = String(s.frames).split('-').map(Number); if (frame >= a && frame <= (b || a)) return s.fps; }
@@ -133,8 +250,35 @@
 
 const params = new URLSearchParams(location.search);
 const hashMovie = location.hash.slice(1);
-const via = ({ entertainment: 'entertainment', work: 'work' })[params.get('via')] || null;
-const movie = via ? 'redsky98.dir' : (params.get('m') || hashMovie.replace(/-/g, '/') || 'redsky98.dir').replace(/[^a-z0-9_\/.]/gi, '');
+const via = WORK === 'redsky98' ? (({ entertainment: 'entertainment', work: 'work' })[params.get('via')] || null) : null;
+let movie = null;
+// The work's settings (start movie, stage size, title) come from works.json.
+const workReady = fetch('works.json').then(r => r.json()).then(({ works }) => {
+  const w = works.find(x => x.slug === WORK) || {};
+  const [sw, sh] = w.stage || [640, 480];
+  const root = document.documentElement.style;
+  root.setProperty('--stage-w', sw + 'px'); root.setProperty('--stage-h', sh + 'px'); root.setProperty('--stage-ratio', sw + '/' + sh);
+  window.__rsFit && window.__rsFit();
+  document.getElementById('what').textContent = params.get('t') || w.title || '';
+  const back = document.getElementById('back'); back.href = 'work.html?w=' + WORK; back.textContent = w.title ? 'About ' + w.title : 'All works';
+  document.title = (params.get('t') || w.title || 'Player') + ' | Red Sky Interactive';
+  if (WORK === 'redsky98') document.getElementById('keys').innerHTML = 'Keys from the CD: <kbd>Ctrl-E</kbd> Entertainment, <kbd>Ctrl-W</kbd> Work, <kbd>Ctrl-X</kbd> Exit, <kbd>Return</kbd> back to the Work menu, <kbd>Space</kbd> skips an intro.';
+  const start = (w.start || {});
+  if (start.page) {   // a web-page work (Absolut DJ, the clock): show it in a browser-sized window
+    const [pw, ph] = w.window || [800, 600];
+    document.getElementById('wrap').style.maxWidth = pw + 'px';
+    const f = document.getElementById('frame'); f.innerHTML = '';
+    f.style.aspectRatio = 'auto'; f.style.height = 'min(' + ph + 'px, 80vh)'; f.style.background = '#000';
+    const ifr = document.createElement('iframe'); ifr.src = start.page; ifr.title = w.title;
+    ifr.style.cssText = 'border:0;width:100%;height:100%;display:block;background:#000';
+    ifr.allow = 'autoplay';
+    f.appendChild(ifr);
+    window.__rsPageWork = true;
+  }
+  const m = via ? 'redsky98.dir' : (params.get('m') || hashMovie.replace(/-/g, '/') || start.movie || 'redsky98.dir');
+  movie = m.replace(/[^a-z0-9_\/.-]/gi, '');
+  return w;
+}).catch(() => { movie = (params.get('m') || 'redsky98.dir').replace(/[^a-z0-9_\/.-]/gi, ''); return {}; });
 
 // Modules are entered through the CD's startup movie, as on the CD: it builds the
 // navigation and state managers that Entertainment and Work rely on (space to
@@ -159,7 +303,6 @@ function enterModule(cover){
   };
   tick();
 }
-document.getElementById('what').textContent = params.get('t') || 'Red Sky Interactive · 1998 demo CD';
 
 async function start(){
   const cover = document.getElementById('cover'), status = document.getElementById('status');
@@ -184,10 +327,11 @@ async function start(){
   } catch (e) { console.warn('[rs] audio unlock failed', e); }
   cover.disabled = true; status.textContent = 'Loading the Director player…';
   try {
-    await window.__rsReady;
+    await window.__rsReady; await workReady;
     const e = document.createElement('embed');
-    e.setAttribute('src', 'rs/' + movie);
-    e.setAttribute('width', '640'); e.setAttribute('height', '480');
+    e.setAttribute('src', WBASE + 'rs/' + movie);
+    const st = getComputedStyle(document.documentElement);
+    e.setAttribute('width', parseInt(st.getPropertyValue('--stage-w')) || 640); e.setAttribute('height', parseInt(st.getPropertyValue('--stage-h')) || 480);
     e.setAttribute('type', 'application/x-director');
     document.getElementById('stage').appendChild(e);
     const res = await fetch('dirplayer-polyfill.js.gz');

@@ -1,0 +1,7 @@
+prefs/prefs.txt	prefs/prefs.txt	Prefs/prefs.txt
+proto_88_hack.dir	proto_88_hack.dir	proto_88_hack.dir
+readme.txt	readme.txt	readme.txt
+request manager.cst	request_manager.cst	Request Manager.cst
+widgets.cst	widgets.cst	widgets.cst
+xtras/beerpagersounds.rmf	xtras/beerpagersounds.rmf	xtras/BeerPagerSounds.rmf
+xtras/patches.hsb	xtras/patches.hsb	xtras/Patches.hsb

@@ -1,178 +1,57 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Red Sky 98</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rye&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Courier+Prime:wght@400;700&display=swap">
-<style>
-  /* Layout: a dark projection-room page; one wide marquee, then the CD's three Work drawers as card grids. */
-  :root {
-    --bg: #0d0a08;          /* projector black, warm */
-    --panel: #17120e;       /* card ground */
-    --rule: #3b2f25;        /* hairlines */
-    --fg: #eee4d1;          /* sepia paper */
-    --muted: #a2937c;       /* faded caption */
-    --accent: #d24a2a;      /* red sky */
-    --display: "Rye", "Rockwell", "Clarendon", Georgia, serif;
-    --body: "Libre Caslon Text", Georgia, "Times New Roman", serif;
-    --mono: "Courier Prime", "Courier New", ui-monospace, monospace;
-    color-scheme: dark;
-  }
-  * { box-sizing: border-box; }
-  body { background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body); margin: 0;
-         padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 56px; }
-  .wrap { max-width: 1080px; margin: 0 auto; }
-  a { color: inherit; }
-  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-
-  header.marquee { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: center; padding-block: 44px 36px; border-bottom: 1px solid var(--rule); }
-  .eyebrow { font: 700 12px/1.2 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
-  h1 { font: 400 clamp(44px, 7vw, 76px)/0.95 var(--display); margin: 0; letter-spacing: .01em; text-wrap: balance; }
-  h1 em { font-style: normal; color: var(--accent); }
-  .lede { max-width: 34em; margin: 18px 0 22px; color: var(--fg); }
-  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
-  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 16px; font: 700 13px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; border: 1px solid var(--accent); }
-  .btn.primary { background: var(--accent); color: #fff6ec; }
-  .btn:hover { background: var(--accent); color: #fff6ec; }
-  .screen { position: relative; border: 1px solid var(--rule); background: #000; aspect-ratio: 4 / 3; max-width: 100%; overflow: hidden; }
-  .screen img { display: block; width: 100%; height: 100%; object-fit: cover; filter: sepia(.25) contrast(1.05); }
-  .screen figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 12px; font: 12px/1.3 var(--mono); color: var(--muted); background: linear-gradient(transparent, rgba(0,0,0,.85)); }
-
-  .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-bottom: 1px solid var(--rule); }
-  .facts div { padding: 18px 16px 18px 0; }
-  .facts b { display: block; font: 400 30px/1.1 var(--display); font-variant-numeric: tabular-nums; }
-  .facts span { font: 13px/1.4 var(--mono); color: var(--muted); }
-
-  section { padding-top: 38px; }
-  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--rule); padding-bottom: 8px; margin-bottom: 16px; }
-  h2 { font: 400 28px/1.1 var(--display); margin: 0; }
-  .sec-head p { margin: 0; font: 13px/1.4 var(--mono); color: var(--muted); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
-  a.card { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--rule); text-decoration: none; min-width: 0; }
-  a.card:hover { border-color: var(--accent); }
-  .card img { display: block; width: 100%; aspect-ratio: 4 / 3; max-width: 100%; object-fit: cover; background: #000; }
-  .card .meta { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 2px; }
-  .card .client { font: 700 12px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-  .card .title { font: 16px/1.3 var(--body); }
-  .card .note { font: italic 13px/1.4 var(--body); color: var(--accent); }
-
-  .notes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; }
-  .notes h3 { font: 700 12px/1.2 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
-  .notes ul { margin: 0; padding-left: 18px; }
-  .notes li { margin-bottom: 6px; max-width: 36em; }
-  kbd { font: 13px var(--mono); border: 1px solid var(--rule); padding: 0 5px; }
-
-  @media (max-width: 760px) {
-    header.marquee { grid-template-columns: 1fr; padding-top: 28px; }
-    .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .notes { grid-template-columns: 1fr; }
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .screen img { animation: flicker 6s steps(1) infinite; }
-    @keyframes flicker { 0%, 96% { opacity: 1; } 97% { opacity: .82; } 98% { opacity: 1; } 99% { opacity: .9; } }
-  }
-</style>
-
-</head><body>
-<div class="wrap">
-  <p id="filewarn" hidden style="margin:16px 0 0;padding:12px 14px;border:1px solid var(--accent);font:14px/1.5 var(--mono)">You opened this page as a file, so the player can't load. Double-click <b>Start Red Sky 98.command</b> in this folder instead (see README.txt).</p>
-  <script>if (location.protocol === 'file:') document.getElementById('filewarn').hidden = false;</script>
-  <header class="marquee">
-    <div>
-      <p class="eyebrow">Red Sky Interactive · Demo CD · 1998</p>
-      <h1>Red Sky <em>98</em></h1>
-      <p class="lede">The agency's 1998 demo CD, recovered from its original Director 6 files and playing in the browser. Click the logo to ride into the Entertainment module, or go straight to the Work.</p>
-      <div class="actions">
-        <a class="btn primary" href="play.html">▶ Play the full CD</a>
-        <a class="btn" href="play.html?via=work&amp;t=Work%20Module">Open the Work</a>
-      </div>
-    </div>
-    <figure class="screen" style="margin:0">
-      <img src="thumbs/ENTERTAINMENT.jpg" alt="The Entertainment module: a western town with a live-action cowboy">
-      <figcaption>Entertainment module, running in DirPlayer</figcaption>
-    </figure>
-  </header>
-
-  <div class="facts" aria-label="What was recovered">
-    <div><b>31</b><span>Director movies and casts decompiled</span></div>
-    <div><b>21,700</b><span>lines of original Lingo restored</span></div>
-    <div><b>10,549</b><span>bitmaps extracted in their 8-bit palettes</span></div>
-    <div><b>228</b><span>sounds extracted</span></div>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Red Sky Interactive</title>
+<meta name="description" content="Playable archive of Red Sky Interactive's CD-ROMs, desktop apps and Shockwave work, 1997 to 2002.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<header class="sky">
+  <div class="wrap">
+    <h1 class="display">Red Sky<br>Interactive</h1>
+    <p class="lede">A San Francisco interactive studio. These are its demo discs, desktop apps and Shockwave pieces, restored so they play in a web browser again.</p>
   </div>
+  <div class="wrap"><nav class="reel" id="reel" aria-label="Works"></nav></div>
+</header>
 
-  <main id="m"></main>
+<main class="wrap years" id="years"></main>
 
-  <section>
-    <div class="sec-head"><h2>Notes</h2><p>How this was rebuilt</p></div>
-    <div class="notes">
-      <div>
-        <h3>Controls</h3>
-        <ul>
-          <li><kbd>Ctrl-E</kbd> Entertainment, <kbd>Ctrl-W</kbd> Work, <kbd>Ctrl-X</kbd> Exit, as on the CD.</li>
-          <li><kbd>Enter</kbd> returns from a piece to the Work menu when you reached it through the CD.</li>
-          <li><kbd>Space</kbd> skips the Entertainment intro screens.</li>
-          <li>Pieces opened directly from this page can't return to the menu; use the browser's back button.</li>
-        </ul>
-      </div>
-      <div>
-        <h3>Known gaps</h3>
-        <ul>
-          <li>Mia Hamm draws its 2-bit graphics as blank boxes.</li>
-          <li>QuickTime clips don't play; pieces fall back to the CD's own non-QuickTime paths.</li>
-          <li>The Speaker and Exit modules are untested.</li>
-          <li>The CD's hardware checks (256 colors, CPU and audio-latency tests) are bypassed.</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-</div>
+<footer class="wrap">
+  <p>Everything here runs the original 1990s files. The Director movies play in DirPlayer, an open-source Director player, and the Beatnik music plays in NeoBAE, the open-source Beatnik engine. Fixes and replaced assets are listed on each work's page.</p>
+  <p>Opened from a downloaded copy? Start it with "Start Red Sky 98.command"; browsers block pages opened as files.</p>
+</footer>
 
 <script>
-const P = [
- ['The CD', 'Modules', [
-  ['redsky98.dir','main','Red Sky Interactive','Startup screen'],
-  ['entertainment_module/entertainment.dir','ENTERTAINMENT','Entertainment','The cowboy'],
-  ['work_module/work.dir','WORK','Work','Portfolio menu'],
- ]],
- ['New-Fangled', 'Web sites and banners', [
-  ['work_module/new_fangled/hp_pong/hp_pong6.dir','hp_pong6','Hewlett-Packard','Pong Ad Banner'],
-  ['work_module/new_fangled/le_beyond/le_beyond6.dir','le_beyond6',"Lands' End","Beyond Lands' End Web Site"],
-  ['work_module/new_fangled/nike_nba_banners/nike_nba_banners6.dir','nike_nba_banners6','Nike','NBA Ad Banners'],
-  ['work_module/new_fangled/nike_tiger_98/nike_tiger_986.dir','nike_tiger_986','Nike','1998 Tiger Woods Web Site'],
-  ['work_module/new_fangled/nike_olympic/nike_olympic6.dir','nike_olympic6','Nike','@tlanta Olympics Web Site'],
-  ['work_module/new_fangled/nike_lil_penny/nike_lil_penny6.dir','nike_lil_penny6','Nike',"Li'l Penny Web Site"],
-  ['work_module/new_fangled/nike_mia/nike_mia6.dir','nike_mia6','Nike','Mia Hamm Web Site','Graphics missing'],
-  ['work_module/new_fangled/nike_tiger_97/nike_tiger_976.dir','nike_tiger_976','Nike','1997 Tiger Woods Web Site'],
-  ['work_module/new_fangled/nike_jordan/nike_jordan6.dir','nike_jordan6','Nike','Michael Jordan Web Site'],
-  ['work_module/new_fangled/nike_agassi/nike_agassi6.dir','nike_agassi6','Nike','Andre Agassi Web Site'],
-  ['work_module/new_fangled/sega_banners/sega_banners6.dir','sega_banners6','Sega','Ad Banners'],
- ]],
- ['Old-Timey', 'Floppies and CD-ROMs', [
-  ['work_module/old_timey/bofa_home/bofa_home6.dir','bofa_home6','Bank of America','HomeBanking Floppy'],
-  ['work_module/old_timey/ready_set_dinner/ready_set_dinner6.dir','ready_set_dinner6','National Potato Board','Ready Set Dinner Floppy'],
-  ['work_module/old_timey/nike_airmax/nike_airmax6.dir','nike_airmax6','Nike','Air Max Floppy'],
-  ['work_module/old_timey/nike_zoomair/nike_zoomair6.dir','nike_zoomair6','Nike','Zoom Air Floppy'],
-  ['work_module/old_timey/sony_vaio/sony_vaio6.dir','sony_vaio6','Sony','Vaio PC CD-ROM'],
-  ['work_module/old_timey/west_end_post/west_end_post6.dir','west_end_post6','West End Post','Self-Promotion Floppy'],
- ]],
- ['Plumb Loco', 'Pitches and experiments', [
-  ['work_module/plumb_loco/at_home/at_home6.dir','at_home6','@Home Network','Sales CD-ROM'],
-  ['work_module/plumb_loco/absolut_pitch/absolut_pitch6.dir','absolut_pitch6','Absolut','Spec Creative'],
-  ['work_module/plumb_loco/clay_demo/clay_demo6.dir','clay_demo6','Red Sky Interactive','Clay Demo'],
-  ['work_module/plumb_loco/hypnosis/hypnosis6.dir','hypnosis6','Red Sky Interactive','Hypnosis Pitch'],
-  ['work_module/plumb_loco/pic_a_puke/pic_a_puke6.dir','pic_a_puke6','Red Sky Interactive','Pick-A-Puke'],
-  ['work_module/plumb_loco/site_x/site_x6.dir','site_x6','Red Sky Interactive','Web Site X'],
-  ['work_module/plumb_loco/virtual_bully/virtual_bully6.dir','virtual_bully6','Red Sky Interactive','Virtual Bully'],
- ]],
-];
-const VIA = {'entertainment_module/entertainment.dir': 'entertainment', 'work_module/work.dir': 'work'};
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-document.getElementById('m').innerHTML = P.map(([sec, sub, items]) =>
-  `<section><div class="sec-head"><h2>${esc(sec)}</h2><p>${esc(sub)} · ${items.length}</p></div><div class="grid">` +
-  items.map(([m, th, client, title, note]) =>
-    `<a class="card" href="play.html?${VIA[m] ? 'via=' + VIA[m] : 'm=' + encodeURIComponent(m)}&amp;t=${encodeURIComponent(client + ' · ' + title)}">` +
-    `<img loading="lazy" src="thumbs/${th}.jpg" alt="${esc(title)}"><div class="meta"><span class="client">${esc(client)}</span>` +
-    `<span class="title">${esc(title)}</span>${note ? `<span class="note">${esc(note)}</span>` : ''}</div></a>`
-  ).join('') + '</div></section>').join('');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function playHref(w) {
+  const s = w.start || {};
+  if (s.via) return 'play.html?w=' + w.slug + '&via=' + s.via;
+  return 'play.html?w=' + w.slug + (s.movie ? '&m=' + encodeURIComponent(s.movie) : '');
+}
+fetch('works.json').then(r => r.json()).then(({ works }) => {
+  document.getElementById('reel').innerHTML = works.map(w =>
+    `<a href="work.html?w=${w.slug}"><img src="${esc(w.thumb)}" alt="" loading="lazy"><span>${esc(w.title)}</span></a>`).join('');
+  const byYear = new Map();
+  for (const w of works) (byYear.get(w.year) || byYear.set(w.year, []).get(w.year)).push(w);
+  document.getElementById('years').innerHTML = [...byYear].sort((a, b) => a[0] - b[0]).map(([year, ws]) =>
+    `<section class="year"><h2 class="display">${year}</h2><div>` + ws.map(w => {
+      const n = (w.groups || []).reduce((t, g) => t + g.pieces.length, 0);
+      return `<article class="work">
+        <a href="work.html?w=${w.slug}" tabindex="-1"><img src="${esc(w.thumb)}" alt="" loading="lazy"></a>
+        <div>
+          <h3><a href="work.html?w=${w.slug}">${esc(w.title)}</a></h3>
+          <p class="facts"><span>${esc(w.client)}</span><span>${esc(w.kind)}</span>${n ? `<span>${n} pieces inside</span>` : ''}</p>
+          <p>${esc(w.summary)}</p>
+          <a class="play" href="${playHref(w)}">Play</a><a class="more" href="work.html?w=${w.slug}">About this work</a>
+        </div>
+      </article>`;
+    }).join('') + '</div></section>').join('');
+});
 </script>
-
-</body></html>
+</body>
+</html>

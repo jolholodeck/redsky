@@ -1,0 +1,19 @@
+data/assets/lib/dz1base.cst	data/assets/lib/dz1base.cst	Data/Assets/Lib/dz1base.cst
+data/assets/lib/dz2base.cst	data/assets/lib/dz2base.cst	Data/Assets/Lib/dz2base.cst
+data/assets/lib/dz3base.cst	data/assets/lib/dz3base.cst	Data/Assets/Lib/dz3base.cst
+data/assets/lib/dz4base.cst	data/assets/lib/dz4base.cst	Data/Assets/Lib/dz4base.cst
+data/assets/lib/dz5base.cst	data/assets/lib/dz5base.cst	Data/Assets/Lib/dz5base.cst
+data/assets/lib/dz6base.cst	data/assets/lib/dz6base.cst	Data/Assets/Lib/dz6base.cst
+data/assets/lib/dz_deflt.cst	data/assets/lib/dz_deflt.cst	Data/Assets/Lib/dz_deflt.cst
+data/assets/lib/uiassets.cst	data/assets/lib/uiassets.cst	Data/Assets/Lib/UIassets.cst
+data/assets/snd/introbnk.rmf	data/assets/snd/introbnk.rmf	Data/Assets/Snd/Introbnk.rmf
+data/assets/snd/intromus.rmf	data/assets/snd/intromus.rmf	Data/Assets/Snd/Intromus.rmf
+data/assets/snd/mainbank.rmf	data/assets/snd/mainbank.rmf	Data/Assets/Snd/Mainbank.rmf
+data/assets/snd/patches.hsb	data/assets/snd/patches.hsb	Data/Assets/Snd/Patches.hsb
+data/assets/snd/stub.hsb	data/assets/snd/stub.hsb	Data/Assets/Snd/Stub.hsb
+data/data.txt	data/data.txt	Data/Data.txt
+data/extro.dir	data/extro.dir	Data/Extro.dir
+data/intro.dir	data/intro.dir	Data/Intro.dir
+data/main.dir	data/main.dir	Data/Main.dir
+lingo.ini	lingo.ini	Lingo.ini
+stub(mac palette).dir	stub_mac_palette_.dir	stub(Mac palette).dir

@@ -1,0 +1,482 @@
+{
+  "note": "One entry per work. 'start' says how the player opens it. Years marked 'approx' come from file dates and need confirming.",
+  "works": [
+    {
+      "slug": "gypsy-wagon",
+      "title": "Red Sky 97 Demo",
+      "aka": "Gypsy Wagon",
+      "client": "Red Sky Interactive",
+      "year": 1997,
+      "kind": "Demo CD-ROM",
+      "platform": "Macromedia Director 5, Mac",
+      "summary": "The studio's 1997 reel on disc: a gypsy wagon at night, a quill that writes the menu, and three drawers of work called Finite, Infinite and Madness.",
+      "start": {
+        "movie": "begin.dir"
+      },
+      "stage": [
+        640,
+        480
+      ],
+      "thumb": "thumbs/gypsy-wagon.jpg",
+      "groups": [
+        {
+          "title": "Finite",
+          "subtitle": "Floppies and CD-ROMs",
+          "pieces": [
+            {
+              "title": "Nike Zoom Air",
+              "client": "Nike",
+              "movie": "finite/zoomair/zoomair.dir"
+            },
+            {
+              "title": "Bank of America HomeBanking",
+              "client": "Bank of America",
+              "movie": "finite/bofahome/bofahome.dir"
+            },
+            {
+              "title": "Sony Vaio PC",
+              "client": "Sony",
+              "movie": "finite/sonyvaio/sonyvaio.dir"
+            }
+          ]
+        },
+        {
+          "title": "Infinite",
+          "subtitle": "Web sites, vignettes and banners",
+          "pieces": [
+            {
+              "title": "Nike Olympic Web Site",
+              "client": "Nike",
+              "movie": "infinite/nikeolyp/nikeolyp.dir"
+            },
+            {
+              "title": "Li'l Penny Vignette",
+              "client": "Nike",
+              "movie": "infinite/lilpenny/lilpenny.dir"
+            },
+            {
+              "title": "Mia Hamm Vignette",
+              "client": "Nike",
+              "movie": "infinite/mia/mia.dir"
+            },
+            {
+              "title": "Tiger Woods Vignette",
+              "client": "Nike",
+              "movie": "infinite/tiger/tiger.dir"
+            },
+            {
+              "title": "Michael Jordan Vignette",
+              "client": "Nike",
+              "movie": "infinite/jordan/jordan.dir"
+            },
+            {
+              "title": "Andre Agassi Vignette",
+              "client": "Nike",
+              "movie": "infinite/agassi/agassi.dir"
+            },
+            {
+              "title": "Ronaldo Vignette",
+              "client": "Nike",
+              "movie": "infinite/ronaldo/ronaldo.dir"
+            },
+            {
+              "title": "Dreyfus Web Site",
+              "client": "Dreyfus",
+              "movie": "infinite/dreyfus/dreyfus.dir"
+            },
+            {
+              "title": "Dreyfus Shockwave",
+              "client": "Dreyfus",
+              "movie": "infinite/dreyfus/lionshok.dir"
+            },
+            {
+              "title": "Intuit Web Site",
+              "client": "Intuit",
+              "movie": "infinite/intuit/intuit.dir"
+            },
+            {
+              "title": "Red Sky Interactive Web Site",
+              "client": "Red Sky Interactive",
+              "movie": "infinite/rsi/rsi.dir"
+            },
+            {
+              "title": "HP Lawnmower Banner",
+              "client": "Hewlett-Packard",
+              "movie": "infinite/hpmower/hpmower.dir"
+            },
+            {
+              "title": "HP Pong Banner",
+              "client": "Hewlett-Packard",
+              "movie": "infinite/pong/pong.dir"
+            }
+          ]
+        },
+        {
+          "title": "Madness",
+          "subtitle": "Pitches and experiments",
+          "pieces": [
+            {
+              "title": "Nike Products",
+              "client": "Nike",
+              "movie": "madness/nikeshoe/nikeshoe.dir"
+            },
+            {
+              "title": "Hypnosis",
+              "client": "Red Sky Interactive",
+              "movie": "madness/hypno/hypno.dir"
+            },
+            {
+              "title": "Sony Pitch",
+              "client": "Sony",
+              "movie": "madness/sonyleaf/sonyleaf.dir"
+            },
+            {
+              "title": "Clay Interface",
+              "client": "Red Sky Interactive",
+              "movie": "madness/clay/clay.dir"
+            }
+          ]
+        }
+      ],
+      "changes": [
+        "The startup movie was cut out of the Mac projector (\"1997 Demo\") and every movie unprotected.",
+        "QuickTime clips (the intro, Nike Products, Sony Vaio) were converted to MP4 and play over the stage.",
+        "Click the wagon once the scene appears to bring up the menu."
+      ]
+    },
+    {
+      "slug": "redsky98",
+      "title": "Red Sky 98 Demo",
+      "client": "Red Sky Interactive",
+      "year": 1998,
+      "kind": "Demo CD-ROM",
+      "platform": "Macromedia Director 6, Mac and Windows",
+      "summary": "The 1998 reel: a projector, a cowboy in a scratched black-and-white western, and a Work menu of 25 pieces in three drawers, New-Fangled, Old-Timey and Plumb Loco.",
+      "start": {
+        "via": "entertainment"
+      },
+      "stage": [
+        640,
+        480
+      ],
+      "thumb": "thumbs/ENTERTAINMENT.jpg",
+      "entries": [
+        {
+          "title": "Start the CD",
+          "detail": "Logo, then the cowboy",
+          "href": "play.html?w=redsky98"
+        },
+        {
+          "title": "Entertainment",
+          "detail": "The cowboy",
+          "href": "play.html?w=redsky98&via=entertainment"
+        },
+        {
+          "title": "Work menu",
+          "detail": "All 25 pieces",
+          "href": "play.html?w=redsky98&via=work"
+        }
+      ],
+      "groups": [
+        {
+          "title": "New-Fangled",
+          "subtitle": "Web sites and banners",
+          "pieces": [
+            {
+              "title": "Pong Ad Banner",
+              "client": "Hewlett-Packard",
+              "movie": "work_module/new_fangled/hp_pong/hp_pong6.dir",
+              "thumb": "thumbs/hp_pong6.jpg"
+            },
+            {
+              "title": "Beyond Lands' End Web Site",
+              "client": "Lands' End",
+              "movie": "work_module/new_fangled/le_beyond/le_beyond6.dir",
+              "thumb": "thumbs/le_beyond6.jpg"
+            },
+            {
+              "title": "NBA Ad Banners",
+              "client": "Nike",
+              "movie": "work_module/new_fangled/nike_nba_banners/nike_nba_banners6.dir",
+              "thumb": "thumbs/nike_nba_banners6.jpg"
+            },
+            {
+              "title": "1998 Tiger Woods Web Site",
+              "client": "Nike",
+              "movie": "work_module/new_fangled/nike_tiger_98/nike_tiger_986.dir",
+              "thumb": "thumbs/nike_tiger_986.jpg"
+            },
+            {
+              "title": "@tlanta Olympics Web Site",
+              "client": "Nike",
+              "movie": "work_module/new_fangled/nike_olympic/nike_olympic6.dir",
+              "thumb": "thumbs/nike_olympic6.jpg"
+            },
+            {
+              "title": "Li'l Penny Web Site",
+              "client": "Nike",
+              "movie": "work_module/new_fangled/nike_lil_penny/nike_lil_penny6.dir",
+              "thumb": "thumbs/nike_lil_penny6.jpg"
+            },
+            {
+              "title": "Mia Hamm Web Site",
+              "client": "Nike",
+              "movie": "work_module/new_fangled/nike_mia/nike_mia6.dir",
+              "thumb": "thumbs/nike_mia6.jpg",
+              "note": "Some graphics missing"
+            },
+            {
+              "title": "1997 Tiger Woods Web Site",
+              "client": "Nike",
+              "movie": "work_module/new_fangled/nike_tiger_97/nike_tiger_976.dir",
+              "thumb": "thumbs/nike_tiger_976.jpg"
+            },
+            {
+              "title": "Michael Jordan Web Site",
+              "client": "Nike",
+              "movie": "work_module/new_fangled/nike_jordan/nike_jordan6.dir",
+              "thumb": "thumbs/nike_jordan6.jpg"
+            },
+            {
+              "title": "Andre Agassi Web Site",
+              "client": "Nike",
+              "movie": "work_module/new_fangled/nike_agassi/nike_agassi6.dir",
+              "thumb": "thumbs/nike_agassi6.jpg"
+            },
+            {
+              "title": "Ad Banners",
+              "client": "Sega",
+              "movie": "work_module/new_fangled/sega_banners/sega_banners6.dir",
+              "thumb": "thumbs/sega_banners6.jpg"
+            }
+          ]
+        },
+        {
+          "title": "Old-Timey",
+          "subtitle": "Floppies and CD-ROMs",
+          "pieces": [
+            {
+              "title": "HomeBanking Floppy",
+              "client": "Bank of America",
+              "movie": "work_module/old_timey/bofa_home/bofa_home6.dir",
+              "thumb": "thumbs/bofa_home6.jpg"
+            },
+            {
+              "title": "Ready Set Dinner Floppy",
+              "client": "National Potato Board",
+              "movie": "work_module/old_timey/ready_set_dinner/ready_set_dinner6.dir",
+              "thumb": "thumbs/ready_set_dinner6.jpg"
+            },
+            {
+              "title": "Air Max Floppy",
+              "client": "Nike",
+              "movie": "work_module/old_timey/nike_airmax/nike_airmax6.dir",
+              "thumb": "thumbs/nike_airmax6.jpg"
+            },
+            {
+              "title": "Zoom Air Floppy",
+              "client": "Nike",
+              "movie": "work_module/old_timey/nike_zoomair/nike_zoomair6.dir",
+              "thumb": "thumbs/nike_zoomair6.jpg"
+            },
+            {
+              "title": "Vaio PC CD-ROM",
+              "client": "Sony",
+              "movie": "work_module/old_timey/sony_vaio/sony_vaio6.dir",
+              "thumb": "thumbs/sony_vaio6.jpg"
+            },
+            {
+              "title": "Self-Promotion Floppy",
+              "client": "West End Post",
+              "movie": "work_module/old_timey/west_end_post/west_end_post6.dir",
+              "thumb": "thumbs/west_end_post6.jpg"
+            }
+          ]
+        },
+        {
+          "title": "Plumb Loco",
+          "subtitle": "Pitches and experiments",
+          "pieces": [
+            {
+              "title": "Sales CD-ROM",
+              "client": "@Home Network",
+              "movie": "work_module/plumb_loco/at_home/at_home6.dir",
+              "thumb": "thumbs/at_home6.jpg"
+            },
+            {
+              "title": "Spec Creative",
+              "client": "Absolut",
+              "movie": "work_module/plumb_loco/absolut_pitch/absolut_pitch6.dir",
+              "thumb": "thumbs/absolut_pitch6.jpg"
+            },
+            {
+              "title": "Clay Demo",
+              "client": "Red Sky Interactive",
+              "movie": "work_module/plumb_loco/clay_demo/clay_demo6.dir",
+              "thumb": "thumbs/clay_demo6.jpg"
+            },
+            {
+              "title": "Hypnosis Pitch",
+              "client": "Red Sky Interactive",
+              "movie": "work_module/plumb_loco/hypnosis/hypnosis6.dir",
+              "thumb": "thumbs/hypnosis6.jpg"
+            },
+            {
+              "title": "Pick-A-Puke",
+              "client": "Red Sky Interactive",
+              "movie": "work_module/plumb_loco/pic_a_puke/pic_a_puke6.dir",
+              "thumb": "thumbs/pic_a_puke6.jpg"
+            },
+            {
+              "title": "Web Site X",
+              "client": "Red Sky Interactive",
+              "movie": "work_module/plumb_loco/site_x/site_x6.dir",
+              "thumb": "thumbs/site_x6.jpg"
+            },
+            {
+              "title": "Virtual Bully",
+              "client": "Red Sky Interactive",
+              "movie": "work_module/plumb_loco/virtual_bully/virtual_bully6.dir",
+              "thumb": "thumbs/virtual_bully6.jpg"
+            }
+          ]
+        }
+      ],
+      "changes": [
+        "See CHANGES.md in the repository for every fix: timing, the film burn and projectionist, flicker, dust kicks, hover states.",
+        "The Sony Vaio and @Home QuickTime clips were converted to MP4."
+      ]
+    },
+    {
+      "slug": "absolut-dj",
+      "title": "Absolut DJ",
+      "client": "Absolut Vodka",
+      "year": 1998,
+      "kind": "CD-ROM for the web browser",
+      "platform": "HTML and Shockwave, Mac and Windows",
+      "summary": "A disc that opened in your browser: an LED bottle, a map, and Shockwave rooms by DJs Coldcut and DJ Spooky, plus a UFO and a history of the bottle.",
+      "start": {
+        "page": "w/absolut-dj/web/absolut/index.htm"
+      },
+      "window": [
+        800,
+        600
+      ],
+      "thumb": "thumbs/absolut-dj.jpg",
+      "changes": [
+        "The original pages are served as they were; a small script tells them Shockwave is installed and plays each movie in DirPlayer.",
+        "Links to absolutvodka.com and other sites of the time no longer go anywhere."
+      ]
+    },
+    {
+      "slug": "millennium-clock",
+      "title": "Millennium Clock",
+      "client": "Red Sky Interactive",
+      "year": 1998,
+      "kind": "Desktop clock",
+      "platform": "Java for Internet Explorer 4, Windows",
+      "summary": "A desktop countdown to the year 2000, with an earth that turns and readouts in each corner. Rebuilt for the web from its original images.",
+      "start": {
+        "page": "w/millennium-clock/index.html"
+      },
+      "window": [
+        640,
+        480
+      ],
+      "thumb": "thumbs/millennium-clock.jpg",
+      "changes": [
+        "Rebuilt as a web page from the original images, following the original Java classes for layout, timing and behaviour.",
+        "The original set its time from atomic-clock servers; this version uses your computer's clock.",
+        "The countdown mode counts seconds to 1 January 2000, as the original did, so it now shows a negative number.",
+        "The Red Sky button opens the Internet Archive's copy of millennium.redsky.com."
+      ]
+    },
+    {
+      "slug": "beer-pager",
+      "title": "Miller Lite Beer Pager",
+      "client": "Miller Lite",
+      "year": 2000,
+      "kind": "Desktop app",
+      "platform": "Macromedia Director 7, Mac and Windows",
+      "summary": "A small desktop app for planning a Miller Time with friends over the internet: pick a place and a time, page your friends, see who's in.",
+      "start": {
+        "movie": "proto_88_hack.dir"
+      },
+      "stage": [
+        300,
+        300
+      ],
+      "thumb": "thumbs/beer-pager.jpg",
+      "caveat": "The Miller Lite server it talked to is long gone. This copy answers with a stand-in that keeps everything on your computer.",
+      "changes": [
+        "The Miller Lite server is gone, so logging in and the friends list do not work yet; the interface runs."
+      ]
+    },
+    {
+      "slug": "moodmaker",
+      "title": "Sutter Home MoodMaker",
+      "client": "Sutter Home",
+      "year": 2000,
+      "kind": "Desktop app",
+      "platform": "Macromedia Director 7 with Beatnik, Mac",
+      "summary": "A wine-country radio for your desktop: three valley landscapes, each with a soundscape you can mix, birds, wind, planes and music.",
+      "start": {
+        "movie": "data/main.dir"
+      },
+      "stage": [
+        370,
+        180
+      ],
+      "thumb": "thumbs/moodmaker.jpg",
+      "changes": [
+        "Beatnik music and soundscapes play through NeoBAE, the open-source Beatnik engine, with its General MIDI bank in place of the one installed on 2000-era Macs.",
+        "Starts directly at the MoodMaker window rather than through the projector stub."
+      ]
+    },
+    {
+      "slug": "datazord",
+      "title": "Power Rangers DataZord",
+      "client": "Bandai",
+      "year": 2000,
+      "yearApprox": true,
+      "kind": "Desktop app",
+      "platform": "Macromedia Director 7 with Beatnik, Mac",
+      "summary": "A Power Rangers companion app: it scans for the DataZords you own, then lets you command them.",
+      "start": {
+        "movie": "data/intro.dir"
+      },
+      "stage": [
+        640,
+        480
+      ],
+      "thumb": "thumbs/datazord.jpg",
+      "changes": [
+        "Starts at the DataZord scan; the Beatnik music plays through NeoBAE.",
+        "Registration data comes from the original Data.txt."
+      ]
+    },
+    {
+      "slug": "spider-man",
+      "title": "Spider-Man Teaser",
+      "client": "Columbia Pictures",
+      "year": 2002,
+      "yearApprox": true,
+      "kind": "Desktop teaser",
+      "platform": "Macromedia Director 7 Shockwave with Beatnik, Mac",
+      "summary": "A teaser for the Spider-Man film, with a score by the Beatnik engine.",
+      "start": {
+        "movie": "spmintro-rev24-stripped.dcr"
+      },
+      "stage": [
+        770,
+        440
+      ],
+      "thumb": "thumbs/spider-man.jpg",
+      "changes": [
+        "Played from the original Shockwave data inside the projector; the score plays through NeoBAE.",
+        "The disk image in the upload was empty, so anything only on it is missing."
+      ],
+      "clientApprox": true
+    }
+  ]
+}

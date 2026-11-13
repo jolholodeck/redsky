@@ -30,6 +30,14 @@ Upstream: https://github.com/igorlira/dirplayer-rs at commit 68376fbb4494a6bbad4
 | `puppetSprite(n, 0)` on a channel with a Score span hands it back to the Score on the next tick: member, position, size, ink and blend return to the Score's values; behaviors stay | Transient sprites froze on their last frame (the bottle's "Red Sky Work" arrow, the cowboy/pig toggle, the background cowboy and pig) |
 | Rollover events (mouseEnter/Within/Leave) go to the front-most *active* sprite (with a behavior or cast member script), and reach cast member scripts | Entertainment's dust kicks: two hidden puff-zone bitmaps under the unscripted backdrop never saw the pointer |
 | `abort` ends an evaluated command quietly | Starting a module through the front door (`play.html?via=`) showed a "Script error: abort" alert |
+| Xtras implemented by the page (`jsbridge.rs`): `new(xtra "Beatnik")`, DirectConnection, FileXtra; instance calls, old-style global calls (`play(gxBeatnik, 0, "UI.rmf")`) and static functions (`FileExists`, `DirectoryToList`) go to `window.__rsXtra*` | MoodMaker, DataZord, Beer Pager and Spider-Man stopped at "Xtra not found"; music silent |
+| QuickTime members (`rs_video.rs`): a DigitalVideo member type with fileName and duration; movieRate, movieTime, stopTime, volume on sprites; each frame the page is told where video sprites are and plays them as MP4 in a `<video>` over the stage | Gypsy Wagon's Nike and Sony pieces, the 1998 CD's Sony Vaio and @Home clips showed nothing |
+| Old-style async Xtra calls (`openFile(xFile, name, mode)`) take the async path | FileIO calls as globals failed with "should be handled by async handler" |
+| `the short/long/abbreviated date`, `the short/long time` | Beer Pager stopped at startup |
+| `set the foreColor/backColor of member` on fields | Spider-Man's text fields |
+| Arithmetic on palette-index colors (`the foreColor of sprite n - 1`) | DataZord |
+| Generic member properties answer neutral values (`the size` of a script, `the width` of a palette) | Spider-Man, DataZord |
+| `the mouseCast` | Gypsy Wagon's Nike Products |
 
 ## Build
 
@@ -47,3 +55,8 @@ With a normal rustup install, step 2 and 3 are replaced by `rustup target add wa
 - `?via=entertainment` / `?via=work` start the CD's startup movie and jump to the module, so the navigation and state managers exist (space to skip, Ctrl-E/W/X, returning from pieces). Loading a module directly skipped them.
 - The audio context is created and unlocked inside the Start click, so the first sounds play.
 - Keyboard focus is kept on the stage, and keys pressed elsewhere on the page are forwarded to it.
+
+## Building
+
+`tools/buildvm.sh` builds the player (Rust to wasm32 with build-std, wasm-bindgen, vite) and
+stops on any compile error. The Beatnik engine is built separately; see `beatnik/`.

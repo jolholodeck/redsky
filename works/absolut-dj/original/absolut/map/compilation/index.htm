@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<title>Absolut DJ Compilation</title>
+<script language="Javascript">
+<!--// 
+if (document.images)
+	{
+	maptexton = new Image(42,16);
+	maptexton.src = "media/cm_1_3on.gif";
+	maptextoff = new Image(42,16);
+	maptextoff.src = "media/cm_1_3off.gif";
+	a = new Image();
+	a.src = "media/cm_2_2on.gif";
+	b = new Image();
+	b.src = "media/cm_2_4on.gif";
+	c = new Image();
+	c.src = "media/cm_2_6on.gif";
+	d = new Image();
+	d.src = "media/cm_3_3spooky.gif";
+	e = new Image();
+	e.src = "media/cm_3_3ufo.gif";
+	f = new Image();
+	f.src = "media/cm_3_3coldcut.gif";
+	}
+function img_act(imgName) {
+               if (document.images) {
+	               imgOn = eval(imgName + "on.src");
+			       document [imgName].src = imgOn;
+		           }
+	       		}
+function img_inact(imgName) {
+               if (document.images) {
+	               imgOff = eval(imgName + "off.src");
+			       document [imgName].src = imgOff;
+	               }
+	       		}
+function msover2(img1,ref1,img2,ref2)
+        {
+                if (document.images)
+                        {
+                        document.images[img1].src = ref1;
+                        document.images[img2].src = ref2;
+                        }
+        }
+function msout2(img1,ref1,img2,ref2)
+        {
+                if (document.images)
+                        {
+                        document.images[img1].src = ref1;
+                        document.images[img2].src = ref2;
+                        }
+        }
+//-->
+</script>	
+</head>
+<body bgcolor="#000000">
+<center>
+<table border="0" cellpadding="0" cellspacing="0" width="580">
+	<tr>
+		<td valign="top" width="414"><img src="media/cm_1_1.gif" width="414" height="114" border="0" usemap="#buttons"></td>
+		<td valign="top" width="166"><img src="media/cm_1_2.gif" width="166" height="67" border="0"><br>
+		<a href="../index.htm" onMouseover = "img_act('maptext')" onMouseout = "img_inact('maptext')"><img src="media/cm_1_3off.gif" width="42" height="16" name="maptext" border="0"></a><img src="media/cm_1_4.gif" width="124" height="16" border="0"><br>
+		<img src="media/cm_1_5.gif" width="166" height="31" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" width="580" colspan="2"><img src="media/cm_2_1.gif" width="147" height="13" border="0"><a href="../coldcut/cl_index.htm" onmouseover="msover2('coldcut','media/cm_2_2on.gif','offstate','media/cm_3_3coldcut.gif')" onmouseout="msout2('coldcut','media/cm_2_2off.gif','offstate','media/cm_3_3off.gif')"><img src="media/cm_2_2off.gif" width="51" height="13" border="0" name="coldcut"></a><img src="media/cm_2_3.gif" width="18" height="13" border="0"><a href="../spooky/sp_index.htm" onmouseover="msover2('spooky','media/cm_2_4on.gif','offstate','media/cm_3_3spooky.gif')" onmouseout="msout2('spooky','media/cm_2_4off.gif','offstate','media/cm_3_3off.gif')"><img src="media/cm_2_4off.gif" name="spooky" width="61" height="13" border="0"></a><img src="media/cm_2_5.gif" width="17" height="13" border="0"><a href="../ufo/uf_index.htm" onmouseover="msover2('ufo','media/cm_2_6on.gif','offstate','media/cm_3_3ufo.gif')" onmouseout="msout2('ufo','media/cm_2_6off.gif','offstate','media/cm_3_3off.gif')"><img src="media/cm_2_6off.gif" width="162" height="13" border="0" name="ufo"></a><img src="media/cm_2_7.gif" width="124" height="13" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" width="580" colspan="2"><img src="media/cm_3_1.gif" width="580" height="106" border="0"><br>
+		<img src="media/cm_3_2.gif" width="281" height="44" border="0"><img src="media/cm_3_3off.gif" width="168" height="44" border="0" name="offstate"><img src="media/cm_3_4.gif" width="131" height="44" border="0"><br>
+		<img src="media/cm_3_5.gif" width="580" height="123" border="0"></td>
+	</tr>
+</table>
+</center>
+<map name="buttons">
+  <area shape="circle" coords="386,65,22" href="../index.htm" onMouseover = "img_act('maptext')" onMouseout = "img_inact('maptext')">  
+</map>
+</body>
+</html>
+

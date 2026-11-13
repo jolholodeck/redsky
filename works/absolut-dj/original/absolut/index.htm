@@ -1,0 +1,171 @@
+<html>
+<head>
+<META NAME="description" CONTENT="Absolut DJ is an experience in creating visual music.  Mix and create your own DJ compositions with the Absolut DJ modules, which are a compilation of DJs from all around the world.  Send a friend your composition.  Learn about the history of the DJ movement.  See other Absolut sites.">
+<META NAME="keywords" CONTENT="absolut, absolut vodka, absolut dj, absolut panushka, absolut kelly, absolut advertising, DJ, music, visionaries, artists, mix, remix, music, interactive music, visual music, DJ Spooky, Spooky, Coldcut, United Future Organization, UFO, shockwave, DJ history, music history, absolut vodka, absolut vodka, absolut vodka, absolut vodka"> 
+<title>Absolut Vodka</title>
+<!-- Begin Detect.asp File Contents -->
+
+
+<script language="Javascript">scriptVers = 1.0</script>
+<script language="Javascript1.1">scriptVers = 1.1</script>
+<script language="Javascript1.2">scriptVers = 1.2</script>
+
+<script language="JavaScript">
+<!--
+
+var version = "Cannot Detect"      
+var shocked = "Maybe"    	        
+var browser = "Unknown"             
+
+
+function CheckBrowser() {
+  if (navigator.plugins) return true
+  return false
+}
+
+function CheckPlugins(PluginName, Version) {
+  for (i=0;i<navigator.plugins.length;i++) {
+  if (navigator.plugins[i].name.indexOf(PluginName) != -1) {
+         if (navigator.plugins[i].name.indexOf(Version) != -1) {
+             return true
+         }
+      }
+  }
+  return false
+}
+
+function GetShockVersion () {
+		var shockDesc = navigator.plugins["Shockwave for Director"].description;		
+		if ((shockDesc.indexOf("version 6.0") >= 0) || (shockDesc.indexOf("version 7.") >= 0)) {
+				version = "6+"; 
+		}
+		else {
+				version = "5";
+		}
+}
+
+if (navigator.appName.indexOf('Netscape') != -1) {
+		browser = "Netscape"
+		if (navigator.plugins) {
+			// Shockwave for Director on Netscape
+		    if (CheckPlugins('Shockwave','Director')) {  	
+					shocked = "Yes"
+					GetShockVersion();									
+			}
+		   	else {
+		            shocked = "No"
+					version = "None"
+	        }
+	    }
+}
+
+
+
+var waveOnPC
+
+if (navigator.userAgent && navigator.userAgent.indexOf("MSIE")>=0) {
+	browser = "IE"
+	if (navigator.userAgent.indexOf("Win")>=0 || navigator.userAgent.indexOf("Windows NT")>=0) {
+				if (scriptVers > 1) {
+						document.write('<SCRIPT LANGUAGE=VBScript\> \n');
+						document.write('on error resume next \n');
+						document.write('waveOnPC = IsObject(CreateObject("SWCtl.SWCtl.1")) \n');
+						document.write('If ( waveOnPC Is FALSE ) Then waveOnPC = IsObject(CreateObject("Macromedia.ActiveShockwave.1")) \n');
+						document.write('</SCRIPT\> \n');
+						if ( waveOnPC ) {
+							shocked = "Yes"
+						} else {
+							shocked = "No"
+						}
+				}
+	} else {    							
+				browser = "Mac IE";			
+				shocked = "Maybe";			
+											
+	}
+}
+
+
+
+function displayDebugInfo() {
+	document.write(" <font size=-2 face='arial,helvetica'>");
+	document.write(" <br><b>DETECTION RESULTS:</b>");
+	document.write(" <br><b>Shocked: </b>" + shocked);
+	document.write(" <br><b>Version: </b>" + version);
+	document.write(" <br><b>Browser: </b>" + browser);
+		if (browser == "Mac IE")
+		document.write("<br><font size=-2>Note: Mac IE has only shaky support of shockwave.</font>");
+	document.write(" <br><b>JavaScript Version: </b>" + scriptVers);
+	document.write(" <br><b>Navigator UserAgent: </b>" + navigator.userAgent);
+	document.write("<p>");
+	document.write(" </font>");
+		
+}
+
+//-->
+</script>
+<script language="JavaScript">
+<!--
+function openWindow(theURL,winName,features)
+{
+  window.open(theURL,winName,features);
+}
+//-->
+</script>
+<!-- End Detect.asp File Contents -->
+<!-- onLoad="openWindow('pop.htm','greg','width=260,height=200')"-->
+</head>
+<body bgcolor="#000000">
+<center>
+<table border="0" cellpadding="0" cellspacing="0" width="600">
+	<tr>
+		<td valign="top" width="600" colspan="3"><img src="media/black.gif" width="2" hspace="298" height="1" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" width="245"><img src="media/black.gif" width="1" height="1" hspace="122" border="0"></td>
+<script language="Javascript">
+<!--
+var bottleSw = '<object classid="clsid:166B1BCA-3F9C-11CF-8075-444553540000" codebase="http://active.macromedia.com/director/cabs/sw.cab#version=6,0,0,0" width="112" height="302"><param name="SRC" value="media/bottle_final.dcr"><param name="BGCOLOR" value="#000000"><embed src="media/bottle_final.dcr" pluginspage="http://www.macromedia.com/shockwave/download/" width="112" height="302" bgcolor="#000000"></embed></object>';
+
+if (browser == "Mac IE") {
+	document.write("<td valign=top align=center width=110><a href='download/mac_ie.htm'><img src='media/absolut_led2.gif' width=110 height=302 border=0></a></td>")
+}
+else {					
+	if ((shocked == "Yes") && (version != "5")) { // User definitely has shockwave
+				document.write("<td valign=top align=center width=110>");
+				document.write(bottleSw);
+				document.write("</td>");
+	}
+	else { 
+			if ((shocked == "No") || (version == "5")) { // User definitely does not have shockwave
+							document.write("<td valign=top align=center width=110><a href='download/index.htm'><img src='media/absolut_led2.gif' width=110 height=302 border=0></a></td>")
+						//document.write("<p>Message: You  need to <a href='" + getShockURL + "'>download shockwave 6.0</a><p>");	
+			}
+			else { // shocked == "Maybe".  User may or may not have shockwave
+							document.write("<td valign=top align=center width=110><a href='download/maybe.htm'><img src='media/absolut_led2.gif' width=110 height=302 border=0></a></td>")
+						//document.write("<p>Message: You may need to <a href='" + getShockURL + "'>download shockwave 6.0</a><p>");			
+			}
+	}
+}
+
+//displayDebugInfo();
+//-->
+</script>
+		<td valign="top" width="245"><img src="media/black.gif" width="1" height="1" hspace="122" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" width="600" colspan="3"><img src="media/black.gif" width="1" vspace="12" height="1" border="0"></td>
+	</tr>
+	<tr>
+		<td valign="top" width="600" colspan="3"><font size="-1" color="#C0C0C0" face="Verdana,Tahoma,Arial,Helvetica,Sans Serif"><center>Welcome to the official <b>ABSOLUT</b> web site.<br><font color="#808080">You must be of legal drinking age to enter this site. Enjoy our quality responsibly.</font></center></font>
+<p>
+<font size="-3" face="Verdana,Tahoma,Arial,Helvetica,Sans Serif" color="#808080">Absolut &#174; Vodka. Product of Sweden. 40 and 50% alc/vol (80 and 100 proof). 100% grain neutral spirits.
+Absolut Country of Sweden Vodka &amp; Logo, Absolut, Absolut Bottle Design, Absolut Calligraphy and
+absolutvodka.com are trademarks owned by V&amp;S Vin &amp; Sprit AB. &copy; 1998 V&amp;S Vin &amp; Sprit
+AB. Imported by the House of Seagram, New York, NY. 
+ </font></td>
+	</tr>
+</table>
+</center>
+</body>
+</html>
