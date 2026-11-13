@@ -41,7 +41,7 @@ img { display: block; max-width: 100%; }
 .reel img { width: 200px; height: 150px; object-fit: cover; border-radius: 3px; background: #000; }
 .reel span { display: block; font-size: 13px; color: var(--haze); padding-top: 6px; }
 
-.years { padding: 56px 0 80px; }
+.years { padding-top: 56px; padding-bottom: 80px; }
 .year { display: grid; grid-template-columns: 180px 1fr; gap: 24px; padding: 28px 0; border-top: 1px solid var(--line); }
 .year > h2 { font-size: 64px; margin: 0; color: var(--haze); }
 .work { display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; padding-bottom: 32px; }
@@ -60,11 +60,11 @@ img { display: block; max-width: 100%; }
 .play:hover { background: var(--ember); }
 .more { margin-left: 14px; font-size: 15px; color: var(--haze); }
 
-footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--haze); font-size: 14px; }
+footer { border-top: 1px solid var(--line); padding-top: 28px; padding-bottom: 48px; color: var(--haze); font-size: 14px; }
 footer p { max-width: 44em; }
 
 /* ---------- Work page ---------- */
-.topbar { padding: 18px 0; font-size: 15px; }
+.topbar { padding-top: 18px; padding-bottom: 18px; font-size: 15px; }
 .topbar a { color: var(--haze); text-decoration: none; }
 .topbar a:hover { color: var(--bone); }
 .hero { background: linear-gradient(180deg, var(--sky-deep), var(--sky)); padding: 36px 0 40px; }
