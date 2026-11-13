@@ -1637,7 +1637,7 @@ index 0000000..0bf46f9
 +    crate::player::handlers::datum_handlers::sound_channel::rs_js_call("__rsVideoFrame", &[list.into()]);
 +}
 diff --git a/vm-rust/src/player/score.rs b/vm-rust/src/player/score.rs
-index 25330f7..4b8b857 100644
+index 25330f7..13ea5bb 100644
 --- a/vm-rust/src/player/score.rs
 +++ b/vm-rust/src/player/score.rs
 @@ -653,11 +653,19 @@ impl Score {
@@ -1879,8 +1879,17 @@ index 25330f7..4b8b857 100644
          }
      }
  
-@@ -3649,6 +3706,12 @@ pub fn sprite_get_prop(
+@@ -3647,8 +3704,21 @@ pub fn sprite_get_prop(
+ ) -> Result<Datum, ScriptError> {
+     // Clear any previous cached ref. Only set for scriptInstanceList.
      player.last_sprite_prop_ref = None;
++    // Red Sky preservation build: `the quad of sprite` reads back the corners set by Lingo.
++    if prop_name.to_string().eq_ignore_ascii_case("quad") {
++        if let Some(q) = get_sprite_in_context(player, sprite_id).and_then(|s| s.quad) {
++            let pts: Vec<_> = q.iter().map(|(x, y)| player.alloc_datum(Datum::Point([*x as f64, *y as f64], 0))).collect();
++            return Ok(Datum::List(crate::director::lingo::datum::DatumType::List, pts.into(), false));
++        }
++    }
      // Use context-aware sprite lookup to support filmloop behaviors
      let sprite = get_sprite_in_context(player, sprite_id);
 +    // Red Sky preservation build: QuickTime sprite properties come from the page's video.
@@ -1892,7 +1901,7 @@ index 25330f7..4b8b857 100644
      match prop_name.into_builtin() {
          Some(BuiltInSymbol::Ilk) => Ok(Datum::Symbol(Symbol::builtin(BuiltInSymbol::Sprite))),
          Some(BuiltInSymbol::SpriteNum | BuiltInSymbol::SpriteNumber) => Ok(Datum::Int(
-@@ -4457,6 +4520,10 @@ pub fn sprite_set_prop(sprite_id: i16, prop_name: Symbol, value: Datum) -> Resul
+@@ -4457,6 +4527,10 @@ pub fn sprite_set_prop(sprite_id: i16, prop_name: Symbol, value: Datum) -> Resul
      if !in_range {
          return Ok(());
      }
@@ -1903,7 +1912,25 @@ index 25330f7..4b8b857 100644
      // Assigning VOID to an appearance property leaves it alone. VOID is not a
      // value any of these can hold, and Director neither raises nor coerces it
      // to zero — Merlin's Revenge proves both halves. Its bSpriteParams mirrors
-@@ -6961,3 +7028,15 @@ mod rect_tests {
+@@ -5997,6 +6071,17 @@ pub fn field_scrollbar_for(
+ 
+ pub fn get_concrete_sprite_rect(player: &DirPlayer, sprite: &Sprite) -> IntRect {
+     use crate::rendering_gpu::webgl2::FIELD_SCROLLBAR_WIDTH;
++    // Red Sky preservation build: a sprite with a quad covers the quad's bounding box.
++    if let Some(q) = sprite.quad {
++        let xs = q.iter().map(|p| p.0);
++        let ys = q.iter().map(|p| p.1);
++        return IntRect {
++            left: xs.clone().min().unwrap_or(0),
++            top: ys.clone().min().unwrap_or(0),
++            right: xs.max().unwrap_or(0),
++            bottom: ys.max().unwrap_or(0),
++        };
++    }
+ 
+     let member = sprite
+         .member
+@@ -6961,3 +7046,15 @@ mod rect_tests {
          assert_eq!(normalise_rect([0, 0, 0, 0]), [0, 0, 0, 0]);
      }
  }
@@ -2398,7 +2425,7 @@ index 0a7e9d6..f1054b6 100644
 +    (reset, dirty)
 +}
 diff --git a/vm-rust/src/rendering_gpu/webgl2/mod.rs b/vm-rust/src/rendering_gpu/webgl2/mod.rs
-index dffbb65..063d6ed 100644
+index dffbb65..0392cc1 100644
 --- a/vm-rust/src/rendering_gpu/webgl2/mod.rs
 +++ b/vm-rust/src/rendering_gpu/webgl2/mod.rs
 @@ -506,7 +506,7 @@ impl WebGL2Renderer {
@@ -2410,7 +2437,37 @@ index dffbb65..063d6ed 100644
          }
          if let Some(ref loc) = program.u_rotation {
              gl.uniform1f(Some(loc), 0.0);
-@@ -849,10 +849,38 @@ impl WebGL2Renderer {
+@@ -514,6 +514,9 @@ impl WebGL2Renderer {
+         if let Some(ref loc) = program.u_skew_flip {
+             gl.uniform1f(Some(loc), 0.0);
+         }
++        if let Some(ref loc) = program.u_quad_on {
++            gl.uniform1f(Some(loc), 0.0);
++        }
+         if let Some(ref loc) = program.u_floor_rule {
+             gl.uniform1f(Some(loc), 0.0);
+         }
+@@ -594,6 +597,9 @@ impl WebGL2Renderer {
+         if let Some(ref loc) = program.u_skew_flip {
+             gl.uniform1f(Some(loc), 0.0);
+         }
++        if let Some(ref loc) = program.u_quad_on {
++            gl.uniform1f(Some(loc), 0.0);
++        }
+         if let Some(ref loc) = program.u_floor_rule {
+             gl.uniform1f(Some(loc), 0.0);
+         }
+@@ -685,6 +691,9 @@ impl WebGL2Renderer {
+         if let Some(ref loc) = program.u_skew_flip {
+             gl.uniform1f(Some(loc), 0.0);
+         }
++        if let Some(ref loc) = program.u_quad_on {
++            gl.uniform1f(Some(loc), 0.0);
++        }
+         if let Some(ref loc) = program.u_floor_rule {
+             gl.uniform1f(Some(loc), 0.0);
+         }
+@@ -849,10 +858,38 @@ impl WebGL2Renderer {
          // Bind quad geometry once
          self.quad.bind(self.context.gl());
  
@@ -2423,7 +2480,7 @@ index dffbb65..063d6ed 100644
 +        let (rs_reset, rs_dirty) = crate::rendering::rs_trails_dirty(player, &channel_list);
 +        if rs_reset && self.trails_fbo.is_some() {
 +            self.destroy_trails_fbo();
-         }
++        }
 +        if let Some(fbo) = self.trails_fbo.clone() {
 +            if !rs_dirty.is_empty() {
 +                let gl = self.context.gl();
@@ -2446,13 +2503,13 @@ index dffbb65..063d6ed 100644
 +                gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
 +                gl.viewport(0, 0, w as i32, h as i32);
 +            }
-+        }
+         }
 +        let rs_trails_top = player.rs_trails_top;
 +        let mut rs_trails_done = self.trails_texture.is_none();
  
          // Render each sprite.
          //
-@@ -868,6 +896,10 @@ impl WebGL2Renderer {
+@@ -868,6 +905,10 @@ impl WebGL2Renderer {
          let overlay_active = player.stage_image_dirty && player.stage_image.is_some();
          let mut deferred_dts_3d: Vec<i16> = Vec::new();
          for (channel_num, _) in &sorted_channels {
@@ -2463,7 +2520,7 @@ index dffbb65..063d6ed 100644
              if overlay_active && self.is_direct_to_stage_3d(player, *channel_num) {
                  deferred_dts_3d.push(*channel_num);
                  continue;
-@@ -875,6 +907,13 @@ impl WebGL2Renderer {
+@@ -875,6 +916,13 @@ impl WebGL2Renderer {
              self.render_sprite(player, *channel_num);
          }
  
@@ -2477,7 +2534,7 @@ index dffbb65..063d6ed 100644
          // Accumulate trails sprites into the trails texture via GPU-side copy.
          // Instead of re-rendering sprites to the FBO, we copy the already-rendered
          // pixel rects from the default framebuffer using copyTexSubImage2D.
-@@ -919,9 +958,6 @@ impl WebGL2Renderer {
+@@ -919,9 +967,6 @@ impl WebGL2Renderer {
  
                  gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
              }
@@ -2487,3 +2544,92 @@ index dffbb65..063d6ed 100644
          }
  
          // Composite the script-owned stage framebuffer over the sprite render
+@@ -1297,6 +1342,9 @@ impl WebGL2Renderer {
+         if let Some(ref loc) = program.u_skew_flip {
+             gl.uniform1f(Some(loc), 0.0);
+         }
++        if let Some(ref loc) = program.u_quad_on {
++            gl.uniform1f(Some(loc), 0.0);
++        }
+         if let Some(ref loc) = program.u_floor_rule {
+             gl.uniform1f(Some(loc), 0.0);
+         }
+@@ -4519,6 +4567,21 @@ impl WebGL2Renderer {
+         if let Some(ref loc) = program.u_skew_flip {
+             gl.uniform1f(Some(loc), if has_skew_flip { 1.0 } else { 0.0 });
+         }
++        // Red Sky preservation build: a sprite with a quad is drawn at its four corners.
++        {
++            let rs_quad = player.movie.score.get_sprite(channel_num).and_then(|s| s.quad);
++            if let Some(ref loc) = program.u_quad_on {
++                gl.uniform1f(Some(loc), if rs_quad.is_some() { 1.0 } else { 0.0 });
++            }
++            if let Some(q) = rs_quad {
++                if let Some(ref loc) = program.u_quad_a {
++                    gl.uniform4f(Some(loc), q[0].0 as f32, q[0].1 as f32, q[1].0 as f32, q[1].1 as f32);
++                }
++                if let Some(ref loc) = program.u_quad_b {
++                    gl.uniform4f(Some(loc), q[2].0 as f32, q[2].1 as f32, q[3].0 as f32, q[3].1 as f32);
++                }
++            }
++        }
+         if let Some(ref loc) = program.u_floor_rule {
+             gl.uniform1f(Some(loc), if floor_rule { 1.0 } else { 0.0 });
+         }
+diff --git a/vm-rust/src/rendering_gpu/webgl2/shaders.rs b/vm-rust/src/rendering_gpu/webgl2/shaders.rs
+index 43b1578..58580e1 100644
+--- a/vm-rust/src/rendering_gpu/webgl2/shaders.rs
++++ b/vm-rust/src/rendering_gpu/webgl2/shaders.rs
+@@ -127,6 +127,9 @@ pub struct ShaderProgram {
+     pub u_rotation: Option<WebGlUniformLocation>,
+     pub u_rotation_center: Option<WebGlUniformLocation>,
+     pub u_skew_flip: Option<WebGlUniformLocation>,
++    pub u_quad_on: Option<WebGlUniformLocation>,
++    pub u_quad_a: Option<WebGlUniformLocation>,
++    pub u_quad_b: Option<WebGlUniformLocation>,
+     /// 1.0 = sample a shrunk sprite at floor(d * src / dst) (see sampleSprite).
+     pub u_floor_rule: Option<WebGlUniformLocation>,
+     /// Continuous skew shear, in radians. The vertex shader applies a
+@@ -217,6 +220,9 @@ uniform float u_rotation;
+ uniform vec2 u_rotation_center;  // sprite's loc (registration point)
+ uniform float u_skew_flip;   // 1.0 = negate y before rotation (for skew=180 effect)
+ uniform float u_skew;        // continuous horizontal-shear angle, in RADIANS
++uniform float u_quad_on;     // Red Sky: 1.0 = place the corners at the sprite's quad
++uniform vec4 u_quad_a;       // top-left.xy, top-right.xy
++uniform vec4 u_quad_b;       // bottom-right.xy, bottom-left.xy
+ 
+ out vec2 v_texcoord;
+ 
+@@ -230,7 +236,11 @@ void main() {
+     // Apply rotation around registration point (sprite's loc)
+     // Director rotates around the registration point, not the sprite center
+     bool needs_skew = abs(u_skew) > 0.001;
+-    if (abs(u_rotation) > 0.001 || u_skew_flip > 0.5 || needs_skew) {
++    if (u_quad_on > 0.5) {
++        vec2 top = mix(u_quad_a.xy, u_quad_a.zw, pos.x);
++        vec2 bot = mix(u_quad_b.zw, u_quad_b.xy, pos.x);
++        world_pos = mix(top, bot, pos.y);
++    } else if (abs(u_rotation) > 0.001 || u_skew_flip > 0.5 || needs_skew) {
+         vec2 center = u_rotation_center;
+         world_pos -= center;
+ 
+@@ -1262,6 +1272,9 @@ void main() {
+         let u_rotation = gl.get_uniform_location(&program, "u_rotation");
+         let u_rotation_center = gl.get_uniform_location(&program, "u_rotation_center");
+         let u_skew_flip = gl.get_uniform_location(&program, "u_skew_flip");
++        let u_quad_on = gl.get_uniform_location(&program, "u_quad_on");
++        let u_quad_a = gl.get_uniform_location(&program, "u_quad_a");
++        let u_quad_b = gl.get_uniform_location(&program, "u_quad_b");
+         let u_floor_rule = gl.get_uniform_location(&program, "u_floor_rule");
+         let u_skew = gl.get_uniform_location(&program, "u_skew");
+ 
+@@ -1281,6 +1294,9 @@ void main() {
+             u_rotation,
+             u_rotation_center,
+             u_skew_flip,
++            u_quad_on,
++            u_quad_a,
++            u_quad_b,
+             u_floor_rule,
+             u_skew,
+         })

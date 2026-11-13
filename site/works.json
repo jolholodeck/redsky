@@ -478,9 +478,9 @@
       ],
       "thumb": "thumbs/spider-man.jpg",
       "changes": [
-        "Played from the original Shockwave data inside the projector; the score plays through NeoBAE.",
-        "The disk image in the upload was empty, so anything only on it is missing.",
-        "After loading, the piece waits on the web (the code calls this mode the harp) for the mouse."
+        "Played from the original Shockwave data inside the projector; the score plays through NeoBAE, the open-source Beatnik engine.",
+        "The web is ten images stretched between moving points (Director's sprite quads); the player now draws those, so the web appears and moves under the mouse.",
+        "The .iso in the archive is empty (0 bytes) in both copies we have; the projector, music and sound bank are all here."
       ],
       "clientApprox": true
     }

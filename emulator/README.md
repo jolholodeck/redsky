@@ -46,6 +46,7 @@ Upstream: https://github.com/igorlira/dirplayer-rs at commit 68376fbb4494a6bbad4
 | `the colorDepth` comes from the page (`colorDepth` in works.json, default 8) | Beer Pager refused to run in 256 colours and then waited forever in its dialog |
 | Buddy API answers as a late-90s Windows PC: `baCpuInfo("type")` 6, `baVersion("os")` "4.10", `baDiskInfo` 4 GB free | DataZord's system check quit at startup |
 | `the fileName of castLib` gives back the path exactly as a script set it | DataZord checks it after linking each module's cast |
+| `the quad of sprite`: sprites are drawn at their four corners (WebGL renderer), report the quad's bounding box as their rect, and read the quad back | Spider-Man's web, which is ten bitmaps stretched between moving nodes |
 | GLU32 (calls into Windows DLLs) answered by the page: no proxy | Beer Pager's proxy lookup |
 
 ## Build
