@@ -34,10 +34,11 @@
       controller: (id, c, k, v) => x.rs_controller(id, c, k, v),
       program: (id, c, b, p) => x.rs_program(id, c, b, p),
       reverb: t => x.rs_reverb(t),
+      master: percent => x.rs_master(percent | 0),
       trackMute: (id, t, m) => x.rs_track_mute(id, t, m ? 1 : 0),
       channelMute: (id, c, m) => x.rs_channel_mute(id, c, m ? 1 : 0),
       songPosition: (id, ms) => x.rs_song_position(id, ms | 0),
-      render(frames) { const p = x.rs_render(frames); return new Int16Array(mem.buffer, p, frames * 2); },
+      render(frames) { const p = x.rs_render(frames); return new Int16Array(mem.buffer, p, x.rs_rendered() * 2); },   // whole engine slices: may be fewer or more frames than asked
     };
   }
   if (typeof module !== 'undefined') module.exports = { createBae }; else root.createBae = createBae;

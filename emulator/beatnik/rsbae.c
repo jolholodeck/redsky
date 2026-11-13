@@ -14,6 +14,7 @@
 extern void BAE_BuildMixerSlice(void *threadContext, void *pAudioBuffer, int32_t bufferByteLength, int32_t sampleFrames);
 extern void *BAE_WASM_GetMixerThreadContext(void);
 extern struct GM_Mixer *GM_GetCurrentMixer(void);
+extern int16_t BAE_GetMaxSamplePerSlice(void);
 
 #define MAX_SONGS 32
 #define MAX_FRAMES 4096
@@ -150,13 +151,34 @@ EMSCRIPTEN_KEEPALIVE int rs_reverb(int type)
     return gMix ? (int)BAEMixer_SetDefaultReverb(gMix, (BAEReverbType)type) : -1;
 }
 
-/* Render frames of interleaved 16-bit stereo; returns a pointer to them. */
+/* Render about `frames` frames of interleaved 16-bit stereo; returns a pointer to them.
+ * BAE_BuildMixerSlice always renders exactly one mixer slice (BAE_GetMaxSamplePerSlice
+ * frames, about 11 ms) whatever size it is asked for, so render whole slices, at least one,
+ * and report how many frames were made through rs_rendered(). Asking it for more than a
+ * slice in one call left the rest of the buffer stale, which chopped every sound. */
+static int gRendered = 0;
 EMSCRIPTEN_KEEPALIVE int16_t *rs_render(int frames)
 {
     if (frames > MAX_FRAMES) frames = MAX_FRAMES;
-    if (!gMix) { memset(gOut, 0, frames * 4); return gOut; }
-    BAE_BuildMixerSlice(slice_ctx(), gOut, frames * 4, frames);
+    if (!gMix) { memset(gOut, 0, frames * 4); gRendered = frames; return gOut; }
+    void *ctx = slice_ctx();
+    int slice = BAE_GetMaxSamplePerSlice();
+    if (slice <= 0 || slice > MAX_FRAMES) slice = 512;
+    int n = frames / slice;
+    if (n < 1) n = 1;
+    if (n * slice > MAX_FRAMES) n = MAX_FRAMES / slice;
+    for (int i = 0; i < n; i++)
+        BAE_BuildMixerSlice(ctx, gOut + i * slice * 2, slice * 4, slice);
+    gRendered = n * slice;
     return gOut;
+}
+
+EMSCRIPTEN_KEEPALIVE int rs_rendered(void) { return gRendered; }
+
+/* Master volume, percent (100 = the engine's full level). For songs mixed hot enough to clip. */
+EMSCRIPTEN_KEEPALIVE int rs_master(int percent)
+{
+    return gMix ? (int)BAEMixer_SetMasterVolume(gMix, FLOAT_TO_UNSIGNED_FIXED((double)percent / 100.0)) : -1;
 }
 
 EMSCRIPTEN_KEEPALIVE int rs_track_mute(int id, int track, int mute)

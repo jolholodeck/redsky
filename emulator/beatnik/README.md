@@ -18,3 +18,10 @@ noteOff, playNote, setController, getController, setTrackMute, fadeFromTo...), a
 `patches.hsb`, NeoBAE's General MIDI bank, standing in for the Beatnik bank each
 computer had installed. The player routes `new(xtra "Beatnik")` and calls on it to these
 through `window.__rsXtra` (see `jsbridge.rs` in the player patch).
+
+## Fixes
+
+| Date | Symptom | Cause and change |
+|---|---|---|
+| 2026-11-13 | Garbled, stuttering music and sounds in every Beatnik work | `BAE_BuildMixerSlice` renders exactly one mixer slice (about 11 ms) however many frames it's asked for. `rs_render` asked for up to 4096 frames in one call, so most of each block was the previous block's audio repeated. `rs_render` now renders whole slices in a loop and reports how many frames it made (`rs_rendered`); `rsbae.js` returns exactly those. |
+| 2026-11-13 | (tool) | `rs_master(percent)` added, for setting the mixer's master volume. |
