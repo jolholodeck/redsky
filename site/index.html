@@ -12,11 +12,11 @@
 </head>
 <body>
 <header class="sky">
-  <div class="wrap">
-    <h1 class="display">Red Sky<br>Interactive</h1>
-    <p class="lede">A San Francisco interactive studio. These are its demo discs, desktop apps and Shockwave pieces, restored so they play in a web browser again.</p>
+  <div class="wrap masthead">
+    <p class="wordmark display">Red Sky Interactive</p>
+    <p class="lede">A San Francisco interactive studio. Its demo discs, desktop apps and Shockwave pieces, restored so they play in a web browser again.</p>
   </div>
-  <div class="wrap"><nav class="jump" id="jump" aria-label="Sections"></nav></div>
+  <div class="wrap feature" id="feature"></div>
 </header>
 
 <main class="wrap" id="collection"></main>
@@ -34,39 +34,37 @@ function playHref(w) {
   return 'play.html?w=' + w.slug + (s.movie ? '&m=' + encodeURIComponent(s.movie) : '');
 }
 const pieceHref = (w, p) => playHref({ slug: w.slug, start: { movie: p.movie } }) + '&t=' + encodeURIComponent(p.client + ': ' + p.title);
-const card = (href, img, title, sub, note) => `<li><a href="${href}">
-  ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : '<div class="noimg"></div>'}
-  <strong>${esc(title)}</strong><span>${esc(sub)}</span>${note ? `<em>${esc(note)}</em>` : ''}</a></li>`;
+const FEATURED = 'redsky98';
 fetch('works.json').then(r => r.json()).then(({ works }) => {
-  works = [...works].sort((a, b) => a.year - b.year);
-  const discs = works.filter(w => w.groups), others = works.filter(w => !w.groups);
-  const sections = discs.map(w => ({
-    id: w.slug, label: w.title,
-    html: `<section class="disc" id="${w.slug}">
-      <div class="disc-head">
-        <h2 class="display">${esc(w.title)}</h2>
-        <p class="facts"><span>${w.year}</span><span>${esc(w.kind)}</span><span>${w.groups.reduce((t, g) => t + g.pieces.length, 0)} pieces</span></p>
-        <p>${esc(w.summary)}</p>
-        <a class="play" href="${playHref(w)}">Play the whole disc</a><a class="more" href="work.html?w=${w.slug}">About this disc</a>
-      </div>
-      ${w.groups.map(g => `<div class="module">
-        <h3>${esc(g.title)}</h3><p>${esc(g.subtitle)}</p>
-        <ul class="pieces">${g.pieces.map(p => card(pieceHref(w, p), p.thumb, p.title, p.client, p.note)).join('')}</ul>
-      </div>`).join('')}
-    </section>`
-  }));
-  sections.push({
-    id: 'other', label: 'Apps and other works',
-    html: `<section class="disc" id="other">
-      <div class="disc-head"><h2 class="display">Apps and other works</h2>
-        <p>Desktop apps, a browser CD-ROM and a teaser, ${others[0].year} to ${others[others.length - 1].year}. Each has its own page with restoration notes.</p></div>
-      <div class="module"><ul class="pieces">${others.map(w => card(playHref(w), w.thumb, w.title, w.client + ', ' + w.year + (w.yearApprox ? '?' : ''), w.caveat ? 'Not working yet' : '')
-        .replace('</a></li>', `</a><a class="about" href="work.html?w=${w.slug}">About</a></li>`)).join('')}</ul></div>
-    </section>`
+  const f = works.find(w => w.slug === FEATURED);
+  const count = w => (w.groups || []).reduce((t, g) => t + g.pieces.length, 0);
+  document.getElementById('feature').innerHTML = `
+    <div>
+      <h1 class="display">${esc(f.title)}</h1>
+      <p class="facts"><span>${f.year}</span><span>${esc(f.kind)}</span><span>${count(f)} pieces</span></p>
+      <p>${esc(f.summary)}</p>
+      <div class="entries">${f.entries.map((e, i) => `<a class="play${i ? ' alt' : ''}" href="${esc(e.href)}" title="${esc(e.detail)}">${esc(e.title)}</a>`).join('')}</div>
+      <a class="more" href="work.html?w=${f.slug}">About this disc</a>
+    </div>
+    <a class="shot" href="${esc(f.entries[0].href)}" tabindex="-1"><img src="thumbs/feature-redsky98.jpg" alt="The Entertainment module: a cowboy in a black-and-white western town"></a>`;
+
+  // Every other module: whole works, and every piece inside a disc, newest first.
+  const items = [];
+  works.forEach((w, wi) => {
+    if (w.slug !== FEATURED) items.push({ year: w.year, order: wi * 1000, href: playHref(w), thumb: w.thumb, title: w.title,
+      sub: w.client + (w.yearApprox ? ', year approximate' : ''), kind: w.kind, note: w.caveat ? 'Not working yet' : '', about: 'work.html?w=' + w.slug });
+    (w.groups || []).forEach(g => g.pieces.forEach(p => items.push({ year: w.year, order: wi * 1000 + items.length, href: pieceHref(w, p),
+      thumb: p.thumb, title: p.title, sub: p.client, kind: 'From ' + w.title + ', ' + g.title, note: p.note })));
   });
-  document.getElementById('jump').innerHTML = sections.map(s => `<a href="#${s.id}">${esc(s.label)}</a>`).join('');
-  document.getElementById('collection').innerHTML = sections.map(s => s.html).join('');
-  if (location.hash) document.querySelector(location.hash)?.scrollIntoView();
+  items.sort((a, b) => b.year - a.year || !!b.about - !!a.about || a.order - b.order);
+  let html = '', year = null;
+  for (const it of items) {
+    if (it.year !== year) { year = it.year; html += `<li class="yr" id="y${year}"><h2 class="display">${year}</h2></li>`; }
+    html += `<li><a href="${it.href}">
+      ${it.thumb ? `<img src="${esc(it.thumb)}" alt="" loading="lazy">` : '<div class="noimg"></div>'}
+      <strong>${esc(it.title)}</strong><span>${esc(it.sub)}</span><span class="kind">${esc(it.kind)}</span>${it.note ? `<em>${esc(it.note)}</em>` : ''}</a>${it.about ? `<a class="about" href="${it.about}">About</a>` : ''}</li>`;
+  }
+  document.getElementById('collection').innerHTML = `<ul class="pieces all">${html}</ul>`;
 });
 </script>
 </body>
