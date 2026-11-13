@@ -16,10 +16,10 @@
     <h1 class="display">Red Sky<br>Interactive</h1>
     <p class="lede">A San Francisco interactive studio. These are its demo discs, desktop apps and Shockwave pieces, restored so they play in a web browser again.</p>
   </div>
-  <div class="wrap"><nav class="reel" id="reel" aria-label="Works"></nav></div>
+  <div class="wrap"><nav class="jump" id="jump" aria-label="Sections"></nav></div>
 </header>
 
-<main class="wrap years" id="years"></main>
+<main class="wrap" id="collection"></main>
 
 <footer class="wrap">
   <p>Everything here runs the original 1990s files. The Director movies play in DirPlayer, an open-source Director player, and the Beatnik music plays in NeoBAE, the open-source Beatnik engine. Fixes and replaced assets are listed on each work's page.</p>
@@ -33,24 +33,40 @@ function playHref(w) {
   if (s.via) return 'play.html?w=' + w.slug + '&via=' + s.via;
   return 'play.html?w=' + w.slug + (s.movie ? '&m=' + encodeURIComponent(s.movie) : '');
 }
+const pieceHref = (w, p) => playHref({ slug: w.slug, start: { movie: p.movie } }) + '&t=' + encodeURIComponent(p.client + ': ' + p.title);
+const card = (href, img, title, sub, note) => `<li><a href="${href}">
+  ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : '<div class="noimg"></div>'}
+  <strong>${esc(title)}</strong><span>${esc(sub)}</span>${note ? `<em>${esc(note)}</em>` : ''}</a></li>`;
 fetch('works.json').then(r => r.json()).then(({ works }) => {
-  document.getElementById('reel').innerHTML = works.map(w =>
-    `<a href="work.html?w=${w.slug}"><img src="${esc(w.thumb)}" alt="" loading="lazy"><span>${esc(w.title)}</span></a>`).join('');
-  const byYear = new Map();
-  for (const w of works) (byYear.get(w.year) || byYear.set(w.year, []).get(w.year)).push(w);
-  document.getElementById('years').innerHTML = [...byYear].sort((a, b) => a[0] - b[0]).map(([year, ws]) =>
-    `<section class="year"><h2 class="display">${year}</h2><div>` + ws.map(w => {
-      const n = (w.groups || []).reduce((t, g) => t + g.pieces.length, 0);
-      return `<article class="work">
-        <a href="work.html?w=${w.slug}" tabindex="-1"><img src="${esc(w.thumb)}" alt="" loading="lazy"></a>
-        <div>
-          <h3><a href="work.html?w=${w.slug}">${esc(w.title)}</a></h3>
-          <p class="facts"><span>${esc(w.client)}</span><span>${esc(w.kind)}</span>${n ? `<span>${n} pieces inside</span>` : ''}</p>
-          <p>${esc(w.summary)}</p>
-          <a class="play" href="${playHref(w)}">Play</a><a class="more" href="work.html?w=${w.slug}">About this work</a>
-        </div>
-      </article>`;
-    }).join('') + '</div></section>').join('');
+  works = [...works].sort((a, b) => a.year - b.year);
+  const discs = works.filter(w => w.groups), others = works.filter(w => !w.groups);
+  const sections = discs.map(w => ({
+    id: w.slug, label: w.title,
+    html: `<section class="disc" id="${w.slug}">
+      <div class="disc-head">
+        <h2 class="display">${esc(w.title)}</h2>
+        <p class="facts"><span>${w.year}</span><span>${esc(w.kind)}</span><span>${w.groups.reduce((t, g) => t + g.pieces.length, 0)} pieces</span></p>
+        <p>${esc(w.summary)}</p>
+        <a class="play" href="${playHref(w)}">Play the whole disc</a><a class="more" href="work.html?w=${w.slug}">About this disc</a>
+      </div>
+      ${w.groups.map(g => `<div class="module">
+        <h3>${esc(g.title)}</h3><p>${esc(g.subtitle)}</p>
+        <ul class="pieces">${g.pieces.map(p => card(pieceHref(w, p), p.thumb, p.title, p.client, p.note)).join('')}</ul>
+      </div>`).join('')}
+    </section>`
+  }));
+  sections.push({
+    id: 'other', label: 'Apps and other works',
+    html: `<section class="disc" id="other">
+      <div class="disc-head"><h2 class="display">Apps and other works</h2>
+        <p>Desktop apps, a browser CD-ROM and a teaser, ${others[0].year} to ${others[others.length - 1].year}. Each has its own page with restoration notes.</p></div>
+      <div class="module"><ul class="pieces">${others.map(w => card(playHref(w), w.thumb, w.title, w.client + ', ' + w.year + (w.yearApprox ? '?' : ''), w.caveat ? 'Not working yet' : '')
+        .replace('</a></li>', `</a><a class="about" href="work.html?w=${w.slug}">About</a></li>`)).join('')}</ul></div>
+    </section>`
+  });
+  document.getElementById('jump').innerHTML = sections.map(s => `<a href="#${s.id}">${esc(s.label)}</a>`).join('');
+  document.getElementById('collection').innerHTML = sections.map(s => s.html).join('');
+  if (location.hash) document.querySelector(location.hash)?.scrollIntoView();
 });
 </script>
 </body>

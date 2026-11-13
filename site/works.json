@@ -26,17 +26,20 @@
             {
               "title": "Nike Zoom Air",
               "client": "Nike",
-              "movie": "finite/zoomair/zoomair.dir"
+              "movie": "finite/zoomair/zoomair.dir",
+              "thumb": "thumbs/gw_zoomair.jpg"
             },
             {
               "title": "Bank of America HomeBanking",
               "client": "Bank of America",
-              "movie": "finite/bofahome/bofahome.dir"
+              "movie": "finite/bofahome/bofahome.dir",
+              "thumb": "thumbs/gw_bofahome.jpg"
             },
             {
               "title": "Sony Vaio PC",
               "client": "Sony",
-              "movie": "finite/sonyvaio/sonyvaio.dir"
+              "movie": "finite/sonyvaio/sonyvaio.dir",
+              "thumb": "thumbs/gw_sonyvaio.jpg"
             }
           ]
         },
@@ -47,67 +50,80 @@
             {
               "title": "Nike Olympic Web Site",
               "client": "Nike",
-              "movie": "infinite/nikeolyp/nikeolyp.dir"
+              "movie": "infinite/nikeolyp/nikeolyp.dir",
+              "thumb": "thumbs/gw_nikeolyp.jpg"
             },
             {
               "title": "Li'l Penny Vignette",
               "client": "Nike",
-              "movie": "infinite/lilpenny/lilpenny.dir"
+              "movie": "infinite/lilpenny/lilpenny.dir",
+              "thumb": "thumbs/gw_lilpenny.jpg"
             },
             {
               "title": "Mia Hamm Vignette",
               "client": "Nike",
-              "movie": "infinite/mia/mia.dir"
+              "movie": "infinite/mia/mia.dir",
+              "thumb": "thumbs/gw_mia.jpg"
             },
             {
               "title": "Tiger Woods Vignette",
               "client": "Nike",
-              "movie": "infinite/tiger/tiger.dir"
+              "movie": "infinite/tiger/tiger.dir",
+              "thumb": "thumbs/gw_tiger.jpg"
             },
             {
               "title": "Michael Jordan Vignette",
               "client": "Nike",
-              "movie": "infinite/jordan/jordan.dir"
+              "movie": "infinite/jordan/jordan.dir",
+              "thumb": "thumbs/gw_jordan.jpg"
             },
             {
               "title": "Andre Agassi Vignette",
               "client": "Nike",
-              "movie": "infinite/agassi/agassi.dir"
+              "movie": "infinite/agassi/agassi.dir",
+              "thumb": "thumbs/gw_agassi.jpg"
             },
             {
               "title": "Ronaldo Vignette",
               "client": "Nike",
-              "movie": "infinite/ronaldo/ronaldo.dir"
+              "movie": "infinite/ronaldo/ronaldo.dir",
+              "thumb": "thumbs/gw_ronaldo.jpg"
             },
             {
               "title": "Dreyfus Web Site",
               "client": "Dreyfus",
-              "movie": "infinite/dreyfus/dreyfus.dir"
+              "movie": "infinite/dreyfus/dreyfus.dir",
+              "thumb": "thumbs/gw_dreyfus.jpg"
             },
             {
               "title": "Dreyfus Shockwave",
               "client": "Dreyfus",
-              "movie": "infinite/dreyfus/lionshok.dir"
+              "movie": "infinite/dreyfus/lionshok.dir",
+              "thumb": "thumbs/gw_lionshok.jpg"
             },
             {
               "title": "Intuit Web Site",
               "client": "Intuit",
-              "movie": "infinite/intuit/intuit.dir"
+              "movie": "infinite/intuit/intuit.dir",
+              "thumb": "thumbs/gw_intuit.jpg"
             },
             {
               "title": "Red Sky Interactive Web Site",
               "client": "Red Sky Interactive",
-              "movie": "infinite/rsi/rsi.dir"
+              "movie": "infinite/rsi/rsi.dir",
+              "thumb": "thumbs/gw_rsi.jpg"
             },
             {
               "title": "HP Lawnmower Banner",
               "client": "Hewlett-Packard",
-              "movie": "infinite/hpmower/hpmower.dir"
+              "movie": "infinite/hpmower/hpmower.dir",
+              "thumb": "thumbs/gw_hpmower.jpg"
             },
             {
               "title": "HP Pong Banner",
               "client": "Hewlett-Packard",
-              "movie": "infinite/pong/pong.dir"
+              "movie": "infinite/pong/pong.dir",
+              "thumb": "thumbs/gw_pong.jpg"
             }
           ]
         },
@@ -118,12 +134,14 @@
             {
               "title": "Nike Products",
               "client": "Nike",
-              "movie": "madness/nikeshoe/nikeshoe.dir"
+              "movie": "madness/nikeshoe/nikeshoe.dir",
+              "thumb": "thumbs/gw_nikeshoe.jpg"
             },
             {
               "title": "Hypnosis",
               "client": "Red Sky Interactive",
-              "movie": "madness/hypno/hypno.dir"
+              "movie": "madness/hypno/hypno.dir",
+              "thumb": "thumbs/gw_hypno.jpg"
             },
             {
               "title": "Sony Pitch",
@@ -133,7 +151,8 @@
             {
               "title": "Clay Interface",
               "client": "Red Sky Interactive",
-              "movie": "madness/clay/clay.dir"
+              "movie": "madness/clay/clay.dir",
+              "thumb": "thumbs/gw_clay.jpg"
             }
           ]
         }
