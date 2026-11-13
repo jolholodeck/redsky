@@ -1,6 +1,6 @@
 // Loaded first by every page of a 1990s Shockwave site kept in this archive.
 // 1. Tells the page's plug-in check that Shockwave for Director 6 is installed.
-// 2. Loads DirPlayer, which replaces each <embed src="*.dcr"> with a working player.
+// 2. Loads this module's copy of DirPlayer, which replaces each <embed src="*.dcr"> with a working player.
 (function () {
   const plugin = { name: 'Shockwave for Director', description: 'Macromedia Shockwave for Director Netscape plug-in, version 6.0', filename: 'np32dsw.dll', length: 1 };
   const real = navigator.plugins, realMimes = navigator.mimeTypes;
@@ -17,7 +17,9 @@
   } catch (e) {}
   const here = document.currentScript.src;
   const load = async () => {
-    const res = await fetch(new URL('../dirplayer-polyfill.js.gz', here));
+    // Each module has its own player: site/players/<module>/, where the module is the w/<module>/ folder this page is in.
+    const mod = (location.pathname.match(/\/w\/([a-z0-9-]+)\//) || [])[1];
+    const res = await fetch(new URL('../players/' + mod + '/dirplayer-polyfill.js.gz', here));
     const js = await new Response(res.body.pipeThrough(new DecompressionStream('gzip'))).text();
     const s = document.createElement('script'); s.textContent = js; document.body.appendChild(s);
   };

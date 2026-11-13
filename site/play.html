@@ -263,7 +263,8 @@ const workReady = fetch('works.json').then(r => r.json()).then(({ works }) => {
   document.getElementById('what').textContent = params.get('t') || w.title || '';
   const back = document.getElementById('back'); back.href = 'work.html?w=' + WORK;
   window.__rsColorDepth = () => w.colorDepth || 8;   // the monitor depth each work expects
-  window.__rsQuit = () => { console.log('[rs] quit'); if (window.__rsNoQuit) return; if (!window.__rsQuitting) { window.__rsQuitting = true; setTimeout(() => { location.href = back.href; }, 300); } };   // Lingo quit: leave the piece back.textContent = w.title ? 'About ' + w.title : 'All works';
+  window.__rsQuit = () => { console.log('[rs] quit'); if (window.__rsNoQuit) return; if (!window.__rsQuitting) { window.__rsQuitting = true; setTimeout(() => { location.href = back.href; }, 300); } };   // Lingo quit: leave the piece
+  back.textContent = w.title ? 'About ' + w.title : 'All works';
   document.title = (params.get('t') || w.title || 'Player') + ' | Red Sky Interactive';
   if (WORK === 'redsky98') document.getElementById('keys').innerHTML = 'Keys from the CD: <kbd>Ctrl-E</kbd> Entertainment, <kbd>Ctrl-W</kbd> Work, <kbd>Ctrl-X</kbd> Exit, <kbd>Return</kbd> back to the Work menu, <kbd>Space</kbd> skips an intro.';
   const start = (w.start || {});
@@ -337,7 +338,7 @@ async function start(){
     e.setAttribute('width', parseInt(st.getPropertyValue('--stage-w')) || 640); e.setAttribute('height', parseInt(st.getPropertyValue('--stage-h')) || 480);
     e.setAttribute('type', 'application/x-director');
     document.getElementById('stage').appendChild(e);
-    const res = await fetch('dirplayer-polyfill.js.gz');
+    const res = await fetch('players/' + WORK + '/dirplayer-polyfill.js.gz');   // each module has its own player
     const js = await new Response(res.body.pipeThrough(new DecompressionStream('gzip'))).text();
     const s = document.createElement('script'); s.textContent = js; document.body.appendChild(s);
     status.textContent = via ? 'Loading the ' + (via === 'work' ? 'Work' : 'Entertainment') + ' module…' : 'Loading the movie…';

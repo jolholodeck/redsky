@@ -11,11 +11,14 @@ MoodMaker, Bandai DataZord and the Spider-Man teaser.
 | `decompiled/` | Unprotected Director files (`.dir`, `.cst`) and recovered Lingo source (`.ls`), made with ProjectorRays (commit 6f9bceb). `MAIN/` is the startup movie cut out of the Mac projector. |
 | `assets/` | Every bitmap (PNG, original palettes) and sound (WAV) extracted per movie, with a `manifest.json` per movie. |
 | `analysis/` | `timing.json`: per-movie score data (tempo, waits, transitions, palette and sound cues) and timing-related Lingo counts. |
-| `emulator/` | Our patch to DirPlayer (github.com/igorlira/dirplayer-rs, commit 68376fbb4494) and how to build it. |
-| `site/` | The playable site: `index.html` (the collection), `work.html` (one work), `play.html` (the player), `works.json` (titles, years, start movies), `w/<slug>/` (each work's files, gzipped), `beatnik/` (the Beatnik engine), `shared/`. Published to GitHub Pages. |
+| `players/<module>/` | Each module's own copy of the DirPlayer player: `dirplayer.patch` (changes from upstream DirPlayer) and `FIXES.md` (what each fix was for). Built with `tools/player.sh`. |
+| `emulator/` | The upstream DirPlayer commit, `base.patch` (the shared player every module started from) and the toolchain. |
+| `site/` | The playable site: `index.html` (the collection), `work.html` (one work), `play.html` (the player), `works.json` (titles, years, start movies), `w/<slug>/` (each work's files, gzipped), `players/<slug>/` (each module's built player), `beatnik/` (the Beatnik engine), `shared/`. Published to GitHub Pages. |
 | `tools/` | Extraction, analysis and test scripts. |
 
-Plan and piece tracker: the "Red Sky 98 Restoration Plan" doc.
+## Working together
+
+The work is split by module: one GitHub issue per module holds its status and who has it checked out. `CLAUDE.md` has the workflow.
 
 ## Run locally
 

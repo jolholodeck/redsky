@@ -1,0 +1,2635 @@
+diff --git a/src/components/VMProvider.tsx b/src/components/VMProvider.tsx
+index 0af392c..b26a515 100644
+--- a/src/components/VMProvider.tsx
++++ b/src/components/VMProvider.tsx
+@@ -63,8 +63,10 @@ function ensureVmGlobalInit(wasmUrl?: string, systemFontPath?: string): Promise<
+     initVmCallbacks();
+     if (wasmUrl) {
+       await init({ module_or_path: wasmUrl });
++      (window as any).__vm = wasm;
+     } else {
+       await init({});
++      (window as any).__vm = wasm;
+     }
+     console.log("VM initialized");
+     // Hand the wasm module to the xtra bridge. The bridge's lazy
+diff --git a/vm-rust/lingo.pest b/vm-rust/lingo.pest
+index e911b63..62a698b 100644
+--- a/vm-rust/lingo.pest
++++ b/vm-rust/lingo.pest
+@@ -203,8 +203,10 @@ go_inline = {
+     go_kw ~ !(WHITESPACE* ~ "(")
+     ~ go_to_kw?
+     ~ go_frame_kw?
+-    ~ (term_arg ~ (go_of_kw ~ go_movie_kw? ~ term_arg)?)?
++    ~ (expr ~ (go_of_kw ~ go_movie_kw? ~ expr)?)?
+ }
++// Red Sky preservation build: destinations are full expressions so
++// `do "go to the frame+1"` parses (it was a single term).
+ 
+ // Assignment can be to any expression (identifier, property access, list index, etc.)
+ // The parser will validate that the left side is a valid lvalue
+diff --git a/vm-rust/src/director/chunks/lctx.rs b/vm-rust/src/director/chunks/lctx.rs
+index 3bf98b4..4e23d95 100644
+--- a/vm-rust/src/director/chunks/lctx.rs
++++ b/vm-rust/src/director/chunks/lctx.rs
+@@ -43,6 +43,9 @@ impl ScriptContextChunk {
+     ) -> Result<ScriptContextChunk, String> {
+         reader.set_endian(Endian::Big);
+ 
++        if reader.length < 46 {
++            return Err("Lctx chunk is empty".to_owned());
++        }
+         let unknown0 = reader.read_u32().unwrap();
+         let unknown1 = reader.read_u32().unwrap();
+         let entry_count = reader.read_u32().unwrap();
+diff --git a/vm-rust/src/director/chunks/score.rs b/vm-rust/src/director/chunks/score.rs
+index 6d1186d..0c2495e 100644
+--- a/vm-rust/src/director/chunks/score.rs
++++ b/vm-rust/src/director/chunks/score.rs
+@@ -474,27 +474,30 @@ pub struct ScoreFrameDataHeader {
+ 
+ #[derive(Clone, Debug)]
+ pub struct SoundChannelData {
+-    pub cast_member: u8,
++    /// Cast library (D5+ score records carry it; 0 = unspecified / default cast).
++    pub cast_lib: u16,
++    pub cast_member: u16,
+ }
+ 
+ impl SoundChannelData {
++    /// D6+ sound channel record: castLib (u16), member (u16), ...
++    /// (Red Sky preservation build: previously only the low byte of the member
++    /// was read and the cast library ignored, so sounds in any cast other than
++    /// the first, or numbered above 255, played the wrong member.)
+     pub fn read(reader: &mut BinaryReader) -> Result<SoundChannelData, String> {
+-        let _unk0 = reader
+-            .read_u8()
+-            .map_err(|e| format!("Failed to read unk0: {:?}", e))?;
+-        let _unk1 = reader
+-            .read_u8()
+-            .map_err(|e| format!("Failed to read unk1: {:?}", e))?;
+-        let _unk2 = reader
+-            .read_u8()
+-            .map_err(|e| format!("Failed to read unk2: {:?}", e))?;
++        let cast_lib = reader
++            .read_u16()
++            .map_err(|e| format!("Failed to read sound castLib: {:?}", e))?;
+         let cast_member = reader
+-            .read_u8()
+-            .map_err(|e| format!("Failed to read cast_member: {:?}", e))?;
+-        
+-        Ok(SoundChannelData {
+-            cast_member,
+-        })
++            .read_u16()
++            .map_err(|e| format!("Failed to read sound member: {:?}", e))?;
++        Ok(SoundChannelData { cast_lib, cast_member })
++    }
++
++    /// Global slot number: (castLib - 1) << 16 | member (castLib 0 means cast 1).
++    pub fn slot_number(&self) -> u32 {
++        let lib = if self.cast_lib == 0 { 1 } else { self.cast_lib as u32 };
++        ((lib - 1) << 16) | self.cast_member as u32
+     }
+ }
+ 
+@@ -757,7 +760,8 @@ impl ScoreFrameData {
+                     if sound1_member != 0 {
+                         debug!("D4 Sound 1 in frame {}: cast_member={}", frame_index, sound1_member);
+                         sound_channel_data.push((frame_index, 3, SoundChannelData {
+-                            cast_member: sound1_member as u8,
++                            cast_lib: 0,
++                            cast_member: sound1_member,
+                         }));
+                     }
+ 
+@@ -767,7 +771,8 @@ impl ScoreFrameData {
+                     if sound2_member != 0 {
+                         debug!("D4 Sound 2 in frame {}: cast_member={}", frame_index, sound2_member);
+                         sound_channel_data.push((frame_index, 4, SoundChannelData {
+-                            cast_member: sound2_member as u8,
++                            cast_lib: 0,
++                            cast_member: sound2_member,
+                         }));
+                     }
+ 
+@@ -874,7 +879,8 @@ impl ScoreFrameData {
+                     if sound1_member != 0 {
+                         debug!("Sound 1 in frame {}: cast_member={}", frame_index, sound1_member);
+                         sound_channel_data.push((frame_index, 3, SoundChannelData {
+-                            cast_member: sound1_member as u8,
++                            cast_lib: 0,
++                            cast_member: sound1_member,
+                         }));
+                     }
+ 
+@@ -884,7 +890,8 @@ impl ScoreFrameData {
+                     if sound2_member != 0 {
+                         debug!("Sound 2 in frame {}: cast_member={}", frame_index, sound2_member);
+                         sound_channel_data.push((frame_index, 4, SoundChannelData {
+-                            cast_member: sound2_member as u8,
++                            cast_lib: 0,
++                            cast_member: sound2_member,
+                         }));
+                     }
+ 
+diff --git a/vm-rust/src/director/chunks/text.rs b/vm-rust/src/director/chunks/text.rs
+index cd299ae..52dc749 100644
+--- a/vm-rust/src/director/chunks/text.rs
++++ b/vm-rust/src/director/chunks/text.rs
+@@ -28,20 +28,21 @@ impl TextChunk {
+     pub fn read(reader: &mut BinaryReader) -> Result<TextChunk, String> {
+         reader.set_endian(binary_reader::Endian::Big);
+ 
+-        let offset = reader.read_u32().unwrap() as usize;
++        // Red Sky: an empty STXT (0 bytes) is an empty text, not a crash.
++        let offset = match reader.read_u32() { Ok(v) => v as usize, Err(_) => return Ok(TextChunk { offset: 12, text_length: 0, data_length: 0, text: String::new(), data: Vec::new() }) };
+         if offset != 12 {
+             return Err("Stxt init: unhandled offset".to_owned());
+         }
+ 
+-        let text_length = reader.read_u32().unwrap() as usize;
+-        let data_length = reader.read_u32().unwrap() as usize;
++        let text_length = reader.read_u32().map_err(|e| e.to_string())? as usize;
++        let data_length = reader.read_u32().map_err(|e| e.to_string())? as usize;
+ 
+         Ok(TextChunk {
+             offset,
+             text_length,
+             data_length,
+-            text: reader.read_string(text_length).unwrap(),
+-            data: reader.read_bytes(data_length).unwrap().to_vec(),
++            text: reader.read_string(text_length).unwrap_or_default(),
++            data: reader.read_bytes(data_length).map(|d| d.to_vec()).unwrap_or_default(),
+         })
+     }
+ 
+diff --git a/vm-rust/src/lib.rs b/vm-rust/src/lib.rs
+index a5fd98f..e942017 100644
+--- a/vm-rust/src/lib.rs
++++ b/vm-rust/src/lib.rs
+@@ -1938,7 +1938,9 @@ pub fn eval_command(command: String) {
+     crate::player::spawn_player_local(async move {
+         JsApi::dispatch_debug_message(&command);
+         let result = eval_lingo_command(command).await;
+-        if let Err(err) = result {
++        // Red Sky preservation build: `abort` ends the command normally, as it
++        // does for any other handler (NavMgr's mGotoModule ends with abort()).
++        if let Err(err) = result.map(|_| ()).or_else(|e| if e.code == crate::player::ScriptErrorCode::Abort { Ok(()) } else { Err(e) }) {
+             reserve_player_ref(|player| {
+                 JsApi::dispatch_script_error(player, &err);
+             });
+@@ -2436,3 +2438,25 @@ pub fn start() {
+     }
+     init_player();
+ }
++
++/// Red Sky debug: score spans + sprite detail behaviors for a channel.
++#[wasm_bindgen]
++pub fn rs_debug_channel(channel: u32) -> String {
++    reserve_player_ref(|player| {
++        let score = &player.movie.score;
++        let mut out = String::new();
++        for s in score.sprite_spans.iter().filter(|s| s.channel_number == channel) {
++            out.push_str(&format!("span {}-{} scripts={:?}\n", s.start_frame, s.end_frame,
++                s.scripts.iter().map(|r| (r.cast_lib, r.cast_member)).collect::<Vec<_>>()));
++        }
++        for (f, ci, d) in score.channel_initialization_data.iter() {
++            if (*ci as u32) == channel + 5 && *f < 6 {
++                let idx = d.sprite_list_idx();
++                let beh = score.sprite_details.get(&idx).map(|sd| sd.behaviors.iter().map(|b| (b.cast_lib, b.cast_member)).collect::<Vec<_>>());
++                out.push_str(&format!("frame {} member {}:{} listIdx {} behaviors {:?}\n", f, d.cast_lib, d.cast_member, idx, beh));
++            }
++        }
++        out.push_str(&format!("sprite_details total {}\n", score.sprite_details.len()));
++        out
++    })
++}
+diff --git a/vm-rust/src/player/allocator.rs b/vm-rust/src/player/allocator.rs
+index c9ee82e..0241b2a 100644
+--- a/vm-rust/src/player/allocator.rs
++++ b/vm-rust/src/player/allocator.rs
+@@ -67,6 +67,16 @@ impl<T> Arena<T> {
+         }
+     }
+ 
++    pub fn for_each_mut<F: FnMut(&mut T)>(&mut self, mut f: F) {
++        for chunk in self.chunks.iter_mut() {
++            for slot in chunk.iter_mut() {
++                if let Some(v) = slot.as_mut() {
++                    f(v);
++                }
++            }
++        }
++    }
++
+     #[inline]
+     pub fn alloc(&mut self, value: T) -> usize {
+         self.count += 1;
+diff --git a/vm-rust/src/player/bytecode/flow_control.rs b/vm-rust/src/player/bytecode/flow_control.rs
+index adf4ab2..58b2205 100644
+--- a/vm-rust/src/player/bytecode/flow_control.rs
++++ b/vm-rust/src/player/bytecode/flow_control.rs
+@@ -208,7 +208,7 @@ impl FlowControlBytecodeHandler {
+     pub async fn local_call(
+         ctx: &BytecodeHandlerContext,
+     ) -> Result<HandlerExecutionResult, ScriptError> {
+-        let (handler_ref, is_no_ret, args, receiver) = reserve_player_mut(|player| {
++        let (handler_ref, is_no_ret, mut args, mut receiver) = reserve_player_mut(|player| {
+             let (args, is_no_ret) = {
+                 let scope = player.scopes.get_mut(ctx.scope_ref).unwrap();
+                 match scope.pop_call_args() {
+@@ -257,6 +257,26 @@ impl FlowControlBytecodeHandler {
+             }
+             Ok((handler_ref, is_no_ret, args, receiver))
+         })?;
++        // Red Sky preservation build: `new(script "Other")` inside a script that has its own `new`
++        // compiles to a local call. Director makes a fresh instance of the other script and runs
++        // its `new` on it; calling it on the script itself made every "instance" the same object.
++        let rs_new_script = reserve_player_ref(|player| {
++            if receiver.is_some() {
++                return None;
++            }
++            if !handler_ref.1.to_string().eq_ignore_ascii_case("new") {
++                return None;
++            }
++            match args.first().map(|a| player.get_datum(a)) {
++                Some(Datum::ScriptRef(r)) => Some(r.clone()),
++                _ => None,
++            }
++        });
++        if let Some(script_ref) = rs_new_script {
++            let (instance_ref, datum_ref) = crate::player::handlers::datum_handlers::script::ScriptDatumHandlers::create_script_instance(&script_ref)?;
++            args[0] = datum_ref;
++            receiver = Some(instance_ref);
++        }
+         // Hand the call to the trampoline driver instead of recursively awaiting
+         // (which would box a future). `use_raw_arg_list: true` matches the old
+         // `player_call_script_handler_raw_args(.., true)` call; the driver does
+diff --git a/vm-rust/src/player/bytecode/get_set.rs b/vm-rust/src/player/bytecode/get_set.rs
+index f811822..60a4e97 100644
+--- a/vm-rust/src/player/bytecode/get_set.rs
++++ b/vm-rust/src/player/bytecode/get_set.rs
+@@ -937,6 +937,17 @@ impl GetSetBytecodeHandler {
+                 )?;
+ 
+                 Ok(player.alloc_datum(Datum::String(last_chunk)))
++            } else if prop_type == 0x04 {
++                // Sound channel properties (`the volume of sound n`)
++                let prop_name = get_sound_prop_name(prop_id as u16);
++                let channel_num_ref = {
++                    let scope = player.scopes.get_mut(ctx.scope_ref).unwrap();
++                    scope.stack.pop().unwrap()
++                };
++                let channel_num = player.get_datum(&channel_num_ref).int_value()?;
++                let sound_channel_datum = player.alloc_datum(Datum::SoundChannel(channel_num as u16));
++                let v = SoundChannelDatumHandlers::get_prop(player, &sound_channel_datum, Symbol::builtin(prop_name))?;
++                Ok(player.alloc_datum(v))
+             } else if prop_type == 0x06 {
+                 // sprite prop
+                 let prop_name = sprite_prop_names().get(&(prop_id as u16));
+diff --git a/vm-rust/src/player/cast_lib.rs b/vm-rust/src/player/cast_lib.rs
+index 5e6848d..0a944c0 100644
+--- a/vm-rust/src/player/cast_lib.rs
++++ b/vm-rust/src/player/cast_lib.rs
+@@ -309,6 +309,13 @@ impl CastLib {
+         match prop.into_builtin() {
+             Some(BuiltInSymbol::PreloadMode) => Ok(Datum::Int(self.preload_mode as i32)),
+             Some(BuiltInSymbol::FileName) => {
++                // Red Sky preservation build: give back the exact string a script set (DataZord
++                // sets a Windows path without extension, then checks `fileName starts path`).
++                if let Some(set) = RS_LINGO_FILE_NAMES.with(|m| m.borrow().get(&self.number).cloned()) {
++                    if self.state != CastLibState::None && !set.is_empty() {
++                        return Ok(Datum::String(set));
++                    }
++                }
+                 // Only return the fileName if the cast is actually loaded.
+                 // External casts with preloadMode=0 ("When Needed") have file_name set
+                 // in the movie structure but aren't loaded yet. Scripts like PreloadCast
+@@ -741,6 +748,11 @@ impl CastMemberRef {
+     }
+ }
+ 
++thread_local! {
++    /// Red Sky: the fileName each castLib was last given by Lingo, as written.
++    static RS_LINGO_FILE_NAMES: std::cell::RefCell<std::collections::HashMap<u32, String>> = std::cell::RefCell::new(std::collections::HashMap::new());
++}
++
+ pub async fn player_cast_lib_set_prop(
+     cast_lib: u32,
+     prop_name: Symbol,
+@@ -764,7 +776,11 @@ pub async fn player_cast_lib_set_prop(
+         );
+     }
+ 
++    let rs_set_name = if builtin_prop_name == BuiltInSymbol::FileName { value.string_value().ok() } else { None };
+     cast_lib_obj.set_prop(prop_name, value, &player.allocator)?;
++    if let Some(n) = rs_set_name {
++        RS_LINGO_FILE_NAMES.with(|m| { m.borrow_mut().insert(cast_lib, n); });
++    }
+     if builtin_prop_name == BuiltInSymbol::FileName {
+         cast_lib_obj
+             .preload(
+diff --git a/vm-rust/src/player/cast_member.rs b/vm-rust/src/player/cast_member.rs
+index 5364456..9e908b2 100644
+--- a/vm-rust/src/player/cast_member.rs
++++ b/vm-rust/src/player/cast_member.rs
+@@ -2920,9 +2920,18 @@ pub enum CastMemberType {
+     PhysXPhysics(PhysXPhysicsMember),
+     Groove3gm(Groove3gmMember),
+     Transition(TransitionMember),
++    /// Red Sky preservation build: a linked QuickTime / Video for Windows member.
++    /// The page plays it in a <video> laid over the stage (see rs_video.rs).
++    DigitalVideo(DigitalVideoMember),
+     Unknown,
+ }
+ 
++#[derive(Clone, Debug)]
++pub struct DigitalVideoMember {
++    /// Linked file path as stored in the cast (or set by `the fileName of member`).
++    pub file_name: String,
++}
++
+ /// A score/puppet transition member. Director stores these as raw member-type 14,
+ /// so they're detected by their transition-shaped specific data rather than the type
+ /// id. `info` carries the built-in effect (Director 11.5 Dictionary `puppetTransition`).
+@@ -2979,12 +2988,16 @@ pub enum CastMemberTypeId {
+     PhysXPhysics,
+     Groove3gm,
+     Transition,
++    DigitalVideo,
+     Unknown,
+ }
+ 
+ impl fmt::Debug for CastMemberType {
+     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+         match self {
++            Self::DigitalVideo(_) => {
++                write!(f, "DigitalVideo")
++            }
+             Self::Field(_) => {
+                 write!(f, "Field")
+             }
+@@ -3049,6 +3062,7 @@ impl fmt::Debug for CastMemberType {
+ impl CastMemberTypeId {
+     pub fn symbol_string(&self) -> Result<&str, ScriptError> {
+         return match self {
++            Self::DigitalVideo => Ok("digitalVideo"),
+             Self::Field => Ok("field"),
+             Self::Text => Ok("text"),
+             Self::Button => Ok("button"),
+@@ -3099,6 +3113,7 @@ impl CastMemberType {
+             // No dedicated CastMemberTypeId; transitions are score-driven, not queried
+             // via `the type of member`, so Unknown is adequate here.
+             Self::Transition(_) => CastMemberTypeId::Transition,
++            Self::DigitalVideo(_) => CastMemberTypeId::DigitalVideo,
+             Self::Unknown => CastMemberTypeId::Unknown,
+         };
+     }
+@@ -3123,6 +3138,7 @@ impl CastMemberType {
+             Self::PhysXPhysics(_) => "physics",
+             Self::Groove3gm(_) => "groove3gm",
+             Self::Transition(_) => "transition",
++            Self::DigitalVideo(_) => "digitalVideo",
+             _ => "unknown",
+         };
+     }
+@@ -6665,6 +6681,10 @@ impl CastMember {
+                         number, chunk.member_type
+                     );
+                     CastMemberType::PhysXPhysics(PhysXPhysicsMember::new())
++                } else if matches!(chunk.member_type, MemberType::DigitalVideo) {
++                    CastMemberType::DigitalVideo(DigitalVideoMember {
++                        file_name: chunk.member_info.as_ref().map(|i| i.file_name.clone()).unwrap_or_default(),
++                    })
+                 } else {
+                     CastMemberType::Unknown
+                 }
+diff --git a/vm-rust/src/player/commands.rs b/vm-rust/src/player/commands.rs
+index 5ade07b..fabae01 100644
+--- a/vm-rust/src/player/commands.rs
++++ b/vm-rust/src/player/commands.rs
+@@ -1295,6 +1295,7 @@ pub async fn run_player_command(command: PlayerVMCommand) -> Result<DatumRef, Sc
+             }
+         }
+         PlayerVMCommand::KeyDown(key, code) => {
++            reserve_player_mut(|player| { player.last_key_down_time = chrono::Utc::now().timestamp_millis().abs(); });
+             crate::player::wait_for_handler_gap().await;
+             crate::player::hold_draw_for_input_handler();
+             // Set command_handler_yielding so that:
+diff --git a/vm-rust/src/player/datum_operations.rs b/vm-rust/src/player/datum_operations.rs
+index a885645..5713bb3 100644
+--- a/vm-rust/src/player/datum_operations.rs
++++ b/vm-rust/src/player/datum_operations.rs
+@@ -135,7 +135,21 @@ fn symbol_as_arithmetic_operand(datum: &Datum) -> Option<Datum> {
+     }
+ }
+ 
++/// Red Sky preservation build: in Director 5-7 a palette-index color (`the foreColor`)
++/// is a plain integer, and movies do arithmetic on it (DataZord: `the foreColor of
++/// sprite n - 1`). Treat a palette-index ColorRef paired with a number as that number.
++fn rs_palette_index_operand(d: &Datum, other: &Datum) -> Option<Datum> {
++    if let Datum::ColorRef(crate::player::sprite::ColorRef::PaletteIndex(i)) = d {
++        if matches!(other, Datum::Int(_) | Datum::Float(_)) {
++            return Some(Datum::Int(*i as i32));
++        }
++    }
++    None
++}
++
+ pub fn add_datums(left: Datum, right: Datum, player: &mut DirPlayer) -> Result<Datum, ScriptError> {
++    if let Some(l) = rs_palette_index_operand(&left, &right) { return add_datums(l, right, player); }
++    if let Some(r) = rs_palette_index_operand(&right, &left) { return add_datums(left, r, player); }
+     if let Some(left) = symbol_as_arithmetic_operand(&left) {
+         return add_datums(left, right, player);
+     }
+@@ -412,6 +426,8 @@ pub fn subtract_datums(
+     right: Datum,
+     player: &mut DirPlayer,
+ ) -> Result<Datum, ScriptError> {
++    if let Some(l) = rs_palette_index_operand(&left, &right) { return subtract_datums(l, right, player); }
++    if let Some(r) = rs_palette_index_operand(&right, &left) { return subtract_datums(left, r, player); }
+     // See `symbol_as_arithmetic_operand`.
+     if let Some(left) = symbol_as_arithmetic_operand(&left) {
+         return subtract_datums(left, right, player);
+diff --git a/vm-rust/src/player/eval.rs b/vm-rust/src/player/eval.rs
+index 9d1fa62..7411195 100644
+--- a/vm-rust/src/player/eval.rs
++++ b/vm-rust/src/player/eval.rs
+@@ -1085,7 +1085,7 @@ pub fn parse_lingo_rule_runtime(
+             // movie path.
+             let mut args = vec![];
+             for child in pair.into_inner() {
+-                if let Rule::term_arg = child.as_rule() {
++                if let Rule::term_arg | Rule::expr = child.as_rule() {
+                     // Director marker-navigation keywords: `go next` / `go
+                     // previous` / `go loop`. As a bareword these parse as an
+                     // undefined variable (→ VOID) and the go handler rejects
+diff --git a/vm-rust/src/player/events.rs b/vm-rust/src/player/events.rs
+index 5acf223..0f97f01 100644
+--- a/vm-rust/src/player/events.rs
++++ b/vm-rust/src/player/events.rs
+@@ -119,9 +119,18 @@ pub fn dispatch_rollover_events() {
+     let (now_hovered, prev_hovered) = reserve_player_mut(|player| {
+         let (x, y) = player.mouse_loc;
+         let prev_hovered = std::mem::take(&mut player.hovered_sprites);
++        // Red Sky preservation build: rollover events follow the front-most
++        // ACTIVE sprite (one with a behavior or a cast member script), the same
++        // rule clicks use; sprites with no scripts don't block them. Red Sky's
++        // Entertainment module hides two matte "puff zone" bitmaps (with cast
++        // member scripts) under its unscripted full-screen backdrop and tracks
++        // the pointer with their mouseEnter/mouseLeave to choose near or far
++        // dust kicks.
+         let now_hovered: Vec<i16> = crate::player::score::get_sprites_at(player, x, y)
+-            .first()
+-            .map(|num| *num as i16)
++            .into_iter()
++            .find(|num| player.movie.score.get_sprite(*num as i16)
++                .map_or(false, |sp| crate::player::score::is_active_sprite(player, sp)))
++            .map(|num| num as i16)
+             .into_iter()
+             .collect();
+         player.hovered_sprites = now_hovered.clone();
+@@ -133,6 +142,7 @@ pub fn dispatch_rollover_events() {
+     for sprite_num in &prev_hovered {
+         if !now_hovered.contains(sprite_num) {
+             player_dispatch_event_to_sprite(Symbol::from_str(&"mouseLeave".to_string()), &vec![], *sprite_num as u16);
++            rs_call_member_script(*sprite_num, "mouseLeave");
+         }
+     }
+     for sprite_num in &now_hovered {
+@@ -142,6 +152,34 @@ pub fn dispatch_rollover_events() {
+             "mouseEnter"
+         };
+         player_dispatch_event_to_sprite(Symbol::from_str(&handler.to_string()), &vec![], *sprite_num as u16);
++        rs_call_member_script(*sprite_num, handler);
++    }
++}
++
++/// Red Sky preservation build: run a sprite's cast member script handler (if it
++/// has one) for a rollover event; the targeted dispatch above only reaches
++/// behaviors.
++fn rs_call_member_script(sprite_num: i16, handler_name: &str) {
++    let handler = reserve_player_mut(|player| {
++        let sprite = player.movie.score.get_sprite(sprite_num)?;
++        let member_ref = sprite.member.clone()?;
++        let member = player.movie.cast_manager.find_member_by_ref(&member_ref)?;
++        let sym = Symbol::from_str(&handler_name.to_string());
++        if let Some(script_ref) = member.get_member_script_ref() {
++            if let Some(script) = player.movie.cast_manager.get_script_by_ref(script_ref) {
++                if let Some(h) = script.get_own_handler_ref(sym.clone()) {
++                    return Some(h);
++                }
++            }
++        }
++        let script_id = member.get_script_id()?;
++        let script = player.movie.cast_manager.get_cast_mut(member_ref.cast_lib as u32).get_behavior_script_from_lctx(script_id)?;
++        script.get_own_handler_ref(sym)
++    });
++    if let Some(h) = handler {
++        crate::player::spawn_player_local(async move {
++            let _ = crate::player::player_call_script_handler(None, h, &vec![]).await;
++        });
+     }
+ }
+ 
+diff --git a/vm-rust/src/player/handlers/datum_handlers/cast_member/field.rs b/vm-rust/src/player/handlers/datum_handlers/cast_member/field.rs
+index d708ac6..cb901c5 100644
+--- a/vm-rust/src/player/handlers/datum_handlers/cast_member/field.rs
++++ b/vm-rust/src/player/handlers/datum_handlers/cast_member/field.rs
+@@ -621,6 +621,22 @@ impl FieldMemberHandlers {
+         value: Datum,
+     ) -> Result<(), ScriptError> {
+         match prop {
++            // Red Sky preservation build: `set the foreColor of member` (a palette
++            // index in D5-7) and backColor, used by Spider-Man's text fields.
++            "forecolor" | "backcolor" | "color" | "bgcolor" => borrow_member_mut(
++                member_ref,
++                |_player| match &value {
++                    Datum::Int(i) => Ok(crate::player::sprite::ColorRef::PaletteIndex((*i).clamp(0, 255) as u8)),
++                    Datum::ColorRef(c) => Ok(c.clone()),
++                    _ => Err(ScriptError::new(format!("Cannot set {} of field to that value", prop))),
++                },
++                |cast_member, c: Result<crate::player::sprite::ColorRef, ScriptError>| {
++                    let c = c?;
++                    let field = cast_member.member_type.as_field_mut().unwrap();
++                    if prop == "forecolor" || prop == "color" { field.fore_color = Some(c); } else { field.back_color = Some(c); }
++                    Ok(())
++                },
++            ),
+             "text" => borrow_member_mut(
+                 member_ref,
+                 |player| value.string_value(),
+diff --git a/vm-rust/src/player/handlers/datum_handlers/cast_member_ref.rs b/vm-rust/src/player/handlers/datum_handlers/cast_member_ref.rs
+index 5e11dde..f665c9f 100644
+--- a/vm-rust/src/player/handlers/datum_handlers/cast_member_ref.rs
++++ b/vm-rust/src/player/handlers/datum_handlers/cast_member_ref.rs
+@@ -1637,7 +1637,33 @@ impl CastMemberRefHandlers {
+             Some(BuiltInSymbol::Comments) => Ok(Datum::String(comments)),
+             Some(BuiltInSymbol::Ilk) => Ok(Datum::Symbol(Symbol::from_str("member"))),
+             Some(BuiltInSymbol::Member) => Ok(Datum::CastMember(cast_member_ref.clone())),
+-            _ => Self::get_member_type_prop(player, cast_member_ref, &member_type, prop),
++            // Red Sky preservation build: QuickTime members.
++            _ if matches!(member_type, CastMemberTypeId::DigitalVideo) => {
++                let file = player.movie.cast_manager.find_member_by_ref(cast_member_ref)
++                    .and_then(|m| match &m.member_type { CastMemberType::DigitalVideo(v) => Some(v.file_name.clone()), _ => None })
++                    .unwrap_or_default();
++                match prop.to_string().to_lowercase().as_str() {
++                    "filename" => Ok(Datum::String(file)),
++                    "duration" => Ok(Datum::Int(crate::player::rs_video::member_duration(&file))),
++                    "loop" | "controller" | "directtostage" | "crop" | "center" | "pausedatstart" | "video" | "sound" => Ok(Datum::Int(match prop.to_string().to_lowercase().as_str() { "video" | "sound" | "directtostage" => 1, _ => 0 })),
++                    "width" | "height" => Ok(Datum::Int(0)),
++                    "framerate" => Ok(Datum::Int(-1)),
++                    _ => Ok(Datum::Void),
++                }
++            }
++            _ => Self::get_member_type_prop(player, cast_member_ref, &member_type, prop).or_else(|e| {
++                // Red Sky preservation build: generic member properties Director answers
++                // for every member type (`the size of member` on a script, `the width`
++                // of a palette...). Answer neutral values instead of stopping the movie.
++                match prop.to_string().to_lowercase().as_str() {
++                    "size" => Ok(Datum::Int(1024)),
++                    "width" | "height" => Ok(Datum::Int(0)),
++                    "loaded" | "mediaready" => Ok(Datum::Int(1)),
++                    "filename" | "url" | "comments" => Ok(Datum::String(String::new())),
++                    "purgepriority" => Ok(Datum::Int(3)),
++                    _ => Err(e),
++                }
++            }),
+         }
+     }
+ 
+@@ -1666,6 +1692,21 @@ impl CastMemberRefHandlers {
+                 .find_member_by_ref(cast_member_ref)
+                 .is_some()
+         });
++        // Red Sky preservation build: `set the fileName of member` on a QuickTime member.
++        let is_video = reserve_player_ref(|player| {
++            player.movie.cast_manager.find_member_by_ref(cast_member_ref)
++                .map_or(false, |m| matches!(m.member_type, CastMemberType::DigitalVideo(_)))
++        });
++        if is_video {
++            if prop.to_string().eq_ignore_ascii_case("fileName") {
++                let name = value.string_value().unwrap_or_default();
++                return borrow_member_mut(cast_member_ref, |_p| (), |cm, _| {
++                    if let CastMemberType::DigitalVideo(v) = &mut cm.member_type { v.file_name = name.clone(); }
++                    Ok(())
++                });
++            }
++            return Ok(());   // loop, controller...: accepted, the page's video ignores them
++        }
+         let result = if exists {
+             match prop.into_builtin() {
+                 Some(BuiltInSymbol::Name) => borrow_member_mut(
+diff --git a/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs b/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
+index 9ae62c7..7e96833 100644
+--- a/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
++++ b/vm-rust/src/player/handlers/datum_handlers/sound_channel.rs
+@@ -58,6 +58,25 @@ pub struct SoundSegment {
+     // into the sequence of members, so we only need to track the current member and its loop info.
+ }
+ 
++
++/// Red Sky preservation build: JS bridge for `sound playFile` with external
++/// files (AIFF on the original CD). The host page defines window.__rsPlayFile,
++/// __rsStopFile and __rsFileBusy.
++pub fn rs_js_call(name: &str, args: &[JsValue]) -> JsValue {
++    if let Some(w) = web_sys::window() {
++        if let Ok(f) = Reflect::get(&w, &JsValue::from_str(name)) {
++            if let Some(f) = f.dyn_ref::<js_sys::Function>() {
++                let arr = js_sys::Array::new();
++                for a in args {
++                    arr.push(a);
++                }
++                return f.apply(&JsValue::NULL, &arr).unwrap_or(JsValue::UNDEFINED);
++            }
++        }
++    }
++    JsValue::UNDEFINED
++}
++
+ pub struct SoundChannelDatumHandlers {}
+ 
+ impl SoundChannelDatumHandlers {
+@@ -249,6 +268,11 @@ impl SoundChannelDatumHandlers {
+                 let is_busy = Self::handle_is_busy(player, datum)?;
+                 Ok(player.alloc_datum(Datum::Int(if is_busy { 1 } else { 0 })))
+             }
++            _ if handler_name.to_string().eq_ignore_ascii_case("close") => {
++                // Director 6 `sound close n` == stop and release the channel.
++                Self::handle_stop(player, datum)?;
++                Ok(datum.clone())
++            }
+             _ => Err(ScriptError::new(format!(
+                 "No handler {handler_name} for sound channel"
+             ))),
+@@ -463,6 +487,26 @@ impl SoundChannelDatumHandlers {
+         // Get the channel as Rc<RefCell<SoundChannel>> (do NOT borrow)
+         let channel_rc = Self::get_sound_channel_mut(player, datum)?;
+ 
++        // A string is either a cast member name (puppetSound "name") or an
++        // external sound file (sound playFile n, "W_BACK1.AIF").
++        let member_datum = player.get_datum(member).clone();
++        if let Datum::String(name) = &member_datum {
++            if let Some(r) = player.movie.cast_manager.find_member_ref_by_name(name) {
++                let md = player.alloc_datum(Datum::CastMember(r));
++                return Self::handle_play_file(player, datum, &md, loop_count);
++            }
++            let channel_num = channel_rc.borrow().channel_num;
++            channel_rc.borrow_mut().stop();
++            let base = player.net_manager.base_path.as_ref().map(|u| u.to_string()).unwrap_or_default();
++            rs_js_call("__rsPlayFile", &[
++                JsValue::from_f64(channel_num as f64),
++                JsValue::from_str(&base),
++                JsValue::from_str(name),
++                JsValue::from_f64(loop_count as f64),
++            ]);
++            return Ok(());
++        }
++
+         // Apply the caller's loop count (overwriting any stale value from a
+         // previous sound). `puppet_sound` passes the value derived from the
+         // member's loop flag (0 = loop forever, 1 = play once); direct
+@@ -501,6 +545,7 @@ impl SoundChannelDatumHandlers {
+     pub fn handle_stop(player: &mut DirPlayer, datum: &DatumRef) -> Result<(), ScriptError> {
+         let channel = Self::get_sound_channel_mut(player, datum)?;
+         let channel_num = channel.borrow().channel_num;
++        rs_js_call("__rsStopFile", &[JsValue::from_f64(channel_num as f64)]);
+         channel.borrow_mut().stop();
+         // Release the audio-time sync anchor when sound 1 stops — the score
+         // frame loop returns to its normal tempo'd advance.
+@@ -1688,7 +1733,13 @@ impl SoundChannel {
+     fn resolve_sound_member(player: &DirPlayer, datum: &Datum) -> Option<SoundMember> {
+         // Case 1: Direct CastMember reference
+         if let Datum::CastMember(member_ref) = datum {
+-            let cast_member = player.movie.cast_manager.find_member_by_ref(member_ref)?;
++            let found = player.movie.cast_manager.find_member_by_ref(member_ref);
++            if found.is_none() {
++                web_sys::console::warn_1(&format!("[rs] sound member not found: {:?} (casts: {})", member_ref, player.movie.cast_manager.casts.len()).into());
++            } else if !matches!(found.map(|m| &m.member_type), Some(CastMemberType::Sound(_))) {
++                web_sys::console::warn_1(&format!("[rs] member {:?} is not a sound: {}", member_ref, found.map(|m| m.member_type.type_string().to_string()).unwrap_or_default()).into());
++            }
++            let cast_member = found?;
+             match &cast_member.member_type {
+                 CastMemberType::Sound(sound_member) => return Some(sound_member.clone()),
+                 _ => {
+diff --git a/vm-rust/src/player/handlers/manager.rs b/vm-rust/src/player/handlers/manager.rs
+index 8bcc917..7800164 100644
+--- a/vm-rust/src/player/handlers/manager.rs
++++ b/vm-rust/src/player/handlers/manager.rs
+@@ -1093,6 +1093,64 @@ impl BuiltInHandlerManager {
+                     } else {
+                         MovieHandlers::go(args).await
+                     }
++                } else if args.is_empty() {
++                    // Red Sky preservation build: `play done` returns to the frame that
++                    // issued the last `play frame X`.
++                    reserve_player_mut(|player| {
++                        let back = player.rs_play_stack.pop();
++                        web_sys::console::log_1(&format!("[rs] play done -> {:?}", back).into());
++                        if let Some(f) = back { player.next_frame = Some(f); }
++                    });
++                    Ok(DatumRef::Void)
++                } else if Self::resolve_flash_sprite_strict(&args[0])?.is_none()
++                    && reserve_player_mut(|player| matches!(player.get_datum(&args[0]).type_enum(),
++                        DatumType::String | DatumType::Symbol | DatumType::Int)) {
++                    // Red Sky preservation build: `play frame X` = go to X and remember
++                    // where we came from for `play done`. When called from an input
++                    // handler (a mouseDown, a keyDown) the calling handler is suspended
++                    // until `play done`, and the score plays meanwhile, so the Lingo
++                    // after `play` runs on return. Red Sky's film-burn sequence
++                    // (check6clicks) depends on this: it restarts the flicker and the
++                    // cowboy only after the projectionist has finished.
++                    let (level, depth, blocking) = reserve_player_mut(|player| {
++                        let cur = player.movie.current_frame;
++                        if player.rs_play_stack.len() < 32 { player.rs_play_stack.push(cur as u32); }
++                        web_sys::console::log_1(&format!("[rs] play frame {:?} from {}", player.get_datum(&args[0]).string_value().ok(), cur).into());
++                        (player.rs_play_stack.len(), player.scope_count,
++                         player.in_mouse_command || player.command_handler_yielding)
++                    });
++                    let r = MovieHandlers::go(args).await?;
++                    if blocking {
++                        let saved = reserve_player_mut(|p| {
++                            let s = (p.in_mouse_command, p.command_handler_yielding, p.is_in_frame_update,
++                                     p.in_frame_script, p.in_enter_frame, p.in_prepare_frame, p.in_event_dispatch);
++                            p.in_mouse_command = false; p.command_handler_yielding = false;
++                            p.is_in_frame_update = false; p.in_frame_script = false; p.in_enter_frame = false;
++                            p.in_prepare_frame = false; p.in_event_dispatch = false;
++                            s
++                        });
++                        let started = chrono::Utc::now().timestamp_millis();
++                        loop {
++                            let _ = async_std::future::timeout(
++                                std::time::Duration::from_millis(16),
++                                std::future::pending::<()>(),
++                            ).await;
++                            let done = reserve_player_ref(|p| {
++                                !p.is_playing
++                                    || (p.rs_play_stack.len() < level && p.scope_count <= depth)
++                            });
++                            if done || chrono::Utc::now().timestamp_millis() - started > 10 * 60 * 1000 {
++                                break;
++                            }
++                        }
++                        reserve_player_mut(|p| {
++                            p.in_mouse_command = saved.0; p.command_handler_yielding = saved.1;
++                            p.is_in_frame_update = saved.2; p.in_frame_script = saved.3; p.in_enter_frame = saved.4;
++                            p.in_prepare_frame = saved.5; p.in_event_dispatch = saved.6;
++                            web_sys::console::log_1(&"[rs] play returned".into());
++                        });
++                    }
++                    Ok(r)
+                 } else {
+                     if !args.is_empty() {
+                         if let Some(sn) = Self::resolve_flash_sprite_strict(&args[0])? {
+@@ -1148,7 +1206,23 @@ impl BuiltInHandlerManager {
+             Some(BuiltInSymbol::Stringp) => TypeHandlers::stringp(args),
+             Some(BuiltInSymbol::Integerp) => TypeHandlers::integerp(args),
+             Some(BuiltInSymbol::Floatp) => TypeHandlers::floatp(args),
+-            Some(BuiltInSymbol::Offset) => StringHandlers::offset(args),
++            Some(BuiltInSymbol::Offset) => {
++                // offset(rect, h, v) shifts a rect; offset(str, str) is a string search.
++                let rect = reserve_player_ref(|player| {
++                    if args.len() >= 3 {
++                        if let Datum::Rect(r, f) = player.get_datum(&args[0]) {
++                            let h = player.get_datum(&args[1]).to_float().unwrap_or(0.0);
++                            let v = player.get_datum(&args[2]).to_float().unwrap_or(0.0);
++                            return Some(Datum::Rect([r[0] + h, r[1] + v, r[2] + h, r[3] + v], *f));
++                        }
++                    }
++                    None
++                });
++                match rect {
++                    Some(d) => reserve_player_mut(|player| Ok(player.alloc_datum(d))),
++                    None => StringHandlers::offset(args),
++                }
++            }
+             Some(BuiltInSymbol::Length) => StringHandlers::length(args),
+             Some(BuiltInSymbol::Script) => MovieHandlers::script(args),
+             Some(BuiltInSymbol::Void) => TypeHandlers::void(args),
+@@ -2525,6 +2599,15 @@ impl BuiltInHandlerManager {
+                 {
+                     return res;
+                 }
++                if name.to_string().eq_ignore_ascii_case("quit") {
++                    // Red Sky preservation build: quitting the projector hands back to the page.
++                    crate::player::handlers::datum_handlers::sound_channel::rs_js_call("__rsQuit", &[]);
++                    return Ok(DatumRef::Void);
++                }
++                if name.to_string().eq_ignore_ascii_case("puppetPalette") {
++                    crate::player::rs_puppet_palette(args);
++                    return Ok(DatumRef::Void);
++                }
+                 let formatted_args = reserve_player_ref(|player| {
+                     let mut s = String::new();
+                     for arg in args {
+@@ -2535,7 +2618,14 @@ impl BuiltInHandlerManager {
+                 })?;
+                 let msg = format!("No built-in handler: {}({})", name, formatted_args);
+                 warn!("{msg}");
+-                return Err(ScriptError::new(msg));
++                // Red Sky preservation build: treat unknown built-ins (puppetPalette,
++                // finishIdleLoad, quit, legacy XObject calls...) as no-ops.
++                let quiet = matches!(name.to_string().to_ascii_lowercase().as_str(),
++                    "puppetpalette" | "finishidleload" | "getosdirectory");
++                if !quiet {
++                    web_sys::console::warn_1(&format!("[lenient] {msg}").into());
++                }
++                return Ok(DatumRef::Void);
+             }
+         }
+     }
+@@ -2544,6 +2634,7 @@ impl BuiltInHandlerManager {
+         reserve_player_mut(|player| {
+             let message = player.get_datum(&args[0]).string_value()?;
+             trace_output(player, &format!("Alert: {}", message));
++            web_sys::console::warn_1(&format!("[rs] alert: {}", message).into());
+             Ok(DatumRef::Void)
+         })
+     }
+diff --git a/vm-rust/src/player/handlers/movie.rs b/vm-rust/src/player/handlers/movie.rs
+index f5f820c..08716b4 100644
+--- a/vm-rust/src/player/handlers/movie.rs
++++ b/vm-rust/src/player/handlers/movie.rs
+@@ -241,9 +241,8 @@ impl MovieHandlers {
+                 .await;
+                 waited_ms += POLL_MS;
+             };
+-            reserve_player_mut(|player| { player.goto_wait_active = false; });
+-
+             if !done {
++                reserve_player_mut(|player| { player.goto_wait_active = false; });
+                 // Fetch never finished — fall back to the deferred frame-loop
+                 // transition so the movie errs loudly instead of freezing.
+                 crate::console_error!(
+@@ -258,6 +257,7 @@ impl MovieHandlers {
+             }
+ 
+             let mounted = crate::player::mount_net_movie(task_id, target, true).await;
++            reserve_player_mut(|player| { player.goto_wait_active = false; });
+             // Success is per-transition noise; a FAILED mount means the calling
+             // handler is about to run against the OLD movie's casts, which is
+             // exactly the bug this path exists to prevent — surface that one.
+@@ -689,11 +689,22 @@ impl MovieHandlers {
+                 // `entered = false` lets the next begin_sprites re-enter the span
+                 // and reload from the score (the deferred revert) when the sprite
+                 // stays unpuppeted; if it is re-puppeted first, it keeps its data.
++                // Red Sky preservation build: a channel with an authored Score
++                // span on the current frame keeps its behaviors and stays
++                // entered (Director's behaviors belong to the span, not to the
++                // puppet state). Movies that loop on one frame never re-enter.
++                let cur_frame = player.movie.current_frame;
++                let has_span = player.movie.score.sprite_spans.iter().any(|sp| {
++                    sp.channel_number == sprite_number as u32
++                        && sp.start_frame <= cur_frame && sp.end_frame >= cur_frame
++                });
+                 let sprite = player.movie.score.get_sprite_mut(sprite_number as i16);
+                 sprite.puppet = false;
+-                sprite.entered = false;
+-                sprite.exited = false;
+-                sprite.script_instance_list.clear();
++                if !has_span {
++                    sprite.entered = false;
++                    sprite.exited = false;
++                    sprite.script_instance_list.clear();
++                }
+                 // Mark for revert on the NEXT frame tick. If the sprite is not
+                 // re-puppeted / re-membered before then it reverts to the Score
+                 // (a reset to empty for a pure-puppet channel with no span). This
+@@ -1368,6 +1379,34 @@ impl MovieHandlers {
+         // Director's updateStage() forces an immediate stage redraw even from
+         // inside enterFrame/prepareFrame loops. Yielding to the browser event loop
+         // is only needed for busy-wait input handlers.
++        // Red Sky preservation build: pace explicit redraws to a 1998-like rate.
++        // Lingo animation loops (`repeat ... updateStage`) otherwise run at full
++        // CPU speed, and without a yield the browser never shows the frames in
++        // between. Default 30 per second; the host page may override per piece
++        // with window.__rsUpdateStageMinMs (0 disables).
++        let pace_ms = reserve_player_mut(|player| {
++            let min_ms = web_sys::window()
++                .and_then(|w| js_sys::Reflect::get(&w, &wasm_bindgen::JsValue::from_str("__rsUpdateStageMinMs")).ok())
++                .and_then(|v| v.as_f64())
++                .unwrap_or(1000.0 / 30.0);
++            let now = js_sys::Date::now();
++            if min_ms <= 0.0 {
++                player.rs_last_paced_draw_ms = now;
++                return 0.0;
++            }
++            let next = player.rs_last_paced_draw_ms + min_ms;
++            if next > now && now - player.rs_last_paced_draw_ms < 1000.0 {
++                player.rs_last_paced_draw_ms = next;
++                next - now
++            } else {
++                player.rs_last_paced_draw_ms = now;
++                0.0
++            }
++        });
++        if pace_ms >= 1.0 {
++            async_std::task::sleep(std::time::Duration::from_millis(pace_ms as u64)).await;
++        }
++
+         reserve_player_mut(|player| { player.stage_dirty = true; });
+         crate::rendering::draw_frame_immediate();
+ 
+diff --git a/vm-rust/src/player/handlers/types.rs b/vm-rust/src/player/handlers/types.rs
+index ad5a8a0..758932b 100644
+--- a/vm-rust/src/player/handlers/types.rs
++++ b/vm-rust/src/player/handlers/types.rs
+@@ -1360,6 +1360,8 @@ impl TypeHandlers {
+                 // first physics step in spectral-wizard's colliPlayer) and
+                 // pass them straight into abs(); Director tolerates this.
+                 Datum::Void => Datum::Int(0),
++                // Director 6 applies abs() component-wise to points/rects.
++                Datum::Point(v, f) => Datum::Point([v[0].abs(), v[1].abs()], *f),
+                 _ => {
+                     return Err(ScriptError::new(format!(
+                         "Cannot get abs of type: {}",
+@@ -2434,6 +2436,14 @@ impl TypeHandlers {
+                 }
+             }
+ 
++            if !is_busy {
++                let ch_num = channel_rc.borrow().channel_num;
++                let v = crate::player::handlers::datum_handlers::sound_channel::rs_js_call(
++                    "__rsFileBusy", &[wasm_bindgen::JsValue::from_f64(ch_num as f64)]);
++                if v.as_bool() == Some(true) {
++                    is_busy = true;
++                }
++            }
+             Ok(player.alloc_datum(Datum::Int(if is_busy { 1 } else { 0 })))
+         })
+     }
+diff --git a/vm-rust/src/player/mod.rs b/vm-rust/src/player/mod.rs
+index 8fef74e..a93c903 100644
+--- a/vm-rust/src/player/mod.rs
++++ b/vm-rust/src/player/mod.rs
+@@ -8,6 +8,7 @@ macro_rules! match_ci {
+ }
+ 
+ pub mod allocator;
++pub mod rs_video;
+ pub mod bitmap;
+ pub mod bytecode;
+ pub mod cast_lib;
+@@ -319,6 +320,10 @@ pub struct DirPlayer {
+     /// (vector DatumRef, parent transform DatumRef, sub-property name)
+     pub transform_sub_refs: Vec<(DatumRef, DatumRef, Symbol)>,
+     pub last_mouse_down_time: i64,
++    pub last_key_down_time: i64,
++    pub rs_last_paced_draw_ms: f64,
++    /// Red Sky preservation build: return stack for `play frame X` / `play done`.
++    pub rs_play_stack: Vec<u32>,
+     pub is_double_click: bool,
+     pub mouse_down_sprite: i16,
+     pub drag_offset: (i32, i32),
+@@ -326,6 +331,11 @@ pub struct DirPlayer {
+     /// from the lift's top edge in local px). Cleared on mouse up.
+     pub field_scroll_drag: Option<(i16, i32)>,
+     pub trails_bitmap: Option<bitmap::bitmap::Bitmap>,
++    /// Red Sky: lowest channel that has drawn trails; trails show above the channels below it.
++    pub rs_trails_top: i16,
++    /// Red Sky: last frame's non-trails sprites (channel, member, rect) for dirty-rect erasing of trails.
++    pub rs_trails_prev: Vec<(i16, String, (i32, i32, i32, i32))>,
++    pub rs_trails_movie: String,
+     pub click_on_sprite: i16,
+     /// Sprite whose CAST MEMBER script is currently executing. A member script
+     /// is not a behavior — it runs with no receiver instance — so
+@@ -775,11 +785,17 @@ impl DirPlayer {
+             cursor_is_hidden: false,
+             transform_sub_refs: Vec::new(),
+             last_mouse_down_time: 0,
++            last_key_down_time: 0,
++            rs_last_paced_draw_ms: 0.0,
++            rs_play_stack: Vec::new(),
+             is_double_click: false,
+             mouse_down_sprite: 0,
+             drag_offset: (0, 0),
+             field_scroll_drag: None,
+             trails_bitmap: None,
++            rs_trails_top: 0,
++            rs_trails_prev: Vec::new(),
++            rs_trails_movie: String::new(),
+             subscribed_member_refs: vec![],
+             is_subscribed_to_channel_names: false,
+             is_subscribed_to_score: false,
+@@ -2015,6 +2031,8 @@ impl DirPlayer {
+         let actor_list_datum = self.alloc_datum(Datum::List(DatumType::List, VecDeque::new(), false));
+         self.globals.insert(Symbol::builtin(BuiltInSymbol::ActorList), actor_list_datum);
+         self.actor_list_generation = 0;
++        let search_path_datum = self.alloc_datum(Datum::List(DatumType::List, VecDeque::new(), false));
++        self.globals.insert(Symbol::builtin(BuiltInSymbol::SearchPath), search_path_datum);
+ 
+         // Mathematical constant
+         let pi_datum = self.alloc_datum(Datum::Float(std::f64::consts::PI));
+@@ -2977,6 +2995,15 @@ impl DirPlayer {
+                 let datum = mouse_member_datum(self);
+                 Ok(self.alloc_datum(datum))
+             },
++            // Red Sky preservation build: `the mouseCast` (Director 4-5): the cast number
++            // of the sprite under the pointer, -1 if none.
++            BuiltInSymbol::MouseCast => {
++                let n = match mouse_member_datum(self) {
++                    Datum::CastMember(r) => if r.cast_member > 0 { r.cast_member } else { -1 },
++                    _ => -1,
++                };
++                Ok(self.alloc_datum(Datum::Int(n)))
++            },
+             BuiltInSymbol::MouseChar => {
+                 let val = compute_mouse_char(self);
+                 Ok(self.alloc_datum(Datum::Int(val)))
+@@ -3062,6 +3089,13 @@ impl DirPlayer {
+                 // Default: return 0 when no sprite context is available
+                 Ok(self.alloc_datum(Datum::Int(0)))
+             },
++            BuiltInSymbol::SearchPath | BuiltInSymbol::SearchPaths => {
++                Ok(self
++                    .globals
++                    .get(&Symbol::builtin(BuiltInSymbol::SearchPath))
++                    .unwrap_or(&DatumRef::Void)
++                    .clone())
++            },
+             BuiltInSymbol::ActorList => {
+                 // Return the reference to the global actorList, not a clone of its contents
+                 Ok(self
+@@ -3262,7 +3296,17 @@ impl DirPlayer {
+             // the load-time logic in `load_movie_from_dir`. Label sources
+             // do NOT trigger URL rewriting in net handlers — that's
+             // reserved for `movie_path_override`. See `set_movie_path_label`.
+-            BuiltInSymbol::MoviePath => {
++            BuiltInSymbol::ColorQD | BuiltInSymbol::SwitchColorDepth => {
++                Ok(self.alloc_datum(Datum::Int(1)))
++            },
++            BuiltInSymbol::QuickTimePresent | BuiltInSymbol::VideoForWindowsPresent => {
++                Ok(self.alloc_datum(Datum::Int(0)))
++            },
++            BuiltInSymbol::LastClick | BuiltInSymbol::LastEvent | BuiltInSymbol::LastKey | BuiltInSymbol::LastRoll => {
++                let v = self.rs_last_event_ticks(prop.into_builtin().unwrap());
++                Ok(self.alloc_datum(Datum::Int(v)))
++            },
++            BuiltInSymbol::MoviePath | BuiltInSymbol::PathName => {
+                 let label = self.movie_path_label_effective();
+                 if let Some(path) = label {
+                     let base_path = dir_part_of_path(&path);
+@@ -3495,6 +3539,18 @@ impl DirPlayer {
+         }
+     }
+ 
++    fn rs_last_event_ticks(&self, which: BuiltInSymbol) -> i32 {
++        let now = chrono::Utc::now().timestamp_millis().abs();
++        let since = |t: i64| -> i32 { if t <= 0 { get_elapsed_ticks(self.start_time) } else { ((now - t).max(0) * 60 / 1000) as i32 } };
++        let click = since(self.last_mouse_down_time);
++        let key = since(self.last_key_down_time);
++        match which {
++            BuiltInSymbol::LastClick => click,
++            BuiltInSymbol::LastKey => key,
++            _ => click.min(key),
++        }
++    }
++
+     fn get_anim_prop(&mut self, prop_id: u16) -> Result<Datum, ScriptError> {
+         let prop_name = get_anim_prop_name(prop_id);
+         // `the timer` / `the keyPressed` / `the key` / `the keyCode` are the
+@@ -3507,7 +3563,7 @@ impl DirPlayer {
+             self.input_polled = true;
+         }
+         match prop_name {
+-            BuiltInSymbol::ColorDepth => Ok(Datum::Int(32)),
++            BuiltInSymbol::ColorDepth => Ok(Datum::Int(crate::player::handlers::datum_handlers::sound_channel::rs_js_call("__rsColorDepth", &[]).as_f64().map(|f| f as i32).unwrap_or(8))), // Red Sky: per work
+             BuiltInSymbol::FullColorPermit => Ok(Datum::Int(1)), // Full color mode is permitted
+             BuiltInSymbol::Timer => Ok(Datum::Int(get_elapsed_ticks(self.start_time))),
+             BuiltInSymbol::TimeoutLength => Ok(Datum::Int(self.movie.timeout_length)),
+@@ -3534,7 +3590,17 @@ impl DirPlayer {
+             BuiltInSymbol::StageColor => Ok(Datum::Int(0)),
+             BuiltInSymbol::DoubleClick => Ok(datum_bool(self.is_double_click)),
+             BuiltInSymbol::LastClick | BuiltInSymbol::LastEvent | BuiltInSymbol::LastKey | BuiltInSymbol::LastRoll => {
+-                Ok(Datum::Int(get_elapsed_ticks(self.start_time)))
++                // Ticks (1/60 s) since the last click / key / any event.
++                let now = chrono::Utc::now().timestamp_millis().abs();
++                let since = |t: i64| -> i32 { if t <= 0 { get_elapsed_ticks(self.start_time) } else { ((now - t).max(0) * 60 / 1000) as i32 } };
++                let click = since(self.last_mouse_down_time);
++                let key = since(self.last_key_down_time);
++                let v = match prop_name {
++                    BuiltInSymbol::LastClick => click,
++                    BuiltInSymbol::LastKey => key,
++                    _ => click.min(key),
++                };
++                Ok(Datum::Int(v))
+             }
+             BuiltInSymbol::MultiSound => Ok(Datum::Int(1)),
+             BuiltInSymbol::PauseState => Ok(datum_bool(self.is_script_paused)),
+@@ -3663,6 +3729,16 @@ impl DirPlayer {
+                 crate::js_api::JsApi::dispatch_stage_size_changed(w, h, self.center_stage);
+                 Ok(())
+             },
++            Some(BuiltInSymbol::SearchPath) | Some(BuiltInSymbol::SearchPaths) => {
++                match value {
++                    Datum::List(list_type, list_items, sorted) => {
++                        let v = self.alloc_datum(Datum::List(list_type, list_items, sorted));
++                        self.globals.insert(Symbol::builtin(BuiltInSymbol::SearchPath), v);
++                        Ok(())
++                    }
++                    _ => Ok(()),
++                }
++            },
+             Some(BuiltInSymbol::ActorList) => {
+                 // Setting actorList - update the global variable
+                 match value {
+@@ -4071,6 +4147,30 @@ pub async fn player_call_global_handler(
+     handler_name: Symbol,
+     args: &Vec<DatumRef>,
+ ) -> Result<DatumRef, ScriptError> {
++    // Red Sky 98 preservation shims: 1998 hardware probes that busy-wait on
++    // audio start/stop or benchmark the CPU. Meaningless in a browser, and the
++    // audio ones spin forever because sounds start asynchronously here.
++    {
++        let lname = handler_name.to_string().to_ascii_lowercase();
++        let stub: Option<i32> = match lname.as_str() {
++            "animation_testlatency2" | "animation_testlatency3" => Some(0),
++            "machineprofile" => Some(100000),
++            "loadprofile" => Some(1),
++            "doperformancecheck" => Some(0),
++            _ => None,
++        };
++        if let Some(v) = stub {
++            return reserve_player_mut(|player| {
++                if lname.starts_with("animation_testlatency") {
++                    let g = format!("ganimation_latency{}", &lname[lname.len() - 1..]);
++                    let zero = player.alloc_datum(Datum::Int(0));
++                    player.globals.insert(Symbol::from_str(&g), zero);
++                }
++                Ok(player.alloc_datum(Datum::Int(v)))
++            });
++        }
++    }
++
+     // Director 6 `birth(script, args)` constructor: when the first arg is a
+     // ScriptRef this is the pre-`new` idiom — allocate a FRESH instance and run
+     // its `on birth me, args`. This MUST run before the generic first-arg
+@@ -4219,6 +4319,27 @@ pub async fn player_call_global_handler(
+         Ok(None) => {}
+     }
+ 
++    // Red Sky preservation build: old-style Xtra calls `openFile(xFile, name, mode)`
++    // reach here as globals; route the Xtra's async handlers (FileIO openFile,
++    // displayOpen...) to the async path instead of the sync one, which refuses them.
++    if !args.is_empty() {
++        let xi = reserve_player_ref(|player| {
++            player.get_datum(&args[0]).to_xtra_instance().ok().map(|(n, id)| (n.to_owned(), *id))
++        });
++        if let Some((xtra_name, instance_id)) = xi {
++            // Page-implemented Xtras (Beatnik...) own every handler called on their
++            // instances, including names that are also Lingo built-ins (play, stop).
++            if crate::player::xtra::jsbridge::is_js_xtra(&xtra_name) && crate::player::xtra::jsbridge::has_handler(&xtra_name, handler_name.as_str()) {
++                let rest = args[1..].to_vec();
++                return crate::player::xtra::jsbridge::call(&xtra_name, instance_id, handler_name.as_str(), &rest);
++            }
++            if crate::player::xtra::manager::has_xtra_instance_async_handler(&xtra_name, handler_name.as_str(), instance_id) {
++                let rest = args[1..].to_vec();
++                return Box::pin(crate::player::xtra::manager::call_xtra_instance_async_handler(
++                    &xtra_name, instance_id, handler_name.as_str(), &rest)).await;
++            }
++        }
++    }
+     if BuiltInHandlerManager::has_async_handler(handler_name) {
+         return Box::pin(BuiltInHandlerManager::call_async_handler(
+             handler_name,
+@@ -5807,6 +5928,19 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
+ 
+     stop_movie_sequence().await;
+ 
++    // Red Sky preservation build: remember which cast library each slot held,
++    // so script instances that survive the movie switch (Director keeps them
++    // alive with their scripts) can be re-pointed at the same-named cast in
++    // the new movie.
++    let old_cast_keys: Vec<(String, String)> = reserve_player_ref(|player| {
++        player.movie.cast_manager.casts.iter().map(|c| {
++            let fb = c.file_name.replace('\\', "/").replace(':', "/");
++            let fb = fb.rsplit('/').next().unwrap_or("").to_lowercase();
++            let fb = fb.rsplit_once('.').map(|(a, _)| a.to_string()).unwrap_or(fb);
++            (c.name.to_lowercase(), fb)
++        }).collect()
++    });
++
+     // 3. Load the new movie data (preserving globals and allocator)
+     reserve_player_mut(|player| {
+         player.is_dispatching_events = prev_dispatching;
+@@ -5845,6 +5979,35 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
+         })
+     }).await;
+ 
++    reserve_player_mut(|player| {
++        let new_keys: Vec<(String, String)> = player.movie.cast_manager.casts.iter().map(|c| {
++            let fb = c.file_name.replace('\\', "/").replace(':', "/");
++            let fb = fb.rsplit('/').next().unwrap_or("").to_lowercase();
++            let fb = fb.rsplit_once('.').map(|(a, _)| a.to_string()).unwrap_or(fb);
++            (c.name.to_lowercase(), fb)
++        }).collect();
++        let mut remap: Vec<i32> = Vec::with_capacity(old_cast_keys.len() + 1);
++        remap.push(0);
++        for (i, (oname, ofile)) in old_cast_keys.iter().enumerate() {
++            let found = new_keys.iter().position(|(n, f)| {
++                (!oname.is_empty() && n == oname && oname != "internal")
++                    || (!ofile.is_empty() && f == ofile && n != "internal")
++            });
++            remap.push(found.map(|p| p as i32 + 1).unwrap_or((i + 1) as i32));
++        }
++        let mut changed = 0;
++        player.allocator.script_instances.for_each_mut(|entry| {
++            let lib = entry.script_instance.script.cast_lib;
++            if lib > 0 && (lib as usize) < remap.len() && remap[lib as usize] != lib {
++                entry.script_instance.script.cast_lib = remap[lib as usize];
++                changed += 1;
++            }
++        });
++        if changed > 0 {
++            web_sys::console::log_1(&format!("[rs] remapped {} surviving script instances; cast map {:?}", changed, remap).into());
++        }
++    });
++
+     // Apply frame target if specified, restore is_playing before init sequence
+     reserve_player_mut(|player| {
+         match &target {
+@@ -6067,7 +6230,8 @@ pub async fn run_single_frame() -> (bool, bool) {
+     // WITHOUT setting visible=0 and relied on the old immediate wipe to clear it.
+     reserve_player_mut(|player| {
+         let frame = player.movie.current_frame;
+-        if player.movie.score.process_pending_unpuppet_reverts(frame) {
++        let dv = player.movie.dir_version;
++        if player.movie.score.process_pending_unpuppet_reverts(frame, dv) {
+             player.movie.score.invalidate_render_channel_cache();
+             player.stage_dirty = true;
+         }
+@@ -6977,6 +7141,18 @@ pub async fn run_frame_loop() {
+             continue;
+         }
+ 
++        // Red Sky preservation build: while go(frame, movie) is fetching and
++        // mounting the next movie, the OLD movie must not keep stepping
++        // (Director loaded movies synchronously, so its idle/exitFrame never
++        // ran against cleared globals).
++        if reserve_player_ref(|player| player.goto_wait_active) {
++            let _ = async_std::future::timeout(
++                std::time::Duration::from_millis(16),
++                std::future::pending::<()>(),
++            ).await;
++            continue;
++        }
++
+         // Pre-dispatch Flash members for sprites on the current frame so they start
+         // loading before Lingo scripts try to access them.
+         reserve_player_mut(|player| {
+@@ -7028,6 +7204,12 @@ pub async fn run_frame_loop() {
+             }
+         }
+ 
++        // Red Sky preservation build: honor the score tempo channel's waits on
++        // the frame just entered (wait N seconds, wait for click, wait for a
++        // score sound to finish). Idle, sound fades and input keep running; a
++        // handler that jumps elsewhere ends the wait, as in Director.
++        rs_hold_for_frame_wait().await;
++
+         // Tick the sound manager so per-channel fade-in / fade-out
+         // progress. Without this, Lingo's `sound fadeIn` sets the
+         // channel volume to 0 to start the fade but the ramp never
+@@ -7254,6 +7436,8 @@ pub async fn player_trigger_error_pause(
+                 .map(|s| s.name.clone())
+                 .unwrap_or_default()
+         });
++        // Red Sky preservation build: say where a script error happened.
++        web_sys::console::warn_1(&format!("[rs] script error in {} / {} at bytecode {}: {}", script_name, handler_ref.1, bytecode_index, err.message).into());
+         let breakpoint = Breakpoint {
+             script_name,
+             handler_name: handler_ref.1.to_string(),
+@@ -8141,3 +8325,148 @@ mod handler_gap_tests {
+         });
+     }
+ }
++
++
++/// Red Sky preservation build: see the call site in the frame loop.
++async fn rs_hold_for_frame_wait() {
++    use crate::player::score::FrameWait;
++    let (wait, frame) = reserve_player_ref(|player| {
++        let f = player.movie.current_frame;
++        (player.movie.score.get_frame_wait(f), f)
++    });
++    let Some(wait) = wait else { return };
++    let started = chrono::Utc::now().timestamp_millis().abs();
++    let limit_ms: i64 = match wait {
++        FrameWait::Seconds(s) => (s as i64) * 1000,
++        _ => 10 * 60 * 1000, // safety cap for click/sound waits
++    };
++    loop {
++        let now = chrono::Utc::now().timestamp_millis().abs();
++        let elapsed = now - started;
++        let (done, interrupted) = reserve_player_ref(|player| {
++            let interrupted = !player.is_playing
++                || player.goto_wait_active
++                || player.movie.current_frame != frame;
++            let done = match wait {
++                FrameWait::Seconds(_) => elapsed >= limit_ms,
++                FrameWait::Click => player.last_mouse_down_time > started,
++                FrameWait::SoundRow(row) => {
++                    // Score row 3 plays on sound channel 2, row 4 on channel 1
++                    // (see the score sound trigger in score.rs).
++                    let idx = if row == 3 { 1 } else { 0 };
++                    let busy = player
++                        .sound_manager
++                        .get_channel(idx)
++                        .map(|ch| {
++                            let c = ch.borrow();
++                            c.status == crate::player::handlers::datum_handlers::sound_channel::SoundStatus::Playing
++                                || c.status == crate::player::handlers::datum_handlers::sound_channel::SoundStatus::Loading
++                        })
++                        .unwrap_or(false);
++                    // give a just-triggered sound a moment to start loading
++                    !busy && elapsed > 150
++                }
++            };
++            (done || elapsed >= limit_ms, interrupted)
++        });
++        if done || interrupted {
++            break;
++        }
++        let _ = async_std::future::timeout(
++            std::time::Duration::from_millis(16),
++            std::future::pending::<()>(),
++        ).await;
++        tick_sound_manager(0.016);
++        let active = reserve_player_ref(|player| {
++            player.is_playing && !player.is_script_paused && !player.pending_movie_init
++        });
++        if active {
++            let _ = player_invoke_frame_and_movie_scripts(Symbol::from_str("idle"), &vec![]).await;
++        }
++    }
++}
++
++
++/// Red Sky preservation build: `puppetPalette(palette, speed, frames)`.
++/// DirPlayer renders in full color, so instead of swapping the stage palette
++/// the change is expressed as a stage brightness: the target palette's
++/// luminance relative to the frame's palette over the entries that differ.
++/// Palette2 (the film-flicker palette) gives a ~5% lift; a near-black palette
++/// gives a fade to black; `puppetPalette(0)` restores. Applied by the host
++/// page's `__rsStageFilter(brightness, durationMs)`.
++pub fn rs_puppet_palette(args: &[DatumRef]) {
++    use crate::director::lingo::datum::Datum;
++    use crate::player::bitmap::bitmap::PaletteRef;
++    let result = reserve_player_ref(|player| {
++        let palette_colors = |r: &CastMemberRef| -> Option<Vec<(u8, u8, u8)>> {
++            let m = player.movie.cast_manager.find_member_by_ref(r)?;
++            match &m.member_type {
++                crate::player::cast_member::CastMemberType::Palette(p) => Some(p.colors.clone()),
++                _ => None,
++            }
++        };
++        let target_ref: Option<CastMemberRef> = match args.first().map(|a| player.get_datum(a)) {
++            Some(Datum::String(n)) => player.movie.cast_manager.find_member_ref_by_name(n),
++            Some(Datum::CastMember(r)) => Some(r.clone()),
++            Some(Datum::Int(n)) if *n > 0 => Some(CastMemberRef { cast_lib: 1, cast_member: *n }),
++            _ => None,
++        };
++        let speed = args.get(1).and_then(|a| player.get_datum(a).int_value().ok()).unwrap_or(60);
++        let frames = args.get(2).and_then(|a| player.get_datum(a).int_value().ok()).unwrap_or(0);
++        let duration_ms = if frames > 0 {
++            frames as f64 * player.movie.get_frame_delay_ms()
++        } else if speed >= 60 || speed <= 0 {
++            0.0
++        } else {
++            (60 - speed) as f64 / 59.0 * 2000.0
++        };
++        let Some(target_ref) = target_ref else { return (1.0, duration_ms) };
++        let Some(target) = palette_colors(&target_ref) else { return (1.0, duration_ms) };
++        let mut reference = match player.movie.score.get_frame_palette(player.movie.current_frame) {
++            PaletteRef::Member(r) => palette_colors(&r),
++            _ => None,
++        };
++        if reference.is_none() {
++            // The frame uses a built-in palette (or the target itself). Measure the
++            // target against its nearest sibling palette in the casts instead, e.g.
++            // Red Sky's flicker "Palette2" against "Palette1", which differ only in a
++            // few greys. Without this the cowboy scene flickered far too dark.
++            let mut best: Option<(usize, Vec<(u8, u8, u8)>)> = None;
++            for cast in &player.movie.cast_manager.casts {
++                for m in cast.members.values() {
++                    if let crate::player::cast_member::CastMemberType::Palette(p) = &m.member_type {
++                        if p.colors.len() != target.len() || p.colors == target { continue; }
++                        let d = p.colors.iter().zip(target.iter()).filter(|(a, b)| a != b).count();
++                        if best.as_ref().map_or(true, |(bd, _)| d < *bd) { best = Some((d, p.colors.clone())); }
++                    }
++                }
++            }
++            reference = match best { Some((d, c)) if d <= 64 => Some(c), _ => None };
++        }
++        let lum = |c: &(u8, u8, u8)| 0.299 * c.0 as f64 + 0.587 * c.1 as f64 + 0.114 * c.2 as f64;
++        let factor = match reference {
++            Some(refc) => {
++                let (mut a, mut b) = (0.0, 0.0);
++                for (t, r) in target.iter().zip(refc.iter()) {
++                    if t != r { a += lum(t); b += lum(r); }
++                }
++                if b > 0.0 { a / b } else { 1.0 }
++            }
++            None => {
++                // No frame palette to compare with: use the mean luminance
++                // against a neutral mid-gray reference.
++                let mean = target.iter().map(lum).sum::<f64>() / target.len().max(1) as f64;
++                (mean / 127.5).clamp(0.0, 2.0)
++            }
++        };
++        (factor.clamp(0.0, 3.0), duration_ms)
++    });
++    #[cfg(target_arch = "wasm32")]
++    {
++        crate::player::handlers::datum_handlers::sound_channel::rs_js_call(
++            "__rsStageFilter",
++            &[wasm_bindgen::JsValue::from_f64(result.0), wasm_bindgen::JsValue::from_f64(result.1)],
++        );
++    }
++    let _ = result;
++}
+diff --git a/vm-rust/src/player/movie.rs b/vm-rust/src/player/movie.rs
+index c4a4ab7..59aaeae 100644
+--- a/vm-rust/src/player/movie.rs
++++ b/vm-rust/src/player/movie.rs
+@@ -225,7 +225,8 @@ impl Movie {
+             // A score always has at least frame 1, so fall back to 1 rather than 0
+             // when the frame count couldn't be determined.
+             BuiltInSymbol::LastFrame => Ok(Datum::Int(self.score.frame_count.unwrap_or(1).max(1) as i32)),
+-            BuiltInSymbol::MoviePath => {
++            BuiltInSymbol::IdleReadChunkSize | BuiltInSymbol::IdleHandlerPeriod | BuiltInSymbol::IdleLoadMode | BuiltInSymbol::IdleLoadPeriod => Ok(Datum::Int(0)),
++            BuiltInSymbol::MoviePath | BuiltInSymbol::PathName => {
+                 let mut result = self.base_path.clone();
+                 if !result.is_empty() && !result.ends_with(PATH_SEPARATOR) {
+                     result.push_str(PATH_SEPARATOR);
+@@ -362,7 +363,7 @@ impl Movie {
+             // Scripting Dictionary, valid values 1/2/4/8/16/32). The web
+             // canvas is true-color, so report 32. Setting it is a no-op
+             // (see set_prop), matching a monitor that can't change depth.
+-            BuiltInSymbol::ColorDepth => Ok(Datum::Int(32)),
++            BuiltInSymbol::ColorDepth => Ok(Datum::Int(crate::player::handlers::datum_handlers::sound_channel::rs_js_call("__rsColorDepth", &[]).as_f64().map(|f| f as i32).unwrap_or(8))), // Red Sky: per work
+             // A SYMBOL, per the Scripting Dictionary: "The possible values of the
+             // active3dRenderer property are #openGL, #directX7_0, #directx9,
+             // #directX5_2, and #software". Returning the string "#openGL" made
+@@ -451,7 +452,25 @@ impl Movie {
+             // emulates Windows Shockwave playback, so report 256 — movies branch their
+             // path separators and platform paths on this.
+             BuiltInSymbol::MachineType => Ok(Datum::Int(256)),
+-            _ => Err(ScriptError::new(format!("Cannot get movie prop {prop}")))
++            _ => {
++                // Red Sky preservation build: `the short/long/abbreviated date` and
++                // `the short/long time` (Beer Pager stamps its saved preferences).
++                let now = chrono::Local::now();
++                let p = prop.to_string().to_lowercase();
++                let s = match p.as_str() {
++                    "date" | "short date" => Some(now.format("%-m/%-d/%y").to_string()),
++                    "long date" => Some(now.format("%A, %B %-d, %Y").to_string()),
++                    "abbreviated date" | "abbrev date" | "abbr date" => Some(now.format("%a, %b %-d, %Y").to_string()),
++                    "time" | "short time" => Some(now.format("%-I:%M %p").to_string()),
++                    "long time" => Some(now.format("%-I:%M:%S %p").to_string()),
++                    "abbreviated time" | "abbrev time" | "abbr time" => Some(now.format("%-I:%M %p").to_string()),
++                    _ => None,
++                };
++                match s {
++                    Some(s) => Ok(Datum::String(s)),
++                    None => Err(ScriptError::new(format!("Cannot get movie prop {prop}"))),
++                }
++            }
+         }
+     }
+ 
+@@ -568,7 +587,7 @@ impl Movie {
+                 self.puppet_tempo = value.int_value()? as u32;
+                 Ok(())
+             },
+-            BuiltInSymbol::ColorDepth | BuiltInSymbol::UseFastQuads | BuiltInSymbol::RomanLingo | BuiltInSymbol::AllowSaveLocal | BuiltInSymbol::CpuHogTicks
++            BuiltInSymbol::IdleReadChunkSize | BuiltInSymbol::IdleHandlerPeriod | BuiltInSymbol::IdleLoadMode | BuiltInSymbol::IdleLoadPeriod | BuiltInSymbol::ColorDepth | BuiltInSymbol::UseFastQuads | BuiltInSymbol::RomanLingo | BuiltInSymbol::AllowSaveLocal | BuiltInSymbol::CpuHogTicks
+             | BuiltInSymbol::PreLoadEventAbort => {
+                 // Read-only / no-op in practice; ignore sets like Director does.
+                 // preLoadEventAbort gates whether a preload event handler may
+@@ -642,6 +661,12 @@ impl Movie {
+         if self.puppet_tempo > 0 {
+             self.puppet_tempo
+         } else {
++            // Red Sky preservation build: a per-piece speed override for this frame
++            // (site/speeds.json via window.__rsTempoOverride) replaces the score's
++            // rate, for sections authored "as fast as possible" in 1998.
++            if let Some(fps) = rs_tempo_override(&self.file_name, self.current_frame) {
++                return fps;
++            }
+             // Get tempo from current frame, or fall back to movie frame_rate
+             self.score.get_frame_tempo(self.current_frame)
+                 .unwrap_or(self.frame_rate as u32)
+@@ -671,3 +696,21 @@ impl Movie {
+         Some(value)
+     }
+ }
++
++
++/// Red Sky preservation build: ask the page for a speed override (frames per
++/// second) for `frame` of the movie `file_name`; None when there is none.
++pub fn rs_tempo_override(file_name: &str, frame: u32) -> Option<u32> {
++    #[cfg(target_arch = "wasm32")]
++    {
++        let v = crate::player::handlers::datum_handlers::sound_channel::rs_js_call(
++            "__rsTempoOverride",
++            &[wasm_bindgen::JsValue::from_str(file_name), wasm_bindgen::JsValue::from_f64(frame as f64)],
++        );
++        if let Some(f) = v.as_f64() {
++            if f >= 1.0 { return Some(f as u32); }
++        }
++    }
++    let _ = (file_name, frame);
++    None
++}
+diff --git a/vm-rust/src/player/rs_video.rs b/vm-rust/src/player/rs_video.rs
+new file mode 100644
+index 0000000..0bf46f9
+--- /dev/null
++++ b/vm-rust/src/player/rs_video.rs
+@@ -0,0 +1,86 @@
++//! Red Sky preservation build: QuickTime / digital video members.
++//!
++//! DirPlayer has no video decoder. A sprite whose member is a DigitalVideo is played by
++//! the page instead: each frame the player tells `window.__rsVideoFrame(list)` which video
++//! sprites are on stage, where, and from which file (the page lays a <video> over the
++//! stage, converted to MP4 under the original name). Lingo's video properties
++//! (movieRate, movieTime, duration, stopTime, volume) are forwarded to
++//! `window.__rsVideo(op, channel, file, value)`. Times are in ticks (1/60 s).
++
++use wasm_bindgen::JsValue;
++
++use crate::director::lingo::datum::Datum;
++use crate::player::cast_member::CastMemberType;
++use crate::player::DirPlayer;
++
++fn js(op: &str, ch: i16, file: &str, value: f64) -> JsValue {
++    crate::player::handlers::datum_handlers::sound_channel::rs_js_call(
++        "__rsVideo",
++        &[JsValue::from_str(op), JsValue::from_f64(ch as f64), JsValue::from_str(file), JsValue::from_f64(value)],
++    )
++}
++
++/// The linked file of the DigitalVideo member on `sprite`, if it has one.
++pub fn sprite_video_file(player: &DirPlayer, sprite: i16) -> Option<String> {
++    let s = player.movie.score.get_sprite(sprite)?;
++    let m = player.movie.cast_manager.find_member_by_ref(s.member.as_ref()?)?;
++    match &m.member_type {
++        CastMemberType::DigitalVideo(v) => Some(v.file_name.clone()),
++        _ => None,
++    }
++}
++
++pub fn is_video_prop(name: &str) -> bool {
++    matches!(name.to_lowercase().as_str(),
++        "movierate" | "movietime" | "duration" | "stoptime" | "starttime" | "volume" | "mediaready" | "loop" | "controller")
++}
++
++pub fn get_sprite_prop(player: &DirPlayer, sprite: i16, prop: &str) -> Option<Datum> {
++    let file = sprite_video_file(player, sprite)?;
++    let v = js(&format!("get:{}", prop.to_lowercase()), sprite, &file, 0.0);
++    Some(match v.as_f64() {
++        Some(f) => Datum::Int(f.round() as i32),
++        None => Datum::Int(0),
++    })
++}
++
++pub fn set_sprite_prop(player: &DirPlayer, sprite: i16, prop: &str, value: &Datum) -> bool {
++    let Some(file) = sprite_video_file(player, sprite) else { return false };
++    let v = match value {
++        Datum::Int(i) => *i as f64,
++        Datum::Float(f) => *f,
++        _ => 0.0,
++    };
++    js(&format!("set:{}", prop.to_lowercase()), sprite, &file, v);
++    true
++}
++
++/// Member duration in ticks (asks the page, which knows the converted file's length).
++pub fn member_duration(file: &str) -> i32 {
++    js("get:duration", 0, file, 0.0).as_f64().map(|f| f.round() as i32).unwrap_or(0)
++}
++
++/// Called after each stage draw: report every visible video sprite.
++pub fn report_frame(player: &DirPlayer) {
++    let list = js_sys::Array::new();
++    let base = player.net_manager.base_path.as_ref().map(|u| u.to_string()).unwrap_or_default();
++    for ch in &player.movie.score.channels {
++        let sp = &ch.sprite;
++        let Some(mref) = sp.member.as_ref() else { continue };
++        let Some(m) = player.movie.cast_manager.find_member_by_ref(mref) else { continue };
++        let CastMemberType::DigitalVideo(v) = &m.member_type else { continue };
++        if !sp.visible { continue; }
++        let o = js_sys::Object::new();
++        let set = |k: &str, val: JsValue| { let _ = js_sys::Reflect::set(&o, &JsValue::from_str(k), &val); };
++        set("channel", JsValue::from_f64(sp.number as f64));
++        set("file", JsValue::from_str(&v.file_name));
++        set("base", JsValue::from_str(&base));
++        let r = crate::player::score::get_concrete_sprite_rect(player, sp);
++        set("left", JsValue::from_f64(r.left as f64));
++        set("top", JsValue::from_f64(r.top as f64));
++        set("width", JsValue::from_f64((r.right - r.left) as f64));
++        set("height", JsValue::from_f64((r.bottom - r.top) as f64));
++        list.push(&o);
++    }
++    crate::player::handlers::datum_handlers::sound_channel::rs_js_call("__rsVideoFrame", &[list.into()]);
++}
+diff --git a/vm-rust/src/player/score.rs b/vm-rust/src/player/score.rs
+index 25330f7..13ea5bb 100644
+--- a/vm-rust/src/player/score.rs
++++ b/vm-rust/src/player/score.rs
+@@ -653,11 +653,19 @@ impl Score {
+     /// channels are left alone (begin_sprites reloads them). Returns true if any
+     /// sprite was reset so the caller can invalidate the render cache. Runs every
+     /// frame (not just on frame change) so single-frame movies revert too.
+-    pub fn process_pending_unpuppet_reverts(&mut self, frame_num: u32) -> bool {
+-        let span_channels: std::collections::HashSet<usize> = self
++    pub fn process_pending_unpuppet_reverts(&mut self, frame_num: u32, dir_version: u16) -> bool {
++        let mut restore: Vec<usize> = Vec::new();
++        let mut span_channels: std::collections::HashSet<usize> = self
+             .active_channel_numbers_for_frame(frame_num)
+             .into_iter()
+             .collect();
++        // Red Sky preservation build: any channel with an authored Score span
++        // on this frame keeps its sprite (and its behaviors) when unpuppeted.
++        for span in self.sprite_spans.iter() {
++            if Self::is_span_in_frame(span, frame_num) {
++                span_channels.insert(span.channel_number as usize);
++            }
++        }
+         let mut any = false;
+         for channel in &mut self.channels {
+             let sprite = &mut channel.sprite;
+@@ -668,11 +676,65 @@ impl Score {
+             if !sprite.puppet && !span_channels.contains(&channel.number) {
+                 sprite.reset();
+                 any = true;
++            } else if !sprite.puppet {
++                restore.push(channel.number);
++            }
++        }
++        // Red Sky preservation build: a span channel handed back to the Score
++        // takes the Score's member, position and ink again (behaviors stay).
++        // Red Sky's animation manager ends every transient animation (the bottle
++        // arrow, the cowboy/pig, the change button) with puppetSprite(n, 0) and
++        // relies on this to clear its last frame off the stage.
++        for ch in restore {
++            if self.rs_restore_channel_from_score(ch, frame_num, dir_version) {
++                any = true;
+             }
+         }
+         any
+     }
+ 
++    fn rs_restore_channel_from_score(&mut self, channel_number: usize, frame_num: u32, dir_version: u16) -> bool {
++        let span_start = self
++            .sprite_spans
++            .iter()
++            .filter(|sp| sp.channel_number as usize == channel_number && Self::is_span_in_frame(sp, frame_num))
++            .map(|sp| sp.start_frame)
++            .max();
++        let Some(span_start) = span_start else { return false };
++        let data = self
++            .channel_initialization_data
++            .iter()
++            .filter(|(fi, ci, _)| {
++                get_channel_number_from_index(*ci as u32) as usize == channel_number
++                    && fi + 1 >= span_start
++                    && fi + 1 <= frame_num
++            })
++            .max_by_key(|(fi, _, _)| *fi)
++            .map(|(_, _, d)| d.clone());
++        let Some(data) = data else { return false };
++        let sprite = self.get_sprite_mut(channel_number as i16);
++        sprite.member = if data.cast_member == 0 {
++            None
++        } else {
++            let lib = if data.cast_lib == 0 || data.cast_lib == 65535 { 1 } else { data.cast_lib as i32 };
++            Some(CastMemberRef { cast_lib: lib, cast_member: data.cast_member as i32 })
++        };
++        sprite.loc_h = data.pos_x as i32;
++        sprite.loc_v = data.pos_y as i32;
++        if data.width != 0 { sprite.width = data.width as i32; sprite.has_size_changed = true; }
++        if data.height != 0 { sprite.height = data.height as i32; sprite.has_size_changed = true; }
++        sprite.skew = data.skew as f64;
++        sprite.rotation = data.rotation as f64;
++        sprite.moveable = data.moveable;
++        sprite.trails = data.trails;
++        sprite.stretch = data.stretch as i32;
++        sprite.ink = (data.ink & 0x3F) as i32;
++        sprite.blend = convert_raw_blend(data.blend, data.sprite_flags, dir_version);
++        sprite.flip_h = data.flip_h();
++        sprite.flip_v = data.flip_v();
++        true
++    }
++
+     pub fn begin_sprites(&mut self, score_ref: ScoreRef, frame_num: u32) {
+         // Clean up sound channel triggers - but only once per frame to prevent double-triggering
+         // Check if we already processed this frame
+@@ -1543,8 +1605,8 @@ impl Score {
+ 
+         // handle score Sound 1 + Sound 2 in Effects Channels
+         // Build a map of (frame_index, channel_index) -> cast_member for quick lookup
+-        let sound_by_frame_channel: HashMap<(u32, u16), u8> = self.sound_channel_data.iter()
+-            .map(|(frame_idx, ch_idx, data)| ((*frame_idx, *ch_idx), data.cast_member))
++        let sound_by_frame_channel: HashMap<(u32, u16), u32> = self.sound_channel_data.iter()
++            .map(|(frame_idx, ch_idx, data)| ((*frame_idx, *ch_idx), data.slot_number()))
+             .collect();
+ 
+         for (frame_index, channel_index, sound_data) in self.sound_channel_data.iter() {
+@@ -1562,7 +1624,7 @@ impl Score {
+ 
+                 let is_new_sound_span = match prev_frame_sound {
+                     None => true, // No sound on previous frame
+-                    Some(&prev_cast_member) => prev_cast_member != sound_data.cast_member, // Different sound
++                    Some(&prev_slot) => prev_slot != sound_data.slot_number(), // Different sound
+                 };
+ 
+                 if !is_new_sound_span {
+@@ -1599,7 +1661,9 @@ impl Score {
+                                             current_datum
+                                         {
+                                             return current_cast_ref.cast_member
+-                                                == sound_data.cast_member as i32;
++                                                == sound_data.cast_member as i32
++                                                && (sound_data.cast_lib == 0
++                                                    || current_cast_ref.cast_lib == sound_data.cast_lib as i32);
+                                         }
+                                     }
+                                 }
+@@ -1614,7 +1678,9 @@ impl Score {
+                                             current_datum
+                                         {
+                                             return current_cast_ref.cast_member
+-                                                == sound_data.cast_member as i32;
++                                                == sound_data.cast_member as i32
++                                                && (sound_data.cast_lib == 0
++                                                    || current_cast_ref.cast_lib == sound_data.cast_lib as i32);
+                                         }
+                                     }
+                                 }
+@@ -1638,15 +1704,18 @@ impl Score {
+                                 }
+                                 ScoreRef::Stage => {
+                                     // Find the cast member by slot number (global)
++                                    // Red Sky preservation build: build the ref from the
++                                    // score's own cast library + member. The old code
++                                    // re-derived it from `m.number` (the member's number
++                                    // within its cast), which always decoded to cast 1.
++                                    let ref_ = CastMemberRefHandlers::member_ref_from_slot_number(sound_data.slot_number());
++                                    let cast_member_ref = CastMemberRef {
++                                        cast_lib: ref_.cast_lib as i32,
++                                        cast_member: ref_.cast_member as i32,
++                                    };
+                                     player.movie.cast_manager
+-                                        .find_member_by_slot_number(sound_data.cast_member as u32)
+-                                        .map(|m| {
+-                                            let ref_ = CastMemberRefHandlers::member_ref_from_slot_number(m.number);
+-                                            (m, CastMemberRef {
+-                                                cast_lib: ref_.cast_lib as i32,
+-                                                cast_member: ref_.cast_member as i32,
+-                                            })
+-                                        })
++                                        .find_member_by_ref(&cast_member_ref)
++                                        .map(|m| (m, cast_member_ref))
+                                 }
+                             };
+ 
+@@ -3554,51 +3623,39 @@ impl Score {
+     }
+ 
+     pub fn get_frame_tempo(&self, frame: u32) -> Option<u32> {
+-        // Search through tempo_channel_data to find the most recent tempo change
+-        // at or before the requested frame.
+-        // Note: frame_idx is 0-based (from score parsing), frame is 1-based (current_frame).
+-        // frame_idx 0 = Director frame 1, so we need frame_idx < frame.
+-        let tempo_data = self.tempo_channel_data
++        // Most recent FRAME-RATE setting at or before `frame` (frame_idx is
++        // 0-based, `frame` 1-based). Red Sky preservation build: wait entries
++        // (247 delay, 248 click, 249 video, 254/255 sound) are not frame rates
++        // and are skipped, so the rate set before a wait frame carries through
++        // it, as in Director. Previously the newest entry won even when it was a
++        // wait, dropping playback to the movie's default rate after every wait.
++        self.tempo_channel_data
+             .iter()
+             .rev()
+-            .find(|(frame_idx, _)| *frame_idx < frame)
+-            .map(|(_, td)| td)?;
+-
+-        let tempo = tempo_data.tempo;
+-        if tempo == 0 {
+-            return None;
+-        }
++            .filter(|(frame_idx, _)| *frame_idx < frame)
++            .find_map(|(_, td)| match td.tempo {
++                246 => if td.tempo_cue_point > 0 { Some(td.tempo_cue_point as u32) } else { None },
++                1..=120 => Some(td.tempo as u32),
++                _ => None,
++            })
++    }
+ 
+-        // D6+ tempo encoding: special codes 246-255
+-        match tempo {
+-            246 => {
+-                // FPS mode: actual FPS is in tempo_cue_point
+-                let fps = tempo_data.tempo_cue_point;
+-                if fps > 0 { Some(fps as u32) } else { None }
+-            }
+-            247 => {
+-                // Delay mode: tempo_cue_point is delay in seconds
+-                // Convert to a very low FPS to approximate the delay
+-                // (actual wait-for-delay should be handled separately)
+-                None // Fall back to movie frame rate; delay handled elsewhere
+-            }
+-            248 => {
+-                // Wait for mouse click - not an FPS value
+-                None
+-            }
+-            254 | 255 => {
+-                // Wait for sound channel - not an FPS value
+-                None
+-            }
+-            1..=120 => {
+-                // Direct FPS value (valid for all versions)
+-                Some(tempo as u32)
+-            }
+-            _ => {
+-                // Other values: pre-D6 special codes or video wait
+-                // For safety, treat as no tempo change
+-                None
+-            }
++    /// Red Sky preservation build: the tempo channel's wait instruction on
++    /// exactly this frame (1-based), if any.
++    pub fn get_frame_wait(&self, frame: u32) -> Option<FrameWait> {
++        let td = self
++            .tempo_channel_data
++            .iter()
++            .find(|(frame_idx, _)| *frame_idx + 1 == frame)
++            .map(|(_, td)| td)?;
++        match td.tempo {
++            247 => Some(FrameWait::Seconds(td.tempo_cue_point as u32)),
++            248 => Some(FrameWait::Click),
++            // 254 waits on the score's first sound row (channel index 3),
++            // 255 on the second (index 4); cue 0xFFFE = until the sound ends.
++            254 => Some(FrameWait::SoundRow(3)),
++            255 => Some(FrameWait::SoundRow(4)),
++            _ => None,
+         }
+     }
+ 
+@@ -3647,8 +3704,21 @@ pub fn sprite_get_prop(
+ ) -> Result<Datum, ScriptError> {
+     // Clear any previous cached ref. Only set for scriptInstanceList.
+     player.last_sprite_prop_ref = None;
++    // Red Sky preservation build: `the quad of sprite` reads back the corners set by Lingo.
++    if prop_name.to_string().eq_ignore_ascii_case("quad") {
++        if let Some(q) = get_sprite_in_context(player, sprite_id).and_then(|s| s.quad) {
++            let pts: Vec<_> = q.iter().map(|(x, y)| player.alloc_datum(Datum::Point([*x as f64, *y as f64], 0))).collect();
++            return Ok(Datum::List(crate::director::lingo::datum::DatumType::List, pts.into(), false));
++        }
++    }
+     // Use context-aware sprite lookup to support filmloop behaviors
+     let sprite = get_sprite_in_context(player, sprite_id);
++    // Red Sky preservation build: QuickTime sprite properties come from the page's video.
++    if crate::player::rs_video::is_video_prop(&prop_name.to_string()) {
++        if let Some(d) = crate::player::rs_video::get_sprite_prop(player, sprite_id, &prop_name.to_string()) {
++            return Ok(d);
++        }
++    }
+     match prop_name.into_builtin() {
+         Some(BuiltInSymbol::Ilk) => Ok(Datum::Symbol(Symbol::builtin(BuiltInSymbol::Sprite))),
+         Some(BuiltInSymbol::SpriteNum | BuiltInSymbol::SpriteNumber) => Ok(Datum::Int(
+@@ -4457,6 +4527,10 @@ pub fn sprite_set_prop(sprite_id: i16, prop_name: Symbol, value: Datum) -> Resul
+     if !in_range {
+         return Ok(());
+     }
++    if crate::player::rs_video::is_video_prop(&prop_name.to_string()) {
++        let handled = reserve_player_ref(|player| crate::player::rs_video::set_sprite_prop(player, sprite_id, &prop_name.to_string(), &value));
++        if handled { return Ok(()); }
++    }
+     // Assigning VOID to an appearance property leaves it alone. VOID is not a
+     // value any of these can hold, and Director neither raises nor coerces it
+     // to zero — Merlin's Revenge proves both halves. Its bSpriteParams mirrors
+@@ -5997,6 +6071,17 @@ pub fn field_scrollbar_for(
+ 
+ pub fn get_concrete_sprite_rect(player: &DirPlayer, sprite: &Sprite) -> IntRect {
+     use crate::rendering_gpu::webgl2::FIELD_SCROLLBAR_WIDTH;
++    // Red Sky preservation build: a sprite with a quad covers the quad's bounding box.
++    if let Some(q) = sprite.quad {
++        let xs = q.iter().map(|p| p.0);
++        let ys = q.iter().map(|p| p.1);
++        return IntRect {
++            left: xs.clone().min().unwrap_or(0),
++            top: ys.clone().min().unwrap_or(0),
++            right: xs.max().unwrap_or(0),
++            bottom: ys.max().unwrap_or(0),
++        };
++    }
+ 
+     let member = sprite
+         .member
+@@ -6961,3 +7046,15 @@ mod rect_tests {
+         assert_eq!(normalise_rect([0, 0, 0, 0]), [0, 0, 0, 0]);
+     }
+ }
++
++
++/// Red Sky preservation build: a score tempo-channel wait.
++#[derive(Clone, Copy, Debug, PartialEq)]
++pub enum FrameWait {
++    /// Hold the frame this many seconds.
++    Seconds(u32),
++    /// Hold until the mouse is clicked.
++    Click,
++    /// Hold until the sound started from this score sound row (3 or 4) ends.
++    SoundRow(u16),
++}
+diff --git a/vm-rust/src/player/symbols/builtin.rs b/vm-rust/src/player/symbols/builtin.rs
+index 9369949..4bfd479 100644
+--- a/vm-rust/src/player/symbols/builtin.rs
++++ b/vm-rust/src/player/symbols/builtin.rs
+@@ -179,6 +179,7 @@ define_builtin_symbols! {
+     "mouseV" => MouseV,
+     "mouseChar" => MouseChar,
+     "mouseMember" => MouseMember,
++    "mouseCast" => MouseCast,
+     "stillDown" => StillDown,
+     "rollover" => Rollover,
+     "keyCode" => KeyCode,
+@@ -224,6 +225,11 @@ define_builtin_symbols! {
+     "long time" => LongTime,
+     "lastChannel" => LastChannel,
+     "moviePath" => MoviePath,
++    "pathName" => PathName,
++    "idleReadChunkSize" => IdleReadChunkSize,
++    "idleHandlerPeriod" => IdleHandlerPeriod,
++    "idleLoadMode" => IdleLoadMode,
++    "idleLoadPeriod" => IdleLoadPeriod,
+     "frame" => Frame,
+     "path" => Path,
+     "timer" => Timer,
+@@ -245,6 +251,8 @@ define_builtin_symbols! {
+     "labelList" => LabelList,
+     "clickOn" => ClickOn,
+     "actorList" => ActorList,
++    "searchPath" => SearchPath,
++    "searchPaths" => SearchPaths,
+     "pi" => Pi,
+     "void" => Void,
+     "empty" => Empty,
+diff --git a/vm-rust/src/player/xtra/budapi/mod.rs b/vm-rust/src/player/xtra/budapi/mod.rs
+index 665a7d0..cb42cc7 100644
+--- a/vm-rust/src/player/xtra/budapi/mod.rs
++++ b/vm-rust/src/player/xtra/budapi/mod.rs
+@@ -49,10 +49,15 @@ impl BudApiXtra {
+ fn dispatch(name: &str, args: &Vec<DatumRef>) -> Result<DatumRef, ScriptError> {
+     match_ci!(name, {
+         // -- Information ------------------------------------------------
+-        "baVersion" => ok_string(BUDAPI_VERSION),
++        // Red Sky preservation build: answer as a late-90s Windows PC with room to spare, so
++        // system checks (DataZord's Pentium / disk / OS tests) pass.
++        "baVersion" => match string_arg(args, 0).unwrap_or_default().to_ascii_lowercase().as_str() {
++            "os" => ok_string("4.10"),
++            _ => ok_string(BUDAPI_VERSION),
++        },
+         "baSysFolder" => ba_sys_folder(args),
+         "baCpuInfo" => ba_cpu_info(args),
+-        "baDiskInfo" => ok_int(-1),
++        "baDiskInfo" => ok_int(4_000_000),
+         "baDiskList" => empty_list(),
+         "baMemoryInfo" => ok_int(0),
+         "baFindApp" => ok_string(""),
+@@ -214,7 +219,8 @@ fn ba_cpu_info(args: &Vec<DatumRef>) -> Result<DatumRef, ScriptError> {
+     let value = match kind.to_ascii_lowercase().as_str() {
+         "vendor" => "WebAssembly",
+         "name" => "WASM Virtual CPU",
+-        "speed" => "0",
++        "speed" => "300",
++        "type" => return ok_int(6),
+         "cores" => web_sys::window()
+             .and_then(|w| w.navigator().hardware_concurrency().to_string().into())
+             .map(|_| "")
+diff --git a/vm-rust/src/player/xtra/jsbridge.rs b/vm-rust/src/player/xtra/jsbridge.rs
+new file mode 100644
+index 0000000..a324521
+--- /dev/null
++++ b/vm-rust/src/player/xtra/jsbridge.rs
+@@ -0,0 +1,151 @@
++//! Red Sky preservation build: Xtras implemented by the host page in JavaScript.
++//!
++//! `new(xtra "Beatnik")` (and the other names in [`JS_XTRAS`]) creates an instance whose
++//! handler calls are forwarded to `window.__rsXtra(xtraName, instanceId, handler, args,
++//! movieBaseUrl)`. The page decides what each call does (e.g. runs the NeoBAE engine
++//! for Beatnik) and returns a number, string, boolean, array or nothing.
++//! Instance methods are also reachable as globals with the instance as first argument
++//! (`play(gxBeatnik, 0, "UI.rmf")`), as Director allowed.
++
++use std::sync::atomic::{AtomicU32, Ordering};
++
++use wasm_bindgen::JsValue;
++
++use crate::director::lingo::datum::{Datum, DatumType, XtraInstanceId};
++use crate::player::{reserve_player_mut, DatumRef, ScriptError};
++
++pub const JS_XTRAS: &[&str] = &["beatnik", "directconnection", "filextra", "textxtra", "muidialog", "mui", "glu32"];
++
++static NEXT_ID: AtomicU32 = AtomicU32::new(1);
++
++pub fn is_js_xtra(name: &str) -> bool {
++    let n = name.to_lowercase();
++    JS_XTRAS.iter().any(|x| *x == n)
++}
++
++pub fn js_available() -> bool {
++    web_sys::window()
++        .and_then(|w| js_sys::Reflect::get(&w, &JsValue::from_str("__rsXtra")).ok())
++        .map_or(false, |f| f.is_function())
++}
++
++pub fn create_instance(name: &str, args: &Vec<DatumRef>) -> XtraInstanceId {
++    let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
++    let _ = call(name, id, "new", args);
++    id
++}
++
++fn datum_to_js(d: &DatumRef) -> JsValue {
++    reserve_player_mut(|player| to_js(player, d, 0))
++}
++
++fn to_js(player: &crate::player::DirPlayer, d: &DatumRef, depth: u32) -> JsValue {
++    match player.get_datum(d) {
++        Datum::Int(i) => JsValue::from_f64(*i as f64),
++        Datum::Float(f) => JsValue::from_f64(*f),
++        Datum::String(s) => JsValue::from_str(s),
++        Datum::StringChunk(_, _, s) => JsValue::from_str(s),
++        Datum::Symbol(s) => JsValue::from_str(&format!("#{}", s)),
++        Datum::List(_, items, _) if depth < 4 => {
++            let a = js_sys::Array::new();
++            for it in items {
++                a.push(&to_js(player, it, depth + 1));
++            }
++            a.into()
++        }
++        Datum::Void => JsValue::UNDEFINED,
++        other => match other.string_value() {
++            Ok(s) => JsValue::from_str(&s),
++            Err(_) => JsValue::NULL,
++        },
++    }
++}
++
++fn from_js(v: JsValue) -> DatumRef {
++    reserve_player_mut(|player| from_js_in(player, &v, 0))
++}
++
++fn from_js_in(player: &mut crate::player::DirPlayer, v: &JsValue, depth: u32) -> DatumRef {
++    if let Some(b) = v.as_bool() {
++        return player.alloc_datum(Datum::Int(if b { 1 } else { 0 }));
++    }
++    if let Some(f) = v.as_f64() {
++        return if f.fract() == 0.0 && f.abs() < 2_147_483_647.0 {
++            player.alloc_datum(Datum::Int(f as i32))
++        } else {
++            player.alloc_datum(Datum::Float(f))
++        };
++    }
++    if let Some(s) = v.as_string() {
++        if let Some(sym) = s.strip_prefix('#') {
++            return player.alloc_datum(Datum::Symbol(crate::player::symbols::symbol::Symbol::from_str(&sym.to_string())));
++        }
++        return player.alloc_datum(Datum::String(s));
++    }
++    if js_sys::Array::is_array(v) && depth < 4 {
++        let arr = js_sys::Array::from(v);
++        let mut items = std::collections::VecDeque::new();
++        for it in arr.iter() {
++            items.push_back(from_js_in(player, &it, depth + 1));
++        }
++        return player.alloc_datum(Datum::List(DatumType::List, items, false));
++    }
++    DatumRef::Void
++}
++
++pub fn call(name: &str, id: XtraInstanceId, handler: &str, args: &Vec<DatumRef>) -> Result<DatumRef, ScriptError> {
++    let jargs = js_sys::Array::new();
++    for a in args {
++        jargs.push(&datum_to_js(a));
++    }
++    let base = reserve_player_mut(|player| {
++        player.net_manager.base_path.as_ref().map(|u| u.to_string()).unwrap_or_default()
++    });
++    let r = crate::player::handlers::datum_handlers::sound_channel::rs_js_call(
++        "__rsXtra",
++        &[
++            JsValue::from_str(&name.to_lowercase()),
++            JsValue::from_f64(id as f64),
++            JsValue::from_str(handler),
++            jargs.into(),
++            JsValue::from_str(&base),
++        ],
++    );
++    Ok(from_js(r))
++}
++
++/// Whether the page implements `handler` for this Xtra (so a global call like
++/// `play(gxBeatnik, ...)` goes to it, while `voidp(gxBeatnik)` stays a built-in).
++pub fn has_handler(name: &str, handler: &str) -> bool {
++    let r = crate::player::handlers::datum_handlers::sound_channel::rs_js_call(
++        "__rsXtraHas",
++        &[JsValue::from_str(&name.to_lowercase()), JsValue::from_str(handler)],
++    );
++    r.as_bool().unwrap_or(false)
++}
++
++/// Global (static) Xtra functions the page implements, e.g. FileXtra's
++/// `FileExists(path)` / `DirectoryToList(path)` answered from the work's file list.
++pub fn has_static(handler: &str) -> bool {
++    crate::player::handlers::datum_handlers::sound_channel::rs_js_call(
++        "__rsXtraStaticHas",
++        &[JsValue::from_str(handler)],
++    )
++    .as_bool()
++    .unwrap_or(false)
++}
++
++pub fn call_static(handler: &str, args: &Vec<DatumRef>) -> Result<DatumRef, ScriptError> {
++    let jargs = js_sys::Array::new();
++    for a in args {
++        jargs.push(&datum_to_js(a));
++    }
++    let base = reserve_player_mut(|player| {
++        player.net_manager.base_path.as_ref().map(|u| u.to_string()).unwrap_or_default()
++    });
++    let r = crate::player::handlers::datum_handlers::sound_channel::rs_js_call(
++        "__rsXtraStatic",
++        &[JsValue::from_str(handler), jargs.into(), JsValue::from_str(&base)],
++    );
++    Ok(from_js(r))
++}
+diff --git a/vm-rust/src/player/xtra/manager.rs b/vm-rust/src/player/xtra/manager.rs
+index 2d562cb..7a186d9 100644
+--- a/vm-rust/src/player/xtra/manager.rs
++++ b/vm-rust/src/player/xtra/manager.rs
+@@ -27,7 +27,8 @@ pub fn is_xtra_registered(name: &str) -> bool {
+         || name_lower == "openurl"
+         || name_lower == "sysmenu"
+         || name_lower == "budapi"
+-        || name_lower == "leechprotectionremovalhelp";
++        || name_lower == "leechprotectionremovalhelp"
++        || super::jsbridge::is_js_xtra(&name_lower);
+ }
+ 
+ pub fn get_registered_xtra_names() -> Vec<String> {
+@@ -40,6 +41,8 @@ pub fn get_registered_xtra_names() -> Vec<String> {
+         "SysMenu".to_string(),
+         "BudAPI".to_string(),
+         "LeechProtectionRemovalHelp".to_string(),
++        "Beatnik".to_string(),
++        "DirectConnection".to_string(),
+     ];
+     // Append any externally loaded xtras. Names are stored lowercased in
+     // the external registry; we surface them as-is — Director treats
+@@ -70,6 +73,9 @@ pub fn try_call_xtra_static_handler(
+     if CurlXtra::has_static_handler(name) {
+         return Some(CurlXtra::call_static_handler(name, args));
+     }
++    if super::jsbridge::has_static(name) {
++        return Some(super::jsbridge::call_static(name, args));
++    }
+     // External plugins own bare global handlers too — e.g. the Groove plugin's
+     // `InitGroove()`/`MoveObject()`, which games call as bare globals (never
+     // `new(xtra "Groove")`). This is the sole path that serves Groove now that
+@@ -127,6 +133,7 @@ pub fn call_xtra_instance_handler(
+         "leechprotectionremovalhelp" if LeechProtectionXtra::has_handler(handler_name) => {
+             return LeechProtectionXtra::call_handler(handler_name, args)
+         }
++        n if super::jsbridge::is_js_xtra(n) => super::jsbridge::call(n, instance_id, handler_name, args),
+         _ => Err(ScriptError::new(format!(
+             "No handler {} found for xtra {} instance #{}",
+             handler_name, xtra_name, instance_id
+@@ -220,6 +227,7 @@ pub fn create_xtra_instance(
+         // an opaque instance id for parity with the real Xtras, but the id
+         // is never consulted by any handler.
+         "openurl" | "sysmenu" | "budapi" | "leechprotectionremovalhelp" => Ok(0),
++        n if super::jsbridge::is_js_xtra(n) => Ok(super::jsbridge::create_instance(n, args)),
+         _ => Err(ScriptError::new(format!("Xtra {} not found", xtra_name))),
+     }
+ }
+diff --git a/vm-rust/src/player/xtra/mod.rs b/vm-rust/src/player/xtra/mod.rs
+index f52d2e9..9f02b77 100644
+--- a/vm-rust/src/player/xtra/mod.rs
++++ b/vm-rust/src/player/xtra/mod.rs
+@@ -2,6 +2,7 @@ pub mod budapi;
+ pub mod curl;
+ pub mod external;
+ pub mod fileio;
++pub mod jsbridge;
+ pub mod leechprotection;
+ pub mod manager;
+ pub mod multiuser;
+diff --git a/vm-rust/src/rendering.rs b/vm-rust/src/rendering.rs
+index 0a7e9d6..f1054b6 100644
+--- a/vm-rust/src/rendering.rs
++++ b/vm-rust/src/rendering.rs
+@@ -1901,28 +1901,8 @@ pub fn render_score_to_bitmap_with_offset(
+         &palettes,
+     );
+ 
+-    // Composite accumulated trails bitmap onto the cleared stage
+-    if let Some(trails_bmp) = &player.trails_bitmap {
+-        if trails_bmp.width == bitmap.width && trails_bmp.height == bitmap.height {
+-            // Copy non-transparent pixels from trails bitmap onto stage
+-            let w = bitmap.width as usize;
+-            let h = bitmap.height as usize;
+-            for y in 0..h {
+-                for x in 0..w {
+-                    let idx = (y * w + x) * 4;
+-                    if idx + 3 < trails_bmp.data.len() {
+-                        let alpha = trails_bmp.data[idx + 3];
+-                        if alpha > 0 {
+-                            bitmap.data[idx] = trails_bmp.data[idx];
+-                            bitmap.data[idx + 1] = trails_bmp.data[idx + 1];
+-                            bitmap.data[idx + 2] = trails_bmp.data[idx + 2];
+-                            bitmap.data[idx + 3] = trails_bmp.data[idx + 3];
+-                        }
+-                    }
+-                }
+-            }
+-        }
+-    }
++    // Red Sky: trails are composited above the channels they were drawn over (see rs_composite_trails).
++    let mut rs_trails_done = !matches!(score_source, ScoreRef::Stage);
+ 
+     let sorted_channel_numbers = {
+         // Get the correct frame number for this score
+@@ -1951,6 +1931,10 @@ pub fn render_score_to_bitmap_with_offset(
+     }
+ 
+     for channel_num in sorted_channel_numbers {
++        if !rs_trails_done && player.rs_trails_top > 0 && channel_num >= player.rs_trails_top {
++            rs_composite_trails(player, bitmap);
++            rs_trails_done = true;
++        }
+         let member_ref = {
+             let score = get_score(&player.movie, score_source).unwrap();
+             let sprite = score.get_sprite(channel_num);
+@@ -3237,25 +3221,38 @@ pub fn render_score_to_bitmap_with_offset(
+         }
+     }
+ 
++    if !rs_trails_done {
++        rs_composite_trails(player, bitmap);
++    }
+     // Accumulate trails sprites into the persistent trails bitmap
+     if matches!(score_source, ScoreRef::Stage) {
+-        // Check if any sprite in the current frame has trails
+-        let mut has_trails = false;
+         let frame_num = player.movie.current_frame;
+         let channels: Vec<i16> = player.movie.score
+             .get_sorted_channels(frame_num)
+             .iter()
+             .map(|x| x.number as i16)
+             .collect();
+-        for &ch in &channels {
+-            if let Some(sprite) = player.movie.score.get_sprite(ch) {
+-                if sprite.trails {
+-                    has_trails = true;
+-                    break;
++        // Red Sky preservation build: Director leaves trails on the stage until something repaints
++        // them. Keep the trails until the movie changes, and erase them only where a sprite that
++        // was drawn last frame has moved, changed or gone (its old rect is repainted).
++        let (rs_reset, rs_dirty) = rs_trails_dirty(player, &channels);
++        if rs_reset {
++            player.trails_bitmap = None;
++        }
++        if let Some(trails_bmp) = &mut player.trails_bitmap {
++            let (bw, bh) = (trails_bmp.width as i32, trails_bmp.height as i32);
++            for rect in &rs_dirty {
++                let (x1, y1, x2, y2) = (rect.0.max(0), rect.1.max(0), rect.2.min(bw), rect.3.min(bh));
++                for y in y1..y2 {
++                    for x in x1..x2 {
++                        let idx = ((y * bw + x) * 4) as usize;
++                        trails_bmp.data[idx + 3] = 0;
++                    }
+                 }
+             }
+         }
+ 
++        let has_trails = channels.iter().any(|&ch| player.movie.score.get_sprite(ch).map_or(false, |s| s.trails));
+         if has_trails {
+             // Ensure trails bitmap exists and is the right size
+             let bw = bitmap.width;
+@@ -3272,7 +3269,6 @@ pub fn render_score_to_bitmap_with_offset(
+                     0,
+                     PaletteRef::BuiltIn(get_system_default_palette()),
+                 );
+-                // Start fully transparent
+                 for pixel in trails_bmp.data.chunks_exact_mut(4) {
+                     pixel[0] = 0;
+                     pixel[1] = 0;
+@@ -3282,15 +3278,15 @@ pub fn render_score_to_bitmap_with_offset(
+                 player.trails_bitmap = Some(trails_bmp);
+             }
+ 
+-            // For each trails sprite, copy its bounding rect from the rendered bitmap to trails_bitmap
+             for &ch in &channels {
+                 if let Some(sprite) = player.movie.score.get_sprite(ch) {
+-                    if sprite.trails && sprite.member.is_some() {
++                    if sprite.trails && sprite.member.is_some() && sprite.visible {
++                        if player.rs_trails_top == 0 || ch < player.rs_trails_top { player.rs_trails_top = ch; }
+                         let sprite_rect = get_concrete_sprite_rect(player, sprite);
+                         let x1 = sprite_rect.left.max(0) as usize;
+                         let y1 = sprite_rect.top.max(0) as usize;
+-                        let x2 = (sprite_rect.right as usize).min(bw as usize);
+-                        let y2 = (sprite_rect.bottom as usize).min(bh as usize);
++                        let x2 = (sprite_rect.right.max(0) as usize).min(bw as usize);
++                        let y2 = (sprite_rect.bottom.max(0) as usize).min(bh as usize);
+                         let w = bw as usize;
+ 
+                         if let Some(trails_bmp) = &mut player.trails_bitmap {
+@@ -3301,7 +3297,7 @@ pub fn render_score_to_bitmap_with_offset(
+                                         trails_bmp.data[idx] = bitmap.data[idx];
+                                         trails_bmp.data[idx + 1] = bitmap.data[idx + 1];
+                                         trails_bmp.data[idx + 2] = bitmap.data[idx + 2];
+-                                        trails_bmp.data[idx + 3] = 255; // Mark as opaque
++                                        trails_bmp.data[idx + 3] = 255;
+                                     }
+                                 }
+                             }
+@@ -3309,9 +3305,6 @@ pub fn render_score_to_bitmap_with_offset(
+                     }
+                 }
+             }
+-        } else {
+-            // No trails sprites in this frame - clear the trails bitmap
+-            player.trails_bitmap = None;
+         }
+     }
+ 
+@@ -4258,6 +4251,8 @@ async fn run_draw_loop() {
+                         renderer.draw_frame(&mut player);
+                         player.stage_dirty = false;
+                     }
++                    // Red Sky preservation build: QuickTime sprites are played by the page.
++                    crate::player::rs_video::report_frame(&player);
+                     if !skip_stage && player.preview_dirty {
+                         renderer.draw_preview_frame(&mut player);
+                         player.preview_dirty = false;
+@@ -4285,3 +4280,46 @@ pub fn has_swf_signature(data: &[u8]) -> bool {
+     let sig = &data[0..3];
+     sig == b"FWS" || sig == b"CWS" || sig == b"ZWS"
+ }
++
++/// Red Sky preservation build: lay the accumulated trails over what has been drawn so far.
++fn rs_composite_trails(player: &DirPlayer, bitmap: &mut Bitmap) {
++    if let Some(trails_bmp) = &player.trails_bitmap {
++        if trails_bmp.width == bitmap.width && trails_bmp.height == bitmap.height {
++            for (d, t) in bitmap.data.chunks_exact_mut(4).zip(trails_bmp.data.chunks_exact(4)) {
++                if t[3] > 0 {
++                    d.copy_from_slice(t);
++                }
++            }
++        }
++    }
++}
++
++/// Red Sky preservation build: Director leaves trails on the stage until something repaints
++/// them. Trails are kept until the movie changes (returns true: start over) and erased only
++/// where a sprite drawn last frame has moved, changed or gone (its old rect is repainted).
++pub fn rs_trails_dirty(player: &mut DirPlayer, channels: &[i16]) -> (bool, Vec<(i32, i32, i32, i32)>) {
++    let mut reset = false;
++    if player.rs_trails_movie != player.movie.file_name {
++        player.rs_trails_movie = player.movie.file_name.clone();
++        player.rs_trails_prev.clear();
++        player.rs_trails_top = 0;
++        reset = true;
++    }
++    let mut now: Vec<(i16, String, (i32, i32, i32, i32))> = Vec::new();
++    for &ch in channels {
++        if let Some(sprite) = player.movie.score.get_sprite(ch) {
++            if sprite.trails || !sprite.visible { continue; }
++            let Some(m) = sprite.member.as_ref() else { continue };
++            let r = get_concrete_sprite_rect(player, sprite);
++            now.push((ch, format!("{:?}", m), (r.left, r.top, r.right, r.bottom)));
++        }
++    }
++    let prev = std::mem::replace(&mut player.rs_trails_prev, Vec::new());
++    let dirty = prev
++        .into_iter()
++        .filter(|(ch, key, rect)| !now.iter().any(|(c, k, r)| c == ch && k == key && r == rect))
++        .map(|(_, _, r)| r)
++        .collect();
++    player.rs_trails_prev = now;
++    (reset, dirty)
++}
+diff --git a/vm-rust/src/rendering_gpu/webgl2/mod.rs b/vm-rust/src/rendering_gpu/webgl2/mod.rs
+index dffbb65..0392cc1 100644
+--- a/vm-rust/src/rendering_gpu/webgl2/mod.rs
++++ b/vm-rust/src/rendering_gpu/webgl2/mod.rs
+@@ -506,7 +506,7 @@ impl WebGL2Renderer {
+             gl.uniform4f(Some(loc), 0.0, 0.0, 1.0, 1.0);
+         }
+         if let Some(ref loc) = program.u_flip {
+-            gl.uniform2f(Some(loc), 0.0, 0.0);
++            gl.uniform2f(Some(loc), 0.0, 1.0); // Red Sky: texture rows were copied bottom-up
+         }
+         if let Some(ref loc) = program.u_rotation {
+             gl.uniform1f(Some(loc), 0.0);
+@@ -514,6 +514,9 @@ impl WebGL2Renderer {
+         if let Some(ref loc) = program.u_skew_flip {
+             gl.uniform1f(Some(loc), 0.0);
+         }
++        if let Some(ref loc) = program.u_quad_on {
++            gl.uniform1f(Some(loc), 0.0);
++        }
+         if let Some(ref loc) = program.u_floor_rule {
+             gl.uniform1f(Some(loc), 0.0);
+         }
+@@ -594,6 +597,9 @@ impl WebGL2Renderer {
+         if let Some(ref loc) = program.u_skew_flip {
+             gl.uniform1f(Some(loc), 0.0);
+         }
++        if let Some(ref loc) = program.u_quad_on {
++            gl.uniform1f(Some(loc), 0.0);
++        }
+         if let Some(ref loc) = program.u_floor_rule {
+             gl.uniform1f(Some(loc), 0.0);
+         }
+@@ -685,6 +691,9 @@ impl WebGL2Renderer {
+         if let Some(ref loc) = program.u_skew_flip {
+             gl.uniform1f(Some(loc), 0.0);
+         }
++        if let Some(ref loc) = program.u_quad_on {
++            gl.uniform1f(Some(loc), 0.0);
++        }
+         if let Some(ref loc) = program.u_floor_rule {
+             gl.uniform1f(Some(loc), 0.0);
+         }
+@@ -849,10 +858,38 @@ impl WebGL2Renderer {
+         // Bind quad geometry once
+         self.quad.bind(self.context.gl());
+ 
+-        // Draw accumulated trails texture onto the cleared stage
+-        if has_trails && self.trails_texture.is_some() {
+-            self.draw_trails_texture();
++        // Red Sky preservation build: trails persist (see rendering::rs_trails_dirty) and show
++        // above the channels they were drawn over, not under everything.
++        let channel_list: Vec<i16> = sorted_channels.iter().map(|(c, _)| *c).collect();
++        let (rs_reset, rs_dirty) = crate::rendering::rs_trails_dirty(player, &channel_list);
++        if rs_reset && self.trails_fbo.is_some() {
++            self.destroy_trails_fbo();
++        }
++        if let Some(fbo) = self.trails_fbo.clone() {
++            if !rs_dirty.is_empty() {
++                let gl = self.context.gl();
++                let (w, h) = self.size;
++                gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, Some(&fbo));
++                gl.viewport(0, 0, w as i32, h as i32);
++                gl.enable(WebGl2RenderingContext::SCISSOR_TEST);
++                gl.clear_color(0.0, 0.0, 0.0, 0.0);
++                for r in &rs_dirty {
++                    let x = r.0.max(0).min(w as i32);
++                    let y = r.1.max(0).min(h as i32);
++                    let rr = r.2.max(0).min(w as i32);
++                    let b = r.3.max(0).min(h as i32);
++                    if rr > x && b > y {
++                        gl.scissor(x, h as i32 - b, rr - x, b - y);
++                        gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
++                    }
++                }
++                gl.disable(WebGl2RenderingContext::SCISSOR_TEST);
++                gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
++                gl.viewport(0, 0, w as i32, h as i32);
++            }
+         }
++        let rs_trails_top = player.rs_trails_top;
++        let mut rs_trails_done = self.trails_texture.is_none();
+ 
+         // Render each sprite.
+         //
+@@ -868,6 +905,10 @@ impl WebGL2Renderer {
+         let overlay_active = player.stage_image_dirty && player.stage_image.is_some();
+         let mut deferred_dts_3d: Vec<i16> = Vec::new();
+         for (channel_num, _) in &sorted_channels {
++            if !rs_trails_done && rs_trails_top > 0 && *channel_num >= rs_trails_top {
++                self.draw_trails_texture();
++                rs_trails_done = true;
++            }
+             if overlay_active && self.is_direct_to_stage_3d(player, *channel_num) {
+                 deferred_dts_3d.push(*channel_num);
+                 continue;
+@@ -875,6 +916,13 @@ impl WebGL2Renderer {
+             self.render_sprite(player, *channel_num);
+         }
+ 
++        if !rs_trails_done {
++            self.draw_trails_texture();
++        }
++        for ch in &trails_channels {
++            if player.rs_trails_top == 0 || *ch < player.rs_trails_top { player.rs_trails_top = *ch; }
++        }
++
+         // Accumulate trails sprites into the trails texture via GPU-side copy.
+         // Instead of re-rendering sprites to the FBO, we copy the already-rendered
+         // pixel rects from the default framebuffer using copyTexSubImage2D.
+@@ -919,9 +967,6 @@ impl WebGL2Renderer {
+ 
+                 gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+             }
+-        } else if self.trails_fbo.is_some() {
+-            // No trails sprites - clean up FBO
+-            self.destroy_trails_fbo();
+         }
+ 
+         // Composite the script-owned stage framebuffer over the sprite render
+@@ -1297,6 +1342,9 @@ impl WebGL2Renderer {
+         if let Some(ref loc) = program.u_skew_flip {
+             gl.uniform1f(Some(loc), 0.0);
+         }
++        if let Some(ref loc) = program.u_quad_on {
++            gl.uniform1f(Some(loc), 0.0);
++        }
+         if let Some(ref loc) = program.u_floor_rule {
+             gl.uniform1f(Some(loc), 0.0);
+         }
+@@ -4519,6 +4567,21 @@ impl WebGL2Renderer {
+         if let Some(ref loc) = program.u_skew_flip {
+             gl.uniform1f(Some(loc), if has_skew_flip { 1.0 } else { 0.0 });
+         }
++        // Red Sky preservation build: a sprite with a quad is drawn at its four corners.
++        {
++            let rs_quad = player.movie.score.get_sprite(channel_num).and_then(|s| s.quad);
++            if let Some(ref loc) = program.u_quad_on {
++                gl.uniform1f(Some(loc), if rs_quad.is_some() { 1.0 } else { 0.0 });
++            }
++            if let Some(q) = rs_quad {
++                if let Some(ref loc) = program.u_quad_a {
++                    gl.uniform4f(Some(loc), q[0].0 as f32, q[0].1 as f32, q[1].0 as f32, q[1].1 as f32);
++                }
++                if let Some(ref loc) = program.u_quad_b {
++                    gl.uniform4f(Some(loc), q[2].0 as f32, q[2].1 as f32, q[3].0 as f32, q[3].1 as f32);
++                }
++            }
++        }
+         if let Some(ref loc) = program.u_floor_rule {
+             gl.uniform1f(Some(loc), if floor_rule { 1.0 } else { 0.0 });
+         }
+diff --git a/vm-rust/src/rendering_gpu/webgl2/shaders.rs b/vm-rust/src/rendering_gpu/webgl2/shaders.rs
+index 43b1578..58580e1 100644
+--- a/vm-rust/src/rendering_gpu/webgl2/shaders.rs
++++ b/vm-rust/src/rendering_gpu/webgl2/shaders.rs
+@@ -127,6 +127,9 @@ pub struct ShaderProgram {
+     pub u_rotation: Option<WebGlUniformLocation>,
+     pub u_rotation_center: Option<WebGlUniformLocation>,
+     pub u_skew_flip: Option<WebGlUniformLocation>,
++    pub u_quad_on: Option<WebGlUniformLocation>,
++    pub u_quad_a: Option<WebGlUniformLocation>,
++    pub u_quad_b: Option<WebGlUniformLocation>,
+     /// 1.0 = sample a shrunk sprite at floor(d * src / dst) (see sampleSprite).
+     pub u_floor_rule: Option<WebGlUniformLocation>,
+     /// Continuous skew shear, in radians. The vertex shader applies a
+@@ -217,6 +220,9 @@ uniform float u_rotation;
+ uniform vec2 u_rotation_center;  // sprite's loc (registration point)
+ uniform float u_skew_flip;   // 1.0 = negate y before rotation (for skew=180 effect)
+ uniform float u_skew;        // continuous horizontal-shear angle, in RADIANS
++uniform float u_quad_on;     // Red Sky: 1.0 = place the corners at the sprite's quad
++uniform vec4 u_quad_a;       // top-left.xy, top-right.xy
++uniform vec4 u_quad_b;       // bottom-right.xy, bottom-left.xy
+ 
+ out vec2 v_texcoord;
+ 
+@@ -230,7 +236,11 @@ void main() {
+     // Apply rotation around registration point (sprite's loc)
+     // Director rotates around the registration point, not the sprite center
+     bool needs_skew = abs(u_skew) > 0.001;
+-    if (abs(u_rotation) > 0.001 || u_skew_flip > 0.5 || needs_skew) {
++    if (u_quad_on > 0.5) {
++        vec2 top = mix(u_quad_a.xy, u_quad_a.zw, pos.x);
++        vec2 bot = mix(u_quad_b.zw, u_quad_b.xy, pos.x);
++        world_pos = mix(top, bot, pos.y);
++    } else if (abs(u_rotation) > 0.001 || u_skew_flip > 0.5 || needs_skew) {
+         vec2 center = u_rotation_center;
+         world_pos -= center;
+ 
+@@ -1262,6 +1272,9 @@ void main() {
+         let u_rotation = gl.get_uniform_location(&program, "u_rotation");
+         let u_rotation_center = gl.get_uniform_location(&program, "u_rotation_center");
+         let u_skew_flip = gl.get_uniform_location(&program, "u_skew_flip");
++        let u_quad_on = gl.get_uniform_location(&program, "u_quad_on");
++        let u_quad_a = gl.get_uniform_location(&program, "u_quad_a");
++        let u_quad_b = gl.get_uniform_location(&program, "u_quad_b");
+         let u_floor_rule = gl.get_uniform_location(&program, "u_floor_rule");
+         let u_skew = gl.get_uniform_location(&program, "u_skew");
+ 
+@@ -1281,6 +1294,9 @@ void main() {
+             u_rotation,
+             u_rotation_center,
+             u_skew_flip,
++            u_quad_on,
++            u_quad_a,
++            u_quad_b,
+             u_floor_rule,
+             u_skew,
+         })

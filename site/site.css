@@ -105,6 +105,7 @@ footer p { max-width: 44em; }
 .hero h1 { font-size: clamp(38px, 5.6vw, 70px); margin: 0 0 16px; text-shadow: 0 2px 0 rgba(0, 0, 0, .35); }
 .hero img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #000; filter: sepia(.2); box-shadow: 0 0 0 6px rgba(13, 10, 8, .55); }
 .hero p { max-width: 34em; }
+.status { font: 14px var(--mono); margin: 0; }
 .caveat { border-left: 3px solid var(--ember); padding: 4px 0 4px 14px; max-width: 34em; font-style: italic; }
 
 .group { padding: 36px 0 8px; }

@@ -1,7 +1,13 @@
-# DirPlayer, patched for Red Sky 98
+# DirPlayer for the Red Sky archive
 
-Upstream: https://github.com/igorlira/dirplayer-rs at commit 68376fbb4494a6bbad4c70081ecdcb99814a74c9.
-`dirplayer-redsky.patch` holds every change. Each is marked "Red Sky preservation build" in the source.
+Upstream: https://github.com/igorlira/dirplayer-rs at the commit in `UPSTREAM_COMMIT`.
+
+**Each module has its own player.** Its patch, fix list and build live in `players/<module>/`
+(`dirplayer.patch`, `FIXES.md`); the built player is `site/players/<module>/dirplayer-polyfill.js.gz`.
+`base.patch` is the shared player all modules started from on 2026-11-13; the table below is
+what it contains. Compare a module's patch with `base.patch` to see that module's own fixes.
+
+Changes are marked "Red Sky preservation build" in the source.
 
 | Change | Why |
 | --- | --- |
@@ -51,22 +57,21 @@ Upstream: https://github.com/igorlira/dirplayer-rs at commit 68376fbb4494a6bbad4
 
 ## Build
 
-The Rust standard library has to be built from source for WebAssembly when rustup can't download it:
+`tools/player.sh load <module>` resets the DirPlayer checkout and applies that module's patch,
+`tools/player.sh save <module>` writes your edits back to the patch, and
+`tools/player.sh build <module>` builds it into `site/players/<module>/`.
 
-1. Check out upstream at the commit above and `git apply dirplayer-redsky.patch`.
-2. Put Rust's `library/` source for your rustc version at `$(rustc --print sysroot)/lib/rustlib/src/rust/library`.
-3. In `vm-rust/.cargo/config.toml`: `[unstable] build-std = ["std","panic_abort"]`.
-4. Run `tools/buildvm.sh` (cargo + wasm-bindgen 0.2.108 + vite). Copy `dist-polyfill/dirplayer-polyfill.js`, gzipped, to `site/dirplayer-polyfill.js.gz`.
+Toolchain: Rust with the `wasm32-unknown-unknown` target, `wasm-bindgen-cli` 0.2.108, Node.
+The DirPlayer checkout (default `~/tools/dirplayer-rs`, or set `DIRPLAYER`) is a clone of
+upstream at `UPSTREAM_COMMIT` with `npm install` run once.
 
-With a normal rustup install, step 2 and 3 are replaced by `rustup target add wasm32-unknown-unknown`.
+With a normal rustup install, `rustup target add wasm32-unknown-unknown` is all the target needs.
+Where rustup can't download it, build the standard library from source: put Rust's `library/`
+source for your rustc version at `$(rustc --print sysroot)/lib/rustlib/src/rust/library` and add
+`[unstable] build-std = ["std","panic_abort"]` to `vm-rust/.cargo/config.toml`.
 
 ## Page-level changes (site/play.html)
 
 - `?via=entertainment` / `?via=work` start the CD's startup movie and jump to the module, so the navigation and state managers exist (space to skip, Ctrl-E/W/X, returning from pieces). Loading a module directly skipped them.
 - The audio context is created and unlocked inside the Start click, so the first sounds play.
 - Keyboard focus is kept on the stage, and keys pressed elsewhere on the page are forwarded to it.
-
-## Building
-
-`tools/buildvm.sh` builds the player (Rust to wasm32 with build-std, wasm-bindgen, vite) and
-stops on any compile error. The Beatnik engine is built separately; see `beatnik/`.

@@ -31,6 +31,7 @@ fetch('works.json').then(r => r.json()).then(({ works }) => {
       <p class="facts"><span>${esc(w.client)}</span><span>${w.year}${w.yearApprox ? ', approximately' : ''}</span><span>${esc(w.kind)}</span><span>${esc(w.platform)}</span></p>
       <p>${esc(w.summary)}</p>
       ${w.caveat ? `<p class="caveat">${esc(w.caveat)}</p>` : ''}
+      ${w.issue ? `<p class="status"><a href="https://github.com/jolholodeck/redsky/issues/${w.issue}">Status and known problems</a></p>` : ''}
       <div class="entries">${entries}</div>
     </div>
     <img src="${esc(w.thumb)}" alt="">`;
