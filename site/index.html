@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Red Sky Interactive</title>
 <meta name="description" content="Playable archive of Red Sky Interactive's CD-ROMs, desktop apps and Shockwave work, 1997 to 2002.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="site.css">
 </head>
 <body>
@@ -46,13 +44,13 @@ fetch('works.json').then(r => r.json()).then(({ works }) => {
       <div class="entries">${f.entries.map((e, i) => `<a class="play${i ? ' alt' : ''}" href="${esc(e.href)}" title="${esc(e.detail)}">${esc(e.title)}</a>`).join('')}</div>
       <a class="more" href="work.html?w=${f.slug}">About this disc</a>
     </div>
-    <a class="shot" href="${esc(f.entries[0].href)}" tabindex="-1"><img src="thumbs/feature-redsky98.jpg" alt="The Entertainment module: a cowboy in a black-and-white western town"></a>`;
+    <a class="screen" href="${esc(f.entries[0].href)}" tabindex="-1"><img src="thumbs/feature-redsky98.jpg" alt="The Entertainment module: a cowboy in a black-and-white western town"></a>`;
 
   // Every other module: whole works, and every piece inside a disc, newest first.
   const items = [];
   works.forEach((w, wi) => {
     if (w.slug !== FEATURED) items.push({ year: w.year, order: wi * 1000, href: playHref(w), thumb: w.thumb, title: w.title,
-      sub: w.client + (w.yearApprox ? ', year approximate' : ''), kind: w.kind, note: w.caveat ? 'Not working yet' : '', about: 'work.html?w=' + w.slug });
+      sub: w.client, kind: w.kind + (w.yearApprox ? ', year approximate' : ''), note: w.caveat ? 'Not working yet' : '', about: 'work.html?w=' + w.slug });
     (w.groups || []).forEach(g => g.pieces.forEach(p => items.push({ year: w.year, order: wi * 1000 + items.length, href: pieceHref(w, p),
       thumb: p.thumb, title: p.title, sub: p.client, kind: 'From ' + w.title + ', ' + g.title, note: p.note })));
   });
