@@ -39,7 +39,7 @@ fetch('works.json').then(r => r.json()).then(({ works }) => {
       <h2 class="display">${esc(g.title)}</h2><p>${esc(g.subtitle)}</p>
       <ul class="pieces">${g.pieces.map(p => `<li><a href="${playHref(w, { movie: p.movie })}&amp;t=${encodeURIComponent(p.client + ': ' + p.title)}">
         ${p.thumb ? `<img src="${esc(p.thumb)}" alt="" loading="lazy">` : '<div class="noimg"></div>'}
-        <strong>${esc(p.title)}</strong><span>${esc(p.client)}</span>${p.note ? `<em>${esc(p.note)}</em>` : ''}</a></li>`).join('')}</ul>
+        <strong>${esc(p.title)}</strong><span>${esc(p.client)}${p.year && p.year !== w.year ? ', ' + p.year : ''}</span>${p.note ? `<em>${esc(p.note)}</em>` : ''}</a></li>`).join('')}</ul>
     </section>`).join('');
   const intro = w.groups ? `<p style="max-width:40em;margin:32px 0 0">Each piece below opens on its own. To leave one, use the back button.</p>` : '';
   document.getElementById('body').innerHTML = intro + groups + (w.changes ? `<section class="notes"><h2>Restoration notes</h2><ul>${w.changes.map(c => `<li>${esc(c)}</li>`).join('')}</ul></section>` : '<div style="height:64px"></div>');

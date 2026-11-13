@@ -27,19 +27,34 @@
               "title": "Nike Zoom Air",
               "client": "Nike",
               "movie": "finite/zoomair/zoomair.dir",
-              "thumb": "thumbs/gw_zoomair.jpg"
+              "thumb": "thumbs/gw_zoomair.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/old_timey/nike_zoomair/nike_zoomair6.dir"
+              },
+              "year": 1997
             },
             {
               "title": "Bank of America HomeBanking",
               "client": "Bank of America",
               "movie": "finite/bofahome/bofahome.dir",
-              "thumb": "thumbs/gw_bofahome.jpg"
+              "thumb": "thumbs/gw_bofahome.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/old_timey/bofa_home/bofa_home6.dir"
+              },
+              "year": 1997
             },
             {
               "title": "Sony Vaio PC",
               "client": "Sony",
               "movie": "finite/sonyvaio/sonyvaio.dir",
-              "thumb": "thumbs/gw_sonyvaio.jpg"
+              "thumb": "thumbs/gw_sonyvaio.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/old_timey/sony_vaio/sony_vaio6.dir"
+              },
+              "year": 1997
             }
           ]
         },
@@ -51,37 +66,67 @@
               "title": "Nike Olympic Web Site",
               "client": "Nike",
               "movie": "infinite/nikeolyp/nikeolyp.dir",
-              "thumb": "thumbs/gw_nikeolyp.jpg"
+              "thumb": "thumbs/gw_nikeolyp.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/new_fangled/nike_olympic/nike_olympic6.dir"
+              },
+              "year": 1996
             },
             {
               "title": "Li'l Penny Vignette",
               "client": "Nike",
               "movie": "infinite/lilpenny/lilpenny.dir",
-              "thumb": "thumbs/gw_lilpenny.jpg"
+              "thumb": "thumbs/gw_lilpenny.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/new_fangled/nike_lil_penny/nike_lil_penny6.dir"
+              },
+              "year": 1997
             },
             {
               "title": "Mia Hamm Vignette",
               "client": "Nike",
               "movie": "infinite/mia/mia.dir",
-              "thumb": "thumbs/gw_mia.jpg"
+              "thumb": "thumbs/gw_mia.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/new_fangled/nike_mia/nike_mia6.dir"
+              },
+              "year": 1997
             },
             {
               "title": "Tiger Woods Vignette",
               "client": "Nike",
               "movie": "infinite/tiger/tiger.dir",
-              "thumb": "thumbs/gw_tiger.jpg"
+              "thumb": "thumbs/gw_tiger.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/new_fangled/nike_tiger_97/nike_tiger_976.dir"
+              },
+              "year": 1997
             },
             {
               "title": "Michael Jordan Vignette",
               "client": "Nike",
               "movie": "infinite/jordan/jordan.dir",
-              "thumb": "thumbs/gw_jordan.jpg"
+              "thumb": "thumbs/gw_jordan.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/new_fangled/nike_jordan/nike_jordan6.dir"
+              },
+              "year": 1997
             },
             {
               "title": "Andre Agassi Vignette",
               "client": "Nike",
               "movie": "infinite/agassi/agassi.dir",
-              "thumb": "thumbs/gw_agassi.jpg"
+              "thumb": "thumbs/gw_agassi.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/new_fangled/nike_agassi/nike_agassi6.dir"
+              },
+              "year": 1997
             },
             {
               "title": "Ronaldo Vignette",
@@ -123,7 +168,12 @@
               "title": "HP Pong Banner",
               "client": "Hewlett-Packard",
               "movie": "infinite/pong/pong.dir",
-              "thumb": "thumbs/gw_pong.jpg"
+              "thumb": "thumbs/gw_pong.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/new_fangled/hp_pong/hp_pong6.dir"
+              },
+              "year": 1995
             }
           ]
         },
@@ -141,7 +191,12 @@
               "title": "Hypnosis",
               "client": "Red Sky Interactive",
               "movie": "madness/hypno/hypno.dir",
-              "thumb": "thumbs/gw_hypno.jpg"
+              "thumb": "thumbs/gw_hypno.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/plumb_loco/hypnosis/hypnosis6.dir"
+              },
+              "year": 1994
             },
             {
               "title": "Sony Pitch",
@@ -152,7 +207,12 @@
               "title": "Clay Interface",
               "client": "Red Sky Interactive",
               "movie": "madness/clay/clay.dir",
-              "thumb": "thumbs/gw_clay.jpg"
+              "thumb": "thumbs/gw_clay.jpg",
+              "sameAs": {
+                "work": "redsky98",
+                "movie": "work_module/plumb_loco/clay_demo/clay_demo6.dir"
+              },
+              "year": 1996
             }
           ]
         }
@@ -206,13 +266,16 @@
               "title": "Pong Ad Banner",
               "client": "Hewlett-Packard",
               "movie": "work_module/new_fangled/hp_pong/hp_pong6.dir",
-              "thumb": "thumbs/hp_pong6.jpg"
+              "thumb": "thumbs/hp_pong6.jpg",
+              "year": 1995,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Beyond Lands' End Web Site",
               "client": "Lands' End",
               "movie": "work_module/new_fangled/le_beyond/le_beyond6.dir",
-              "thumb": "thumbs/le_beyond6.jpg"
+              "thumb": "thumbs/le_beyond6.jpg",
+              "year": 1995
             },
             {
               "title": "NBA Ad Banners",
@@ -230,38 +293,50 @@
               "title": "@tlanta Olympics Web Site",
               "client": "Nike",
               "movie": "work_module/new_fangled/nike_olympic/nike_olympic6.dir",
-              "thumb": "thumbs/nike_olympic6.jpg"
+              "thumb": "thumbs/nike_olympic6.jpg",
+              "year": 1996,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Li'l Penny Web Site",
               "client": "Nike",
               "movie": "work_module/new_fangled/nike_lil_penny/nike_lil_penny6.dir",
-              "thumb": "thumbs/nike_lil_penny6.jpg"
+              "thumb": "thumbs/nike_lil_penny6.jpg",
+              "year": 1997,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Mia Hamm Web Site",
               "client": "Nike",
               "movie": "work_module/new_fangled/nike_mia/nike_mia6.dir",
               "thumb": "thumbs/nike_mia6.jpg",
-              "note": "Some graphics missing"
+              "note": "Some graphics missing",
+              "year": 1997,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "1997 Tiger Woods Web Site",
               "client": "Nike",
               "movie": "work_module/new_fangled/nike_tiger_97/nike_tiger_976.dir",
-              "thumb": "thumbs/nike_tiger_976.jpg"
+              "thumb": "thumbs/nike_tiger_976.jpg",
+              "year": 1997,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Michael Jordan Web Site",
               "client": "Nike",
               "movie": "work_module/new_fangled/nike_jordan/nike_jordan6.dir",
-              "thumb": "thumbs/nike_jordan6.jpg"
+              "thumb": "thumbs/nike_jordan6.jpg",
+              "year": 1997,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Andre Agassi Web Site",
               "client": "Nike",
               "movie": "work_module/new_fangled/nike_agassi/nike_agassi6.dir",
-              "thumb": "thumbs/nike_agassi6.jpg"
+              "thumb": "thumbs/nike_agassi6.jpg",
+              "year": 1997,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Ad Banners",
@@ -279,13 +354,16 @@
               "title": "HomeBanking Floppy",
               "client": "Bank of America",
               "movie": "work_module/old_timey/bofa_home/bofa_home6.dir",
-              "thumb": "thumbs/bofa_home6.jpg"
+              "thumb": "thumbs/bofa_home6.jpg",
+              "year": 1997,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Ready Set Dinner Floppy",
               "client": "National Potato Board",
               "movie": "work_module/old_timey/ready_set_dinner/ready_set_dinner6.dir",
-              "thumb": "thumbs/ready_set_dinner6.jpg"
+              "thumb": "thumbs/ready_set_dinner6.jpg",
+              "year": 1994
             },
             {
               "title": "Air Max Floppy",
@@ -297,19 +375,24 @@
               "title": "Zoom Air Floppy",
               "client": "Nike",
               "movie": "work_module/old_timey/nike_zoomair/nike_zoomair6.dir",
-              "thumb": "thumbs/nike_zoomair6.jpg"
+              "thumb": "thumbs/nike_zoomair6.jpg",
+              "year": 1997,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Vaio PC CD-ROM",
               "client": "Sony",
               "movie": "work_module/old_timey/sony_vaio/sony_vaio6.dir",
-              "thumb": "thumbs/sony_vaio6.jpg"
+              "thumb": "thumbs/sony_vaio6.jpg",
+              "year": 1997,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Self-Promotion Floppy",
               "client": "West End Post",
               "movie": "work_module/old_timey/west_end_post/west_end_post6.dir",
-              "thumb": "thumbs/west_end_post6.jpg"
+              "thumb": "thumbs/west_end_post6.jpg",
+              "year": 1993
             }
           ]
         },
@@ -333,13 +416,17 @@
               "title": "Clay Demo",
               "client": "Red Sky Interactive",
               "movie": "work_module/plumb_loco/clay_demo/clay_demo6.dir",
-              "thumb": "thumbs/clay_demo6.jpg"
+              "thumb": "thumbs/clay_demo6.jpg",
+              "year": 1996,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Hypnosis Pitch",
               "client": "Red Sky Interactive",
               "movie": "work_module/plumb_loco/hypnosis/hypnosis6.dir",
-              "thumb": "thumbs/hypnosis6.jpg"
+              "thumb": "thumbs/hypnosis6.jpg",
+              "year": 1994,
+              "alsoOn": "gypsy-wagon"
             },
             {
               "title": "Pick-A-Puke",
@@ -357,7 +444,8 @@
               "title": "Virtual Bully",
               "client": "Red Sky Interactive",
               "movie": "work_module/plumb_loco/virtual_bully/virtual_bully6.dir",
-              "thumb": "thumbs/virtual_bully6.jpg"
+              "thumb": "thumbs/virtual_bully6.jpg",
+              "year": 1993
             }
           ]
         }

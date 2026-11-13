@@ -51,8 +51,10 @@ fetch('works.json').then(r => r.json()).then(({ works }) => {
   works.forEach((w, wi) => {
     if (w.slug !== FEATURED) items.push({ year: w.year, order: wi * 1000, href: playHref(w), thumb: w.thumb, title: w.title,
       sub: w.client, kind: w.kind + (w.yearApprox ? ', year approximate' : ''), note: w.caveat ? 'Not working yet' : '', about: 'work.html?w=' + w.slug });
-    (w.groups || []).forEach(g => g.pieces.forEach(p => items.push({ year: w.year, order: wi * 1000 + items.length, href: pieceHref(w, p),
-      thumb: p.thumb, title: p.title, sub: p.client, kind: 'From ' + w.title + ', ' + g.title, note: p.note })));
+    // A piece on more than one disc is listed once (works.json marks the other copy sameAs).
+    (w.groups || []).forEach(g => g.pieces.forEach(p => p.sameAs || items.push({ year: p.year || w.year, order: wi * 1000 + items.length, href: pieceHref(w, p),
+      thumb: p.thumb, title: p.title, sub: p.client,
+      kind: p.alsoOn ? 'On ' + works.find(x => x.slug === p.alsoOn).title + ' and ' + w.title : 'From ' + w.title + ', ' + g.title, note: p.note })));
   });
   items.sort((a, b) => b.year - a.year || !!b.about - !!a.about || a.order - b.order);
   let html = '', year = null;
