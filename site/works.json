@@ -152,7 +152,7 @@
       "year": 1998,
       "kind": "Demo CD-ROM",
       "platform": "Macromedia Director 6, Mac and Windows",
-      "summary": "The 1998 reel: a projector, a cowboy in a scratched black-and-white western, and a Work menu of 25 pieces in three drawers, New-Fangled, Old-Timey and Plumb Loco.",
+      "summary": "The 1998 reel: a projector, a cowboy in a scratched black-and-white western, and a Work menu of 24 pieces in three drawers, New-Fangled, Old-Timey and Plumb Loco.",
       "start": {
         "via": "entertainment"
       },
@@ -174,7 +174,7 @@
         },
         {
           "title": "Work menu",
-          "detail": "All 25 pieces",
+          "detail": "All 24 pieces",
           "href": "play.html?w=redsky98&via=work"
         }
       ],
