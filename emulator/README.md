@@ -38,6 +38,10 @@ Upstream: https://github.com/igorlira/dirplayer-rs at commit 68376fbb4494a6bbad4
 | Arithmetic on palette-index colors (`the foreColor of sprite n - 1`) | DataZord |
 | Generic member properties answer neutral values (`the size` of a script, `the width` of a palette) | Spider-Man, DataZord |
 | `the mouseCast` | Gypsy Wagon's Nike Products |
+| Sprite trails stay on the stage until something repaints them, and sit under the trails sprites rather than under everything (software and WebGL renderers) | Gypsy Wagon's menus, written stroke by stroke with a trails pen |
+| `new(script "Other")` inside a script with its own `new` makes a fresh instance of the other script | Gypsy Wagon's menu pages were all one object, so menus crashed |
+| Empty text and script-context chunks load as empty instead of stopping the player | Gypsy Wagon's Bank of America demo |
+| Script errors print the script and handler name to the browser console | Debugging |
 
 ## Build
 

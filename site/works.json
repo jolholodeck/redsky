@@ -140,8 +140,9 @@
       ],
       "changes": [
         "The startup movie was cut out of the Mac projector (\"1997 Demo\") and every movie unprotected.",
-        "QuickTime clips (the intro, Nike Products, Sony Vaio) were converted to MP4 and play over the stage.",
-        "Click the wagon once the scene appears to bring up the menu."
+        "The player now keeps Director's sprite trails, so the quill writes each menu onto the scroll as it did.",
+        "QuickTime clips were converted to MP4 and play over the stage.",
+        "Click a bottle to bring up its menu of work, then click a title."
       ]
     },
     {

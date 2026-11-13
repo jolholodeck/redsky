@@ -29,6 +29,20 @@ index e911b63..62a698b 100644
  
  // Assignment can be to any expression (identifier, property access, list index, etc.)
  // The parser will validate that the left side is a valid lvalue
+diff --git a/vm-rust/src/director/chunks/lctx.rs b/vm-rust/src/director/chunks/lctx.rs
+index 3bf98b4..4e23d95 100644
+--- a/vm-rust/src/director/chunks/lctx.rs
++++ b/vm-rust/src/director/chunks/lctx.rs
+@@ -43,6 +43,9 @@ impl ScriptContextChunk {
+     ) -> Result<ScriptContextChunk, String> {
+         reader.set_endian(Endian::Big);
+ 
++        if reader.length < 46 {
++            return Err("Lctx chunk is empty".to_owned());
++        }
+         let unknown0 = reader.read_u32().unwrap();
+         let unknown1 = reader.read_u32().unwrap();
+         let entry_count = reader.read_u32().unwrap();
 diff --git a/vm-rust/src/director/chunks/score.rs b/vm-rust/src/director/chunks/score.rs
 index 6d1186d..0c2495e 100644
 --- a/vm-rust/src/director/chunks/score.rs
@@ -120,6 +134,37 @@ index 6d1186d..0c2495e 100644
                          }));
                      }
  
+diff --git a/vm-rust/src/director/chunks/text.rs b/vm-rust/src/director/chunks/text.rs
+index cd299ae..52dc749 100644
+--- a/vm-rust/src/director/chunks/text.rs
++++ b/vm-rust/src/director/chunks/text.rs
+@@ -28,20 +28,21 @@ impl TextChunk {
+     pub fn read(reader: &mut BinaryReader) -> Result<TextChunk, String> {
+         reader.set_endian(binary_reader::Endian::Big);
+ 
+-        let offset = reader.read_u32().unwrap() as usize;
++        // Red Sky: an empty STXT (0 bytes) is an empty text, not a crash.
++        let offset = match reader.read_u32() { Ok(v) => v as usize, Err(_) => return Ok(TextChunk { offset: 12, text_length: 0, data_length: 0, text: String::new(), data: Vec::new() }) };
+         if offset != 12 {
+             return Err("Stxt init: unhandled offset".to_owned());
+         }
+ 
+-        let text_length = reader.read_u32().unwrap() as usize;
+-        let data_length = reader.read_u32().unwrap() as usize;
++        let text_length = reader.read_u32().map_err(|e| e.to_string())? as usize;
++        let data_length = reader.read_u32().map_err(|e| e.to_string())? as usize;
+ 
+         Ok(TextChunk {
+             offset,
+             text_length,
+             data_length,
+-            text: reader.read_string(text_length).unwrap(),
+-            data: reader.read_bytes(data_length).unwrap().to_vec(),
++            text: reader.read_string(text_length).unwrap_or_default(),
++            data: reader.read_bytes(data_length).map(|d| d.to_vec()).unwrap_or_default(),
+         })
+     }
+ 
 diff --git a/vm-rust/src/lib.rs b/vm-rust/src/lib.rs
 index a5fd98f..e942017 100644
 --- a/vm-rust/src/lib.rs
@@ -182,6 +227,46 @@ index c9ee82e..0241b2a 100644
      #[inline]
      pub fn alloc(&mut self, value: T) -> usize {
          self.count += 1;
+diff --git a/vm-rust/src/player/bytecode/flow_control.rs b/vm-rust/src/player/bytecode/flow_control.rs
+index adf4ab2..58b2205 100644
+--- a/vm-rust/src/player/bytecode/flow_control.rs
++++ b/vm-rust/src/player/bytecode/flow_control.rs
+@@ -208,7 +208,7 @@ impl FlowControlBytecodeHandler {
+     pub async fn local_call(
+         ctx: &BytecodeHandlerContext,
+     ) -> Result<HandlerExecutionResult, ScriptError> {
+-        let (handler_ref, is_no_ret, args, receiver) = reserve_player_mut(|player| {
++        let (handler_ref, is_no_ret, mut args, mut receiver) = reserve_player_mut(|player| {
+             let (args, is_no_ret) = {
+                 let scope = player.scopes.get_mut(ctx.scope_ref).unwrap();
+                 match scope.pop_call_args() {
+@@ -257,6 +257,26 @@ impl FlowControlBytecodeHandler {
+             }
+             Ok((handler_ref, is_no_ret, args, receiver))
+         })?;
++        // Red Sky preservation build: `new(script "Other")` inside a script that has its own `new`
++        // compiles to a local call. Director makes a fresh instance of the other script and runs
++        // its `new` on it; calling it on the script itself made every "instance" the same object.
++        let rs_new_script = reserve_player_ref(|player| {
++            if receiver.is_some() {
++                return None;
++            }
++            if !handler_ref.1.to_string().eq_ignore_ascii_case("new") {
++                return None;
++            }
++            match args.first().map(|a| player.get_datum(a)) {
++                Some(Datum::ScriptRef(r)) => Some(r.clone()),
++                _ => None,
++            }
++        });
++        if let Some(script_ref) = rs_new_script {
++            let (instance_ref, datum_ref) = crate::player::handlers::datum_handlers::script::ScriptDatumHandlers::create_script_instance(&script_ref)?;
++            args[0] = datum_ref;
++            receiver = Some(instance_ref);
++        }
+         // Hand the call to the trampoline driver instead of recursively awaiting
+         // (which would box a future). `use_raw_arg_list: true` matches the old
+         // `player_call_script_handler_raw_args(.., true)` call; the driver does
 diff --git a/vm-rust/src/player/bytecode/get_set.rs b/vm-rust/src/player/bytecode/get_set.rs
 index f811822..60a4e97 100644
 --- a/vm-rust/src/player/bytecode/get_set.rs
@@ -821,7 +906,7 @@ index ad5a8a0..758932b 100644
          })
      }
 diff --git a/vm-rust/src/player/mod.rs b/vm-rust/src/player/mod.rs
-index 8fef74e..aba9615 100644
+index 8fef74e..e678630 100644
 --- a/vm-rust/src/player/mod.rs
 +++ b/vm-rust/src/player/mod.rs
 @@ -8,6 +8,7 @@ macro_rules! match_ci {
@@ -843,7 +928,19 @@ index 8fef74e..aba9615 100644
      pub is_double_click: bool,
      pub mouse_down_sprite: i16,
      pub drag_offset: (i32, i32),
-@@ -775,6 +780,9 @@ impl DirPlayer {
+@@ -326,6 +331,11 @@ pub struct DirPlayer {
+     /// from the lift's top edge in local px). Cleared on mouse up.
+     pub field_scroll_drag: Option<(i16, i32)>,
+     pub trails_bitmap: Option<bitmap::bitmap::Bitmap>,
++    /// Red Sky: lowest channel that has drawn trails; trails show above the channels below it.
++    pub rs_trails_top: i16,
++    /// Red Sky: last frame's non-trails sprites (channel, member, rect) for dirty-rect erasing of trails.
++    pub rs_trails_prev: Vec<(i16, String, (i32, i32, i32, i32))>,
++    pub rs_trails_movie: String,
+     pub click_on_sprite: i16,
+     /// Sprite whose CAST MEMBER script is currently executing. A member script
+     /// is not a behavior — it runs with no receiver instance — so
+@@ -775,11 +785,17 @@ impl DirPlayer {
              cursor_is_hidden: false,
              transform_sub_refs: Vec::new(),
              last_mouse_down_time: 0,
@@ -853,7 +950,15 @@ index 8fef74e..aba9615 100644
              is_double_click: false,
              mouse_down_sprite: 0,
              drag_offset: (0, 0),
-@@ -2015,6 +2023,8 @@ impl DirPlayer {
+             field_scroll_drag: None,
+             trails_bitmap: None,
++            rs_trails_top: 0,
++            rs_trails_prev: Vec::new(),
++            rs_trails_movie: String::new(),
+             subscribed_member_refs: vec![],
+             is_subscribed_to_channel_names: false,
+             is_subscribed_to_score: false,
+@@ -2015,6 +2031,8 @@ impl DirPlayer {
          let actor_list_datum = self.alloc_datum(Datum::List(DatumType::List, VecDeque::new(), false));
          self.globals.insert(Symbol::builtin(BuiltInSymbol::ActorList), actor_list_datum);
          self.actor_list_generation = 0;
@@ -862,7 +967,7 @@ index 8fef74e..aba9615 100644
  
          // Mathematical constant
          let pi_datum = self.alloc_datum(Datum::Float(std::f64::consts::PI));
-@@ -2977,6 +2987,15 @@ impl DirPlayer {
+@@ -2977,6 +2995,15 @@ impl DirPlayer {
                  let datum = mouse_member_datum(self);
                  Ok(self.alloc_datum(datum))
              },
@@ -878,7 +983,7 @@ index 8fef74e..aba9615 100644
              BuiltInSymbol::MouseChar => {
                  let val = compute_mouse_char(self);
                  Ok(self.alloc_datum(Datum::Int(val)))
-@@ -3062,6 +3081,13 @@ impl DirPlayer {
+@@ -3062,6 +3089,13 @@ impl DirPlayer {
                  // Default: return 0 when no sprite context is available
                  Ok(self.alloc_datum(Datum::Int(0)))
              },
@@ -892,7 +997,7 @@ index 8fef74e..aba9615 100644
              BuiltInSymbol::ActorList => {
                  // Return the reference to the global actorList, not a clone of its contents
                  Ok(self
-@@ -3262,7 +3288,17 @@ impl DirPlayer {
+@@ -3262,7 +3296,17 @@ impl DirPlayer {
              // the load-time logic in `load_movie_from_dir`. Label sources
              // do NOT trigger URL rewriting in net handlers — that's
              // reserved for `movie_path_override`. See `set_movie_path_label`.
@@ -911,7 +1016,7 @@ index 8fef74e..aba9615 100644
                  let label = self.movie_path_label_effective();
                  if let Some(path) = label {
                      let base_path = dir_part_of_path(&path);
-@@ -3495,6 +3531,18 @@ impl DirPlayer {
+@@ -3495,6 +3539,18 @@ impl DirPlayer {
          }
      }
  
@@ -930,7 +1035,7 @@ index 8fef74e..aba9615 100644
      fn get_anim_prop(&mut self, prop_id: u16) -> Result<Datum, ScriptError> {
          let prop_name = get_anim_prop_name(prop_id);
          // `the timer` / `the keyPressed` / `the key` / `the keyCode` are the
-@@ -3507,7 +3555,7 @@ impl DirPlayer {
+@@ -3507,7 +3563,7 @@ impl DirPlayer {
              self.input_polled = true;
          }
          match prop_name {
@@ -939,7 +1044,7 @@ index 8fef74e..aba9615 100644
              BuiltInSymbol::FullColorPermit => Ok(Datum::Int(1)), // Full color mode is permitted
              BuiltInSymbol::Timer => Ok(Datum::Int(get_elapsed_ticks(self.start_time))),
              BuiltInSymbol::TimeoutLength => Ok(Datum::Int(self.movie.timeout_length)),
-@@ -3534,7 +3582,17 @@ impl DirPlayer {
+@@ -3534,7 +3590,17 @@ impl DirPlayer {
              BuiltInSymbol::StageColor => Ok(Datum::Int(0)),
              BuiltInSymbol::DoubleClick => Ok(datum_bool(self.is_double_click)),
              BuiltInSymbol::LastClick | BuiltInSymbol::LastEvent | BuiltInSymbol::LastKey | BuiltInSymbol::LastRoll => {
@@ -958,7 +1063,7 @@ index 8fef74e..aba9615 100644
              }
              BuiltInSymbol::MultiSound => Ok(Datum::Int(1)),
              BuiltInSymbol::PauseState => Ok(datum_bool(self.is_script_paused)),
-@@ -3663,6 +3721,16 @@ impl DirPlayer {
+@@ -3663,6 +3729,16 @@ impl DirPlayer {
                  crate::js_api::JsApi::dispatch_stage_size_changed(w, h, self.center_stage);
                  Ok(())
              },
@@ -975,7 +1080,7 @@ index 8fef74e..aba9615 100644
              Some(BuiltInSymbol::ActorList) => {
                  // Setting actorList - update the global variable
                  match value {
-@@ -4071,6 +4139,30 @@ pub async fn player_call_global_handler(
+@@ -4071,6 +4147,30 @@ pub async fn player_call_global_handler(
      handler_name: Symbol,
      args: &Vec<DatumRef>,
  ) -> Result<DatumRef, ScriptError> {
@@ -1006,7 +1111,7 @@ index 8fef74e..aba9615 100644
      // Director 6 `birth(script, args)` constructor: when the first arg is a
      // ScriptRef this is the pre-`new` idiom — allocate a FRESH instance and run
      // its `on birth me, args`. This MUST run before the generic first-arg
-@@ -4219,6 +4311,27 @@ pub async fn player_call_global_handler(
+@@ -4219,6 +4319,27 @@ pub async fn player_call_global_handler(
          Ok(None) => {}
      }
  
@@ -1034,7 +1139,7 @@ index 8fef74e..aba9615 100644
      if BuiltInHandlerManager::has_async_handler(handler_name) {
          return Box::pin(BuiltInHandlerManager::call_async_handler(
              handler_name,
-@@ -5807,6 +5920,19 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
+@@ -5807,6 +5928,19 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
  
      stop_movie_sequence().await;
  
@@ -1054,7 +1159,7 @@ index 8fef74e..aba9615 100644
      // 3. Load the new movie data (preserving globals and allocator)
      reserve_player_mut(|player| {
          player.is_dispatching_events = prev_dispatching;
-@@ -5845,6 +5971,35 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
+@@ -5845,6 +5979,35 @@ pub(crate) async fn mount_net_movie(task_id: u32, target: MovieFrameTarget, eage
          })
      }).await;
  
@@ -1090,7 +1195,7 @@ index 8fef74e..aba9615 100644
      // Apply frame target if specified, restore is_playing before init sequence
      reserve_player_mut(|player| {
          match &target {
-@@ -6067,7 +6222,8 @@ pub async fn run_single_frame() -> (bool, bool) {
+@@ -6067,7 +6230,8 @@ pub async fn run_single_frame() -> (bool, bool) {
      // WITHOUT setting visible=0 and relied on the old immediate wipe to clear it.
      reserve_player_mut(|player| {
          let frame = player.movie.current_frame;
@@ -1100,7 +1205,7 @@ index 8fef74e..aba9615 100644
              player.movie.score.invalidate_render_channel_cache();
              player.stage_dirty = true;
          }
-@@ -6977,6 +7133,18 @@ pub async fn run_frame_loop() {
+@@ -6977,6 +7141,18 @@ pub async fn run_frame_loop() {
              continue;
          }
  
@@ -1119,7 +1224,7 @@ index 8fef74e..aba9615 100644
          // Pre-dispatch Flash members for sprites on the current frame so they start
          // loading before Lingo scripts try to access them.
          reserve_player_mut(|player| {
-@@ -7028,6 +7196,12 @@ pub async fn run_frame_loop() {
+@@ -7028,6 +7204,12 @@ pub async fn run_frame_loop() {
              }
          }
  
@@ -1132,7 +1237,16 @@ index 8fef74e..aba9615 100644
          // Tick the sound manager so per-channel fade-in / fade-out
          // progress. Without this, Lingo's `sound fadeIn` sets the
          // channel volume to 0 to start the fade but the ramp never
-@@ -8141,3 +8315,148 @@ mod handler_gap_tests {
+@@ -7254,6 +7436,8 @@ pub async fn player_trigger_error_pause(
+                 .map(|s| s.name.clone())
+                 .unwrap_or_default()
+         });
++        // Red Sky preservation build: say where a script error happened.
++        web_sys::console::warn_1(&format!("[rs] script error in {} / {} at bytecode {}: {}", script_name, handler_ref.1, bytecode_index, err.message).into());
+         let breakpoint = Breakpoint {
+             script_name,
+             handler_name: handler_ref.1.to_string(),
+@@ -8141,3 +8325,148 @@ mod handler_gap_tests {
          });
      }
  }
@@ -2002,10 +2116,145 @@ index f52d2e9..9f02b77 100644
  pub mod manager;
  pub mod multiuser;
 diff --git a/vm-rust/src/rendering.rs b/vm-rust/src/rendering.rs
-index 0a7e9d6..2b63b8d 100644
+index 0a7e9d6..f1054b6 100644
 --- a/vm-rust/src/rendering.rs
 +++ b/vm-rust/src/rendering.rs
-@@ -4258,6 +4258,8 @@ async fn run_draw_loop() {
+@@ -1901,28 +1901,8 @@ pub fn render_score_to_bitmap_with_offset(
+         &palettes,
+     );
+ 
+-    // Composite accumulated trails bitmap onto the cleared stage
+-    if let Some(trails_bmp) = &player.trails_bitmap {
+-        if trails_bmp.width == bitmap.width && trails_bmp.height == bitmap.height {
+-            // Copy non-transparent pixels from trails bitmap onto stage
+-            let w = bitmap.width as usize;
+-            let h = bitmap.height as usize;
+-            for y in 0..h {
+-                for x in 0..w {
+-                    let idx = (y * w + x) * 4;
+-                    if idx + 3 < trails_bmp.data.len() {
+-                        let alpha = trails_bmp.data[idx + 3];
+-                        if alpha > 0 {
+-                            bitmap.data[idx] = trails_bmp.data[idx];
+-                            bitmap.data[idx + 1] = trails_bmp.data[idx + 1];
+-                            bitmap.data[idx + 2] = trails_bmp.data[idx + 2];
+-                            bitmap.data[idx + 3] = trails_bmp.data[idx + 3];
+-                        }
+-                    }
+-                }
+-            }
+-        }
+-    }
++    // Red Sky: trails are composited above the channels they were drawn over (see rs_composite_trails).
++    let mut rs_trails_done = !matches!(score_source, ScoreRef::Stage);
+ 
+     let sorted_channel_numbers = {
+         // Get the correct frame number for this score
+@@ -1951,6 +1931,10 @@ pub fn render_score_to_bitmap_with_offset(
+     }
+ 
+     for channel_num in sorted_channel_numbers {
++        if !rs_trails_done && player.rs_trails_top > 0 && channel_num >= player.rs_trails_top {
++            rs_composite_trails(player, bitmap);
++            rs_trails_done = true;
++        }
+         let member_ref = {
+             let score = get_score(&player.movie, score_source).unwrap();
+             let sprite = score.get_sprite(channel_num);
+@@ -3237,25 +3221,38 @@ pub fn render_score_to_bitmap_with_offset(
+         }
+     }
+ 
++    if !rs_trails_done {
++        rs_composite_trails(player, bitmap);
++    }
+     // Accumulate trails sprites into the persistent trails bitmap
+     if matches!(score_source, ScoreRef::Stage) {
+-        // Check if any sprite in the current frame has trails
+-        let mut has_trails = false;
+         let frame_num = player.movie.current_frame;
+         let channels: Vec<i16> = player.movie.score
+             .get_sorted_channels(frame_num)
+             .iter()
+             .map(|x| x.number as i16)
+             .collect();
+-        for &ch in &channels {
+-            if let Some(sprite) = player.movie.score.get_sprite(ch) {
+-                if sprite.trails {
+-                    has_trails = true;
+-                    break;
++        // Red Sky preservation build: Director leaves trails on the stage until something repaints
++        // them. Keep the trails until the movie changes, and erase them only where a sprite that
++        // was drawn last frame has moved, changed or gone (its old rect is repainted).
++        let (rs_reset, rs_dirty) = rs_trails_dirty(player, &channels);
++        if rs_reset {
++            player.trails_bitmap = None;
++        }
++        if let Some(trails_bmp) = &mut player.trails_bitmap {
++            let (bw, bh) = (trails_bmp.width as i32, trails_bmp.height as i32);
++            for rect in &rs_dirty {
++                let (x1, y1, x2, y2) = (rect.0.max(0), rect.1.max(0), rect.2.min(bw), rect.3.min(bh));
++                for y in y1..y2 {
++                    for x in x1..x2 {
++                        let idx = ((y * bw + x) * 4) as usize;
++                        trails_bmp.data[idx + 3] = 0;
++                    }
+                 }
+             }
+         }
+ 
++        let has_trails = channels.iter().any(|&ch| player.movie.score.get_sprite(ch).map_or(false, |s| s.trails));
+         if has_trails {
+             // Ensure trails bitmap exists and is the right size
+             let bw = bitmap.width;
+@@ -3272,7 +3269,6 @@ pub fn render_score_to_bitmap_with_offset(
+                     0,
+                     PaletteRef::BuiltIn(get_system_default_palette()),
+                 );
+-                // Start fully transparent
+                 for pixel in trails_bmp.data.chunks_exact_mut(4) {
+                     pixel[0] = 0;
+                     pixel[1] = 0;
+@@ -3282,15 +3278,15 @@ pub fn render_score_to_bitmap_with_offset(
+                 player.trails_bitmap = Some(trails_bmp);
+             }
+ 
+-            // For each trails sprite, copy its bounding rect from the rendered bitmap to trails_bitmap
+             for &ch in &channels {
+                 if let Some(sprite) = player.movie.score.get_sprite(ch) {
+-                    if sprite.trails && sprite.member.is_some() {
++                    if sprite.trails && sprite.member.is_some() && sprite.visible {
++                        if player.rs_trails_top == 0 || ch < player.rs_trails_top { player.rs_trails_top = ch; }
+                         let sprite_rect = get_concrete_sprite_rect(player, sprite);
+                         let x1 = sprite_rect.left.max(0) as usize;
+                         let y1 = sprite_rect.top.max(0) as usize;
+-                        let x2 = (sprite_rect.right as usize).min(bw as usize);
+-                        let y2 = (sprite_rect.bottom as usize).min(bh as usize);
++                        let x2 = (sprite_rect.right.max(0) as usize).min(bw as usize);
++                        let y2 = (sprite_rect.bottom.max(0) as usize).min(bh as usize);
+                         let w = bw as usize;
+ 
+                         if let Some(trails_bmp) = &mut player.trails_bitmap {
+@@ -3301,7 +3297,7 @@ pub fn render_score_to_bitmap_with_offset(
+                                         trails_bmp.data[idx] = bitmap.data[idx];
+                                         trails_bmp.data[idx + 1] = bitmap.data[idx + 1];
+                                         trails_bmp.data[idx + 2] = bitmap.data[idx + 2];
+-                                        trails_bmp.data[idx + 3] = 255; // Mark as opaque
++                                        trails_bmp.data[idx + 3] = 255;
+                                     }
+                                 }
+                             }
+@@ -3309,9 +3305,6 @@ pub fn render_score_to_bitmap_with_offset(
+                     }
+                 }
+             }
+-        } else {
+-            // No trails sprites in this frame - clear the trails bitmap
+-            player.trails_bitmap = None;
+         }
+     }
+ 
+@@ -4258,6 +4251,8 @@ async fn run_draw_loop() {
                          renderer.draw_frame(&mut player);
                          player.stage_dirty = false;
                      }
@@ -2014,3 +2263,140 @@ index 0a7e9d6..2b63b8d 100644
                      if !skip_stage && player.preview_dirty {
                          renderer.draw_preview_frame(&mut player);
                          player.preview_dirty = false;
+@@ -4285,3 +4280,46 @@ pub fn has_swf_signature(data: &[u8]) -> bool {
+     let sig = &data[0..3];
+     sig == b"FWS" || sig == b"CWS" || sig == b"ZWS"
+ }
++
++/// Red Sky preservation build: lay the accumulated trails over what has been drawn so far.
++fn rs_composite_trails(player: &DirPlayer, bitmap: &mut Bitmap) {
++    if let Some(trails_bmp) = &player.trails_bitmap {
++        if trails_bmp.width == bitmap.width && trails_bmp.height == bitmap.height {
++            for (d, t) in bitmap.data.chunks_exact_mut(4).zip(trails_bmp.data.chunks_exact(4)) {
++                if t[3] > 0 {
++                    d.copy_from_slice(t);
++                }
++            }
++        }
++    }
++}
++
++/// Red Sky preservation build: Director leaves trails on the stage until something repaints
++/// them. Trails are kept until the movie changes (returns true: start over) and erased only
++/// where a sprite drawn last frame has moved, changed or gone (its old rect is repainted).
++pub fn rs_trails_dirty(player: &mut DirPlayer, channels: &[i16]) -> (bool, Vec<(i32, i32, i32, i32)>) {
++    let mut reset = false;
++    if player.rs_trails_movie != player.movie.file_name {
++        player.rs_trails_movie = player.movie.file_name.clone();
++        player.rs_trails_prev.clear();
++        player.rs_trails_top = 0;
++        reset = true;
++    }
++    let mut now: Vec<(i16, String, (i32, i32, i32, i32))> = Vec::new();
++    for &ch in channels {
++        if let Some(sprite) = player.movie.score.get_sprite(ch) {
++            if sprite.trails || !sprite.visible { continue; }
++            let Some(m) = sprite.member.as_ref() else { continue };
++            let r = get_concrete_sprite_rect(player, sprite);
++            now.push((ch, format!("{:?}", m), (r.left, r.top, r.right, r.bottom)));
++        }
++    }
++    let prev = std::mem::replace(&mut player.rs_trails_prev, Vec::new());
++    let dirty = prev
++        .into_iter()
++        .filter(|(ch, key, rect)| !now.iter().any(|(c, k, r)| c == ch && k == key && r == rect))
++        .map(|(_, _, r)| r)
++        .collect();
++    player.rs_trails_prev = now;
++    (reset, dirty)
++}
+diff --git a/vm-rust/src/rendering_gpu/webgl2/mod.rs b/vm-rust/src/rendering_gpu/webgl2/mod.rs
+index dffbb65..063d6ed 100644
+--- a/vm-rust/src/rendering_gpu/webgl2/mod.rs
++++ b/vm-rust/src/rendering_gpu/webgl2/mod.rs
+@@ -506,7 +506,7 @@ impl WebGL2Renderer {
+             gl.uniform4f(Some(loc), 0.0, 0.0, 1.0, 1.0);
+         }
+         if let Some(ref loc) = program.u_flip {
+-            gl.uniform2f(Some(loc), 0.0, 0.0);
++            gl.uniform2f(Some(loc), 0.0, 1.0); // Red Sky: texture rows were copied bottom-up
+         }
+         if let Some(ref loc) = program.u_rotation {
+             gl.uniform1f(Some(loc), 0.0);
+@@ -849,10 +849,38 @@ impl WebGL2Renderer {
+         // Bind quad geometry once
+         self.quad.bind(self.context.gl());
+ 
+-        // Draw accumulated trails texture onto the cleared stage
+-        if has_trails && self.trails_texture.is_some() {
+-            self.draw_trails_texture();
++        // Red Sky preservation build: trails persist (see rendering::rs_trails_dirty) and show
++        // above the channels they were drawn over, not under everything.
++        let channel_list: Vec<i16> = sorted_channels.iter().map(|(c, _)| *c).collect();
++        let (rs_reset, rs_dirty) = crate::rendering::rs_trails_dirty(player, &channel_list);
++        if rs_reset && self.trails_fbo.is_some() {
++            self.destroy_trails_fbo();
+         }
++        if let Some(fbo) = self.trails_fbo.clone() {
++            if !rs_dirty.is_empty() {
++                let gl = self.context.gl();
++                let (w, h) = self.size;
++                gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, Some(&fbo));
++                gl.viewport(0, 0, w as i32, h as i32);
++                gl.enable(WebGl2RenderingContext::SCISSOR_TEST);
++                gl.clear_color(0.0, 0.0, 0.0, 0.0);
++                for r in &rs_dirty {
++                    let x = r.0.max(0).min(w as i32);
++                    let y = r.1.max(0).min(h as i32);
++                    let rr = r.2.max(0).min(w as i32);
++                    let b = r.3.max(0).min(h as i32);
++                    if rr > x && b > y {
++                        gl.scissor(x, h as i32 - b, rr - x, b - y);
++                        gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
++                    }
++                }
++                gl.disable(WebGl2RenderingContext::SCISSOR_TEST);
++                gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
++                gl.viewport(0, 0, w as i32, h as i32);
++            }
++        }
++        let rs_trails_top = player.rs_trails_top;
++        let mut rs_trails_done = self.trails_texture.is_none();
+ 
+         // Render each sprite.
+         //
+@@ -868,6 +896,10 @@ impl WebGL2Renderer {
+         let overlay_active = player.stage_image_dirty && player.stage_image.is_some();
+         let mut deferred_dts_3d: Vec<i16> = Vec::new();
+         for (channel_num, _) in &sorted_channels {
++            if !rs_trails_done && rs_trails_top > 0 && *channel_num >= rs_trails_top {
++                self.draw_trails_texture();
++                rs_trails_done = true;
++            }
+             if overlay_active && self.is_direct_to_stage_3d(player, *channel_num) {
+                 deferred_dts_3d.push(*channel_num);
+                 continue;
+@@ -875,6 +907,13 @@ impl WebGL2Renderer {
+             self.render_sprite(player, *channel_num);
+         }
+ 
++        if !rs_trails_done {
++            self.draw_trails_texture();
++        }
++        for ch in &trails_channels {
++            if player.rs_trails_top == 0 || *ch < player.rs_trails_top { player.rs_trails_top = *ch; }
++        }
++
+         // Accumulate trails sprites into the trails texture via GPU-side copy.
+         // Instead of re-rendering sprites to the FBO, we copy the already-rendered
+         // pixel rects from the default framebuffer using copyTexSubImage2D.
+@@ -919,9 +958,6 @@ impl WebGL2Renderer {
+ 
+                 gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+             }
+-        } else if self.trails_fbo.is_some() {
+-            // No trails sprites - clean up FBO
+-            self.destroy_trails_fbo();
+         }
+ 
+         // Composite the script-owned stage framebuffer over the sprite render
