@@ -137,6 +137,9 @@ const WBASE = 'w/' + WORK + '/';
     return 0;
   };
 
+  // GLU32 (Beer Pager's proxy lookup through a Windows DLL): no proxy.
+  (window.__rsXtraHandlers ||= {}).glu32 = (id, handler) => String(handler).toLowerCase() === 'glucall' ? '' : 0;
+
   // ---- FileXtra-style globals, answered from this work's file list.
   function relDir(path, base){
     let p = String(path || '');
@@ -260,7 +263,9 @@ const workReady = fetch('works.json').then(r => r.json()).then(({ works }) => {
   root.setProperty('--stage-w', sw + 'px'); root.setProperty('--stage-h', sh + 'px'); root.setProperty('--stage-ratio', sw + '/' + sh);
   window.__rsFit && window.__rsFit();
   document.getElementById('what').textContent = params.get('t') || w.title || '';
-  const back = document.getElementById('back'); back.href = 'work.html?w=' + WORK; back.textContent = w.title ? 'About ' + w.title : 'All works';
+  const back = document.getElementById('back'); back.href = 'work.html?w=' + WORK;
+  window.__rsColorDepth = () => w.colorDepth || 8;   // the monitor depth each work expects
+  window.__rsQuit = () => { console.log('[rs] quit'); if (window.__rsNoQuit) return; if (!window.__rsQuitting) { window.__rsQuitting = true; setTimeout(() => { location.href = back.href; }, 300); } };   // Lingo quit: leave the piece back.textContent = w.title ? 'About ' + w.title : 'All works';
   document.title = (params.get('t') || w.title || 'Player') + ' | Red Sky Interactive';
   if (WORK === 'redsky98') document.getElementById('keys').innerHTML = 'Keys from the CD: <kbd>Ctrl-E</kbd> Entertainment, <kbd>Ctrl-W</kbd> Work, <kbd>Ctrl-X</kbd> Exit, <kbd>Return</kbd> back to the Work menu, <kbd>Space</kbd> skips an intro.';
   const start = (w.start || {});

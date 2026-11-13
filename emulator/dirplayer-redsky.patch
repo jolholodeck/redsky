@@ -289,6 +289,48 @@ index f811822..60a4e97 100644
              } else if prop_type == 0x06 {
                  // sprite prop
                  let prop_name = sprite_prop_names().get(&(prop_id as u16));
+diff --git a/vm-rust/src/player/cast_lib.rs b/vm-rust/src/player/cast_lib.rs
+index 5e6848d..0a944c0 100644
+--- a/vm-rust/src/player/cast_lib.rs
++++ b/vm-rust/src/player/cast_lib.rs
+@@ -309,6 +309,13 @@ impl CastLib {
+         match prop.into_builtin() {
+             Some(BuiltInSymbol::PreloadMode) => Ok(Datum::Int(self.preload_mode as i32)),
+             Some(BuiltInSymbol::FileName) => {
++                // Red Sky preservation build: give back the exact string a script set (DataZord
++                // sets a Windows path without extension, then checks `fileName starts path`).
++                if let Some(set) = RS_LINGO_FILE_NAMES.with(|m| m.borrow().get(&self.number).cloned()) {
++                    if self.state != CastLibState::None && !set.is_empty() {
++                        return Ok(Datum::String(set));
++                    }
++                }
+                 // Only return the fileName if the cast is actually loaded.
+                 // External casts with preloadMode=0 ("When Needed") have file_name set
+                 // in the movie structure but aren't loaded yet. Scripts like PreloadCast
+@@ -741,6 +748,11 @@ impl CastMemberRef {
+     }
+ }
+ 
++thread_local! {
++    /// Red Sky: the fileName each castLib was last given by Lingo, as written.
++    static RS_LINGO_FILE_NAMES: std::cell::RefCell<std::collections::HashMap<u32, String>> = std::cell::RefCell::new(std::collections::HashMap::new());
++}
++
+ pub async fn player_cast_lib_set_prop(
+     cast_lib: u32,
+     prop_name: Symbol,
+@@ -764,7 +776,11 @@ pub async fn player_cast_lib_set_prop(
+         );
+     }
+ 
++    let rs_set_name = if builtin_prop_name == BuiltInSymbol::FileName { value.string_value().ok() } else { None };
+     cast_lib_obj.set_prop(prop_name, value, &player.allocator)?;
++    if let Some(n) = rs_set_name {
++        RS_LINGO_FILE_NAMES.with(|m| { m.borrow_mut().insert(cast_lib, n); });
++    }
+     if builtin_prop_name == BuiltInSymbol::FileName {
+         cast_lib_obj
+             .preload(
 diff --git a/vm-rust/src/player/cast_member.rs b/vm-rust/src/player/cast_member.rs
 index 5364456..9e908b2 100644
 --- a/vm-rust/src/player/cast_member.rs
@@ -673,7 +715,7 @@ index 9ae62c7..7e96833 100644
                  CastMemberType::Sound(sound_member) => return Some(sound_member.clone()),
                  _ => {
 diff --git a/vm-rust/src/player/handlers/manager.rs b/vm-rust/src/player/handlers/manager.rs
-index 8bcc917..afc0d6c 100644
+index 8bcc917..7800164 100644
 --- a/vm-rust/src/player/handlers/manager.rs
 +++ b/vm-rust/src/player/handlers/manager.rs
 @@ -1093,6 +1093,64 @@ impl BuiltInHandlerManager {
@@ -766,10 +808,15 @@ index 8bcc917..afc0d6c 100644
              Some(BuiltInSymbol::Length) => StringHandlers::length(args),
              Some(BuiltInSymbol::Script) => MovieHandlers::script(args),
              Some(BuiltInSymbol::Void) => TypeHandlers::void(args),
-@@ -2525,6 +2599,10 @@ impl BuiltInHandlerManager {
+@@ -2525,6 +2599,15 @@ impl BuiltInHandlerManager {
                  {
                      return res;
                  }
++                if name.to_string().eq_ignore_ascii_case("quit") {
++                    // Red Sky preservation build: quitting the projector hands back to the page.
++                    crate::player::handlers::datum_handlers::sound_channel::rs_js_call("__rsQuit", &[]);
++                    return Ok(DatumRef::Void);
++                }
 +                if name.to_string().eq_ignore_ascii_case("puppetPalette") {
 +                    crate::player::rs_puppet_palette(args);
 +                    return Ok(DatumRef::Void);
@@ -777,7 +824,7 @@ index 8bcc917..afc0d6c 100644
                  let formatted_args = reserve_player_ref(|player| {
                      let mut s = String::new();
                      for arg in args {
-@@ -2535,7 +2613,14 @@ impl BuiltInHandlerManager {
+@@ -2535,7 +2618,14 @@ impl BuiltInHandlerManager {
                  })?;
                  let msg = format!("No built-in handler: {}({})", name, formatted_args);
                  warn!("{msg}");
@@ -792,6 +839,14 @@ index 8bcc917..afc0d6c 100644
 +                return Ok(DatumRef::Void);
              }
          }
+     }
+@@ -2544,6 +2634,7 @@ impl BuiltInHandlerManager {
+         reserve_player_mut(|player| {
+             let message = player.get_datum(&args[0]).string_value()?;
+             trace_output(player, &format!("Alert: {}", message));
++            web_sys::console::warn_1(&format!("[rs] alert: {}", message).into());
+             Ok(DatumRef::Void)
+         })
      }
 diff --git a/vm-rust/src/player/handlers/movie.rs b/vm-rust/src/player/handlers/movie.rs
 index f5f820c..08716b4 100644
@@ -906,7 +961,7 @@ index ad5a8a0..758932b 100644
          })
      }
 diff --git a/vm-rust/src/player/mod.rs b/vm-rust/src/player/mod.rs
-index 8fef74e..e678630 100644
+index 8fef74e..a93c903 100644
 --- a/vm-rust/src/player/mod.rs
 +++ b/vm-rust/src/player/mod.rs
 @@ -8,6 +8,7 @@ macro_rules! match_ci {
@@ -1040,7 +1095,7 @@ index 8fef74e..e678630 100644
          }
          match prop_name {
 -            BuiltInSymbol::ColorDepth => Ok(Datum::Int(32)),
-+            BuiltInSymbol::ColorDepth => Ok(Datum::Int(8)),
++            BuiltInSymbol::ColorDepth => Ok(Datum::Int(crate::player::handlers::datum_handlers::sound_channel::rs_js_call("__rsColorDepth", &[]).as_f64().map(|f| f as i32).unwrap_or(8))), // Red Sky: per work
              BuiltInSymbol::FullColorPermit => Ok(Datum::Int(1)), // Full color mode is permitted
              BuiltInSymbol::Timer => Ok(Datum::Int(get_elapsed_ticks(self.start_time))),
              BuiltInSymbol::TimeoutLength => Ok(Datum::Int(self.movie.timeout_length)),
@@ -1396,7 +1451,7 @@ index 8fef74e..e678630 100644
 +    let _ = result;
 +}
 diff --git a/vm-rust/src/player/movie.rs b/vm-rust/src/player/movie.rs
-index c4a4ab7..a6d2c08 100644
+index c4a4ab7..59aaeae 100644
 --- a/vm-rust/src/player/movie.rs
 +++ b/vm-rust/src/player/movie.rs
 @@ -225,7 +225,8 @@ impl Movie {
@@ -1414,7 +1469,7 @@ index c4a4ab7..a6d2c08 100644
              // canvas is true-color, so report 32. Setting it is a no-op
              // (see set_prop), matching a monitor that can't change depth.
 -            BuiltInSymbol::ColorDepth => Ok(Datum::Int(32)),
-+            BuiltInSymbol::ColorDepth => Ok(Datum::Int(8)),
++            BuiltInSymbol::ColorDepth => Ok(Datum::Int(crate::player::handlers::datum_handlers::sound_channel::rs_js_call("__rsColorDepth", &[]).as_f64().map(|f| f as i32).unwrap_or(8))), // Red Sky: per work
              // A SYMBOL, per the Scripting Dictionary: "The possible values of the
              // active3dRenderer property are #openGL, #directX7_0, #directx9,
              // #directX5_2, and #software". Returning the string "#openGL" made
@@ -1897,9 +1952,41 @@ index 9369949..4bfd479 100644
      "pi" => Pi,
      "void" => Void,
      "empty" => Empty,
+diff --git a/vm-rust/src/player/xtra/budapi/mod.rs b/vm-rust/src/player/xtra/budapi/mod.rs
+index 665a7d0..cb42cc7 100644
+--- a/vm-rust/src/player/xtra/budapi/mod.rs
++++ b/vm-rust/src/player/xtra/budapi/mod.rs
+@@ -49,10 +49,15 @@ impl BudApiXtra {
+ fn dispatch(name: &str, args: &Vec<DatumRef>) -> Result<DatumRef, ScriptError> {
+     match_ci!(name, {
+         // -- Information ------------------------------------------------
+-        "baVersion" => ok_string(BUDAPI_VERSION),
++        // Red Sky preservation build: answer as a late-90s Windows PC with room to spare, so
++        // system checks (DataZord's Pentium / disk / OS tests) pass.
++        "baVersion" => match string_arg(args, 0).unwrap_or_default().to_ascii_lowercase().as_str() {
++            "os" => ok_string("4.10"),
++            _ => ok_string(BUDAPI_VERSION),
++        },
+         "baSysFolder" => ba_sys_folder(args),
+         "baCpuInfo" => ba_cpu_info(args),
+-        "baDiskInfo" => ok_int(-1),
++        "baDiskInfo" => ok_int(4_000_000),
+         "baDiskList" => empty_list(),
+         "baMemoryInfo" => ok_int(0),
+         "baFindApp" => ok_string(""),
+@@ -214,7 +219,8 @@ fn ba_cpu_info(args: &Vec<DatumRef>) -> Result<DatumRef, ScriptError> {
+     let value = match kind.to_ascii_lowercase().as_str() {
+         "vendor" => "WebAssembly",
+         "name" => "WASM Virtual CPU",
+-        "speed" => "0",
++        "speed" => "300",
++        "type" => return ok_int(6),
+         "cores" => web_sys::window()
+             .and_then(|w| w.navigator().hardware_concurrency().to_string().into())
+             .map(|_| "")
 diff --git a/vm-rust/src/player/xtra/jsbridge.rs b/vm-rust/src/player/xtra/jsbridge.rs
 new file mode 100644
-index 0000000..38516c6
+index 0000000..a324521
 --- /dev/null
 +++ b/vm-rust/src/player/xtra/jsbridge.rs
 @@ -0,0 +1,151 @@
@@ -1919,7 +2006,7 @@ index 0000000..38516c6
 +use crate::director::lingo::datum::{Datum, DatumType, XtraInstanceId};
 +use crate::player::{reserve_player_mut, DatumRef, ScriptError};
 +
-+pub const JS_XTRAS: &[&str] = &["beatnik", "directconnection", "filextra", "textxtra", "muidialog", "mui"];
++pub const JS_XTRAS: &[&str] = &["beatnik", "directconnection", "filextra", "textxtra", "muidialog", "mui", "glu32"];
 +
 +static NEXT_ID: AtomicU32 = AtomicU32::new(1);
 +

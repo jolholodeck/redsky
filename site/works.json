@@ -410,8 +410,10 @@
       "thumb": "thumbs/beer-pager.jpg",
       "caveat": "The Miller Lite server it talked to is long gone. This copy answers with a stand-in that keeps everything on your computer.",
       "changes": [
-        "The Miller Lite server is gone, so logging in and the friends list do not work yet; the interface runs."
-      ]
+        "The Miller Lite server is gone, so logging in and the friends list do not work; the interface runs up to the login.",
+        "It runs at thousands of colours, which it insisted on."
+      ],
+      "colorDepth": 16
     },
     {
       "slug": "moodmaker",
@@ -453,7 +455,8 @@
       "thumb": "thumbs/datazord.jpg",
       "changes": [
         "Starts at the DataZord scan; the Beatnik music plays through NeoBAE.",
-        "Registration data comes from the original Data.txt."
+        "Let the scan finish: clicking during it quits, as the original did, which here returns you to this page.",
+        "The system check (Pentium, disk space, sound card) is answered as a 1999 Windows PC so it passes."
       ]
     },
     {
